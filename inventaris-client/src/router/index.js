@@ -49,6 +49,24 @@ const routes = [
   },
   // Order routes
   {
+    path: '/orders',
+    name: 'Orders',
+    component: () => import('../views/orders/OrdersView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/orders/purchase',
+    name: 'PurchaseOrders',
+    component: () => import('../views/orders/PurchaseOrderView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/orders/sales',
+    name: 'SalesOrders',
+    component: () => import('../views/orders/SalesOrderView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/orders/:id',
     name: 'OrderDetail',
     component: () => import('../views/orders/OrderDetailView.vue'),
