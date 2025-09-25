@@ -365,6 +365,43 @@
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
+/* Improve form input and label contrast */
+.modal-content .form-group label {
+  color: #212529; /* Darker text color for better readability */
+  font-weight: bold;
+}
+
+.modal-content .form-group input,
+.modal-content .form-group select {
+  background-color: #ffffff; /* White background for better contrast */
+  color: #212529; /* Darker text color */
+  border: 1px solid #ddd; /* Subtle border for clarity */
+  padding: 0.75rem;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+/* Ensure consistent alignment and spacing for form inputs */
+.modal-content .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Add spacing between label and input */
+  margin-bottom: 1rem; /* Add spacing between form groups */
+}
+
+.modal-content .form-group input,
+.modal-content .form-group select {
+  width: 100%; /* Ensure inputs take full width */
+  box-sizing: border-box; /* Include padding and border in width calculation */
+}
+
+.modal-content .form-group input:focus,
+.modal-content .form-group select:focus {
+  border-color: #007bff; /* Highlight border on focus */
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
