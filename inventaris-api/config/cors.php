@@ -5,7 +5,12 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    // Allow specific frontend origins
+    'allowed_origins' => [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3000',
+    ],
 
     'allowed_origins_patterns' => [],
 
@@ -15,5 +20,6 @@ return [
 
     'max_age' => 0,
 
+    // Not using cookies, so set to false
     'supports_credentials' => false,
 ];

@@ -1,31 +1,32 @@
 import axios from 'axios';
 
+const apiBase = 'http://localhost:8000';
+
 const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api', // Updated base URL
+  baseURL: `${apiBase}/api`,
   headers: {
     'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
   },
+  withCredentials: false,
 });
 
-// Request interceptor to add token
+// Request interceptor
 apiClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle token expiration
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response && error.response.status === 401) {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       window.location.href = '/login';
