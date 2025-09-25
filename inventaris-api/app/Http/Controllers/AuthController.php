@@ -57,6 +57,7 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'role' => 'staff', // Default role
         ]);
 
         $token = $user->createToken('authToken')->plainTextToken;
@@ -64,6 +65,7 @@ class AuthController extends Controller
         return response()->json([
             'user' => $user,
             'token' => $token,
+            'message' => 'User registered successfully'
         ], 201);
     }
 }
