@@ -12,6 +12,11 @@
 
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     </form>
+
+    <!-- Register Button -->
+    <div class="register-link">
+      <p>Don't have an account? <router-link to="/register">Register here</router-link></p>
+    </div>
   </div>
 </template>
 
@@ -30,13 +35,26 @@ export default {
   methods: {
     async handleLogin() {
       try {
-        const response = await axios.post("/api/login", {
+        const response = await axios.post("/login", {
           email: this.email,
           password: this.password,
         });
-        const token = response.data.token;
+        
+        const { user, token } = response.data;
+        
+        // Store token and user data
         localStorage.setItem("authToken", token);
-        this.$router.push("/dashboard");
+        localStorage.setItem("user", JSON.stringify(user));
+        
+        // Set axios default header
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        
+        // Redirect based on role
+        if (user.role === 'admin') {
+          this.$router.push('/admin/dashboard');
+        } else {
+          this.$router.push('/dashboard');
+        }
       } catch (error) {
         this.errorMessage =
           error.response?.data?.message || "Login failed. Please try again.";
@@ -47,50 +65,5 @@ export default {
 </script>
 
 <style scoped>
-.login-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-.error-message {
-  color: red;
-  text-align: center;
-  margin-top: 10px;
-}
+@import "../../styles/login.css";
 </style>

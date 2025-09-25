@@ -19,9 +19,16 @@
         required
       />
 
+      <label for="role">Role:</label>
+      <select id="role" v-model="role" required>
+        <option value="staff">Staff</option>
+        <option value="admin">Admin</option>
+      </select>
+
       <button type="submit">Register</button>
     </form>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+    <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
   </div>
 </template>
 
@@ -36,24 +43,35 @@ export default {
       email: "",
       password: "",
       passwordConfirmation: "",
+      role: "staff",
       errorMessage: "",
+      successMessage: "",
     };
   },
   methods: {
     async handleRegister() {
       try {
-        const response = await axios.post("/api/register", {
+        const response = await axios.post("/register", {
           name: this.name,
           email: this.email,
           password: this.password,
           password_confirmation: this.passwordConfirmation,
+          role: this.role,
         });
-        console.log("Registration successful:", response.data);
-        this.$router.push("/login");
+        
+        this.successMessage = "Registration successful! Redirecting to login...";
+        this.errorMessage = "";
+        
+        // Redirect after 2 seconds
+        setTimeout(() => {
+          this.$router.push("/login");
+        }, 2000);
+        
       } catch (error) {
         this.errorMessage =
           error.response?.data?.message ||
           "Registration failed. Please try again.";
+        this.successMessage = "";
       }
     },
   },
@@ -61,6 +79,8 @@ export default {
 </script>
 
 <style scoped>
+@import "../../styles/register.css";
+
 .register-container {
   max-width: 400px;
   margin: 0 auto;
@@ -80,7 +100,8 @@ label {
   margin-bottom: 5px;
 }
 
-input {
+input,
+select {
   width: 100%;
   padding: 10px;
   margin-bottom: 15px;
@@ -104,6 +125,12 @@ button:hover {
 
 .error-message {
   color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.success-message {
+  color: green;
   text-align: center;
   margin-top: 10px;
 }
