@@ -17,6 +17,7 @@
   padding: 1.5rem;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #212529; /* Darker text color */
 }
 
 .page-header h1 {
@@ -109,6 +110,8 @@
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 1rem;
+  color: #212529; /* Darker text color for better contrast */
+  background-color: #ffffff; /* White background for better contrast */
 }
 
 .filter-group {
@@ -122,6 +125,8 @@
   border-radius: 5px;
   font-size: 1rem;
   min-width: 150px;
+  color: #212529; /* Darker text color for better contrast */
+  background-color: #ffffff; /* White background for better contrast */
 }
 
 /* Table */
@@ -150,6 +155,7 @@
 .product-table td {
   padding: 1rem;
   border-bottom: 1px solid #dee2e6;
+  color: #212529; /* Darker text color for better contrast */
 }
 
 .product-table tbody tr:hover {
@@ -157,7 +163,7 @@
 }
 
 .low-stock {
-  color: #dc3545;
+  color: #dc3545; /* Red color for emphasis */
   font-weight: bold;
 }
 
