@@ -115,22 +115,36 @@ export default {
     async createProduct() {
       this.isSubmitting = true;
       this.error = null;
-      
+
       try {
+        console.log('Sending product data:', this.product);
         const response = await axios.post('/products', {
           name: this.product.name,
-          description: this.product.description,
-          price: parseFloat(this.product.price),
-          stock: parseInt(this.product.stock),
-          category: this.product.category
+          description: this.product.description || null,
+          category: this.product.category,
+          purchase_price: parseFloat(this.product.price),
+          selling_price: parseFloat(this.product.price) + 50,
+          stock: Number(this.product.stock),
         });
-        
+
+        console.log('API response:', response.data);
+
         if (response.data) {
           this.$router.push('/products');
         }
       } catch (error) {
-        console.error('Error creating product:', error);
-        this.error = error.response?.data?.message || 'Failed to create product. Please try again.';
+        console.error('Error creating product:', error.response || error.message);
+        if (error.response) {
+          console.error('Error details:', error.response.data);
+        }
+        // Show validation messages if present
+        if (error.response?.status === 422) {
+          const errs = error.response.data.errors || {};
+          const firstKey = Object.keys(errs)[0];
+          this.error = errs[firstKey]?.[0] || 'Form validation failed. Please review your input.';
+        } else {
+          this.error = error.response?.data?.message || 'Failed to create product. Please try again.';
+        }
       } finally {
         this.isSubmitting = false;
       }
@@ -140,19 +154,5 @@ export default {
 </script>
 
 <style scoped>
-@import "../../styles/layout.css";
-
-.product-form {
-  width: 100%;
-}
-
-.btn-lg {
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+@import "../../styles/product-create.css";
 </style>
