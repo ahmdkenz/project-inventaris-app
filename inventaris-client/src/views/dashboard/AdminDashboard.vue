@@ -101,6 +101,14 @@ export default {
   async mounted() {
     this.loadUserData();
     await this.loadDashboardData();
+
+    // Polling untuk realtime refresh
+    this._dashboardInterval = setInterval(async () => {
+      await this.loadDashboardData();
+    }, 10000); // Refresh setiap 10 detik
+  },
+  beforeUnmount() {
+    if (this._dashboardInterval) clearInterval(this._dashboardInterval);
   },
   methods: {
     loadUserData() {
