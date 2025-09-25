@@ -14,7 +14,7 @@ class DashboardController extends Controller
     /**
      * Get dashboard statistics
      */
-    public function getStats(Request $request)
+    public function stats(Request $request)
     {
         try {
             $stats = [
@@ -36,7 +36,7 @@ class DashboardController extends Controller
     /**
      * Get recent activities
      */
-    public function getActivities(Request $request)
+    public function recentActivities(Request $request)
     {
         try {
             $activities = collect();
@@ -109,7 +109,7 @@ class DashboardController extends Controller
     /**
      * Get admin dashboard overview
      */
-    public function adminOverview(Request $request)
+    public function overview(Request $request)
     {
         try {
             $data = [
@@ -118,9 +118,10 @@ class DashboardController extends Controller
                     'lowStock' => Product::whereColumn('stock', '<=', 'min_stock')->count(),
                     'totalUsers' => User::count(),
                     'recentTransactions' => Transaction::where('created_at', '>=', now()->subDays(7))->count(),
-                    'totalRevenue' => Transaction::where('type', 'out')
-                        ->where('created_at', '>=', now()->subMonth())
-                        ->sum(DB::raw('quantity * price')),
+                    'totalRevenue' => Transaction::join('products', 'transactions.product_id', '=', 'products.id')
+                        ->where('transactions.type', 'out')
+                        ->where('transactions.created_at', '>=', now()->subMonth())
+                        ->sum(DB::raw('transactions.quantity * products.selling_price')),
                 ],
                 'lowStockProducts' => Product::whereColumn('stock', '<=', 'min_stock')
                     ->select(['id', 'name', 'stock', 'min_stock'])

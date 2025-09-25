@@ -9,9 +9,14 @@ class Product extends Model
         'name',
         'sku',
         'description',
+        'category',
+    'category_id',
         'purchase_price',
         'selling_price',
-        'stock'
+        'stock',
+        'min_stock',
+        'status',
+        'user_id',
     ];
 
     protected $casts = [

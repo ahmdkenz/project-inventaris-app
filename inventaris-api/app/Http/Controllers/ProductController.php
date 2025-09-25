@@ -74,7 +74,8 @@ class ProductController extends Controller
             'sku' => 'nullable|string|unique:products',
             'description' => 'nullable|string',
             'category' => 'required|string|max:100',
-            'price' => 'required|numeric|min:0',
+            'purchase_price' => 'required|numeric|min:0',
+            'selling_price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'min_stock' => 'nullable|integer|min:0',
             'status' => 'nullable|in:active,inactive',
@@ -98,7 +99,9 @@ class ProductController extends Controller
                 'sku' => $request->sku,
                 'description' => $request->description,
                 'category' => $request->category,
-                'price' => $request->price,
+                'category_id' => 0,
+                'purchase_price' => $request->purchase_price,
+                'selling_price' => $request->selling_price,
                 'stock' => $request->stock,
                 'min_stock' => $request->min_stock ?? 10,
                 'status' => $request->status ?? 'active',
@@ -146,7 +149,8 @@ class ProductController extends Controller
             'sku' => 'sometimes|string|unique:products,sku,' . $product->id,
             'description' => 'nullable|string',
             'category' => 'sometimes|string|max:100',
-            'price' => 'sometimes|numeric|min:0',
+            'purchase_price' => 'sometimes|numeric|min:0',
+            'selling_price' => 'sometimes|numeric|min:0',
             'stock' => 'sometimes|integer|min:0',
             'min_stock' => 'sometimes|integer|min:0',
             'status' => 'sometimes|in:active,inactive',
@@ -162,7 +166,7 @@ class ProductController extends Controller
         try {
             $product->update($request->only([
                 'name', 'sku', 'description', 'category', 
-                'price', 'stock', 'min_stock', 'status'
+                'purchase_price', 'selling_price', 'stock', 'min_stock', 'status'
             ]));
 
             return response()->json([
