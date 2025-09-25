@@ -2,10 +2,10 @@
   <div class="user-management">
     <!-- Header -->
     <div class="page-header">
-      <h1>User Management</h1>
+      <h1>Manajemen Pengguna</h1>
       <div class="actions">
         <button @click="showAddUserModal = true" class="btn btn-primary">
-          Add New User
+          Tambah Pengguna Baru
         </button>
         <button @click="refreshUsers" class="btn btn-secondary">
           Refresh
@@ -16,19 +16,19 @@
     <!-- User Stats -->
     <div class="user-stats">
       <div class="stat-card">
-        <h3>Total Users</h3>
+        <h3>Total Pengguna</h3>
         <span class="stat-number">{{ users.length }}</span>
       </div>
       <div class="stat-card">
-        <h3>Active Users</h3>
+        <h3>Pengguna Aktif</h3>
         <span class="stat-number">{{ activeUsers }}</span>
       </div>
       <div class="stat-card">
-        <h3>Admins</h3>
+        <h3>Admin</h3>
         <span class="stat-number">{{ adminUsers }}</span>
       </div>
       <div class="stat-card">
-        <h3>Staff Members</h3>
+        <h3>Staff</h3>
         <span class="stat-number">{{ staffUsers }}</span>
       </div>
     </div>
@@ -39,37 +39,48 @@
         <input 
           v-model="searchQuery" 
           type="text" 
-          placeholder="Search users..." 
+          placeholder="Cari pengguna..." 
           @input="filterUsers"
         >
       </div>
       <div class="filter-group">
         <select v-model="roleFilter" @change="filterUsers">
-          <option value="">All Roles</option>
+          <option value="">Semua Role</option>
           <option value="admin">Admin</option>
           <option value="staff">Staff</option>
         </select>
         <select v-model="statusFilter" @change="filterUsers">
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="">Semua Status</option>
+          <option value="active">Aktif</option>
+          <option value="inactive">Nonaktif</option>
         </select>
       </div>
     </div>
 
+    <!-- Loading State -->
+    <div v-if="loading" class="loading-state">
+      <p>Memuat data pengguna...</p>
+    </div>
+
+    <!-- Error State -->
+    <div v-if="error" class="error-state">
+      <p>{{ error }}</p>
+      <button @click="loadUsers" class="btn btn-primary">Coba Lagi</button>
+    </div>
+
     <!-- Users Table -->
-    <div class="table-container">
+    <div v-if="!loading && !error" class="table-container">
       <table class="users-table">
         <thead>
           <tr>
             <th>ID</th>
-            <th>Name</th>
+            <th>Nama</th>
             <th>Email</th>
             <th>Role</th>
             <th>Status</th>
-            <th>Created At</th>
-            <th>Last Login</th>
-            <th>Actions</th>
+            <th>Dibuat Pada</th>
+            <th>Login Terakhir</th>
+            <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -77,7 +88,7 @@
             <td>{{ user.id }}</td>
             <td>
               <div class="user-info">
-                <div class="avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
+                <div class="avatar">{{ (user.name || '?').charAt(0).toUpperCase() }}</div>
                 <span>{{ user.name }}</span>
               </div>
             </td>
@@ -89,7 +100,7 @@
               <span :class="`status ${user.status}`">{{ user.status }}</span>
             </td>
             <td>{{ formatDate(user.created_at) }}</td>
-            <td>{{ user.last_login ? formatDate(user.last_login) : 'Never' }}</td>
+            <td>{{ user.last_login ? formatDate(user.last_login) : 'Belum Pernah' }}</td>
             <td>
               <div class="action-buttons">
                 <button 
@@ -102,16 +113,21 @@
                   @click="toggleUserStatus(user)" 
                   :class="`btn btn-sm ${user.status === 'active' ? 'btn-danger' : 'btn-success'}`"
                 >
-                  {{ user.status === 'active' ? 'Deactivate' : 'Activate' }}
+                  {{ user.status === 'active' ? 'Nonaktifkan' : 'Aktifkan' }}
                 </button>
                 <button 
                   v-if="user.id !== currentUser.id"
                   @click="deleteUser(user.id)" 
                   class="btn btn-sm btn-danger"
                 >
-                  Delete
+                  Hapus
                 </button>
               </div>
+            </td>
+          </tr>
+          <tr v-if="paginatedUsers.length === 0">
+            <td colspan="8" style="text-align: center; padding: 20px;">
+              Tidak ada data pengguna ditemukan
             </td>
           </tr>
         </tbody>
@@ -119,23 +135,23 @@
     </div>
 
     <!-- Pagination -->
-    <div class="pagination">
+    <div v-if="!loading && !error && totalPages > 1" class="pagination">
       <button 
         @click="previousPage" 
         :disabled="currentPage <= 1"
         class="btn btn-secondary"
       >
-        Previous
+        Sebelumnya
       </button>
       <span class="page-info">
-        Page {{ currentPage }} of {{ totalPages }}
+        Halaman {{ currentPage }} dari {{ totalPages }}
       </span>
       <button 
         @click="nextPage" 
         :disabled="currentPage >= totalPages"
         class="btn btn-secondary"
       >
-        Next
+        Selanjutnya
       </button>
     </div>
 
@@ -143,12 +159,12 @@
     <div v-if="showAddUserModal || showEditUserModal" class="modal-overlay" @click="closeModals">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>{{ showAddUserModal ? 'Add New User' : 'Edit User' }}</h3>
+          <h3>{{ showAddUserModal ? 'Tambah Pengguna Baru' : 'Edit Pengguna' }}</h3>
           <button @click="closeModals" class="close-btn">&times;</button>
         </div>
         <form @submit.prevent="saveUser">
           <div class="form-group">
-            <label for="userName">Name:</label>
+            <label for="userName">Nama:</label>
             <input 
               id="userName" 
               v-model="userForm.name" 
@@ -174,6 +190,14 @@
               required 
             />
           </div>
+          <div v-if="showEditUserModal" class="form-group">
+            <label for="userPassword">Password (Kosongkan jika tidak ingin mengubah):</label>
+            <input 
+              id="userPassword" 
+              v-model="userForm.password" 
+              type="password" 
+            />
+          </div>
           <div class="form-group">
             <label for="userRole">Role:</label>
             <select id="userRole" v-model="userForm.role" required>
@@ -184,16 +208,16 @@
           <div class="form-group">
             <label for="userStatus">Status:</label>
             <select id="userStatus" v-model="userForm.status" required>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="active">Aktif</option>
+              <option value="inactive">Nonaktif</option>
             </select>
           </div>
           <div class="modal-actions">
             <button type="button" @click="closeModals" class="btn btn-secondary">
-              Cancel
+              Batal
             </button>
             <button type="submit" class="btn btn-primary">
-              {{ showAddUserModal ? 'Create User' : 'Update User' }}
+              {{ showAddUserModal ? 'Buat Pengguna' : 'Perbarui Pengguna' }}
             </button>
           </div>
         </form>
@@ -219,6 +243,8 @@ export default {
       itemsPerPage: 10,
       showAddUserModal: false,
       showEditUserModal: false,
+      loading: false,
+      error: null,
       userForm: {
         id: null,
         name: '',
@@ -251,6 +277,13 @@ export default {
   async mounted() {
     this.loadCurrentUser();
     await this.loadUsers();
+    // Polling untuk realtime refresh
+    this._usersInterval = setInterval(() => {
+      this.loadUsers();
+    }, 10000);
+  },
+  beforeUnmount() {
+    if (this._usersInterval) clearInterval(this._usersInterval);
   },
   methods: {
     loadCurrentUser() {
@@ -260,40 +293,20 @@ export default {
       }
     },
     async loadUsers() {
+      this.loading = true;
+      this.error = null;
       try {
-        // Mock data - replace with actual API call
-        this.users = [
-          {
-            id: 1,
-            name: 'Admin User',
-            email: 'admin@example.com',
-            role: 'admin',
-            status: 'active',
-            created_at: '2024-01-15T10:30:00Z',
-            last_login: '2024-09-25T08:15:00Z'
-          },
-          {
-            id: 2,
-            name: 'John Doe',
-            email: 'john@example.com',
-            role: 'staff',
-            status: 'active',
-            created_at: '2024-02-20T14:20:00Z',
-            last_login: '2024-09-24T16:45:00Z'
-          },
-          {
-            id: 3,
-            name: 'Jane Smith',
-            email: 'jane@example.com',
-            role: 'staff',
-            status: 'inactive',
-            created_at: '2024-03-10T09:00:00Z',
-            last_login: null
-          }
-        ];
+        const response = await axios.get('/users');
+        console.log('Data pengguna:', response.data);
+        this.users = response.data;
+        // Terapkan filter yang sedang aktif setelah refresh
         this.filteredUsers = [...this.users];
+        this.filterUsers();
       } catch (error) {
         console.error('Error loading users:', error);
+        this.error = 'Gagal memuat data pengguna. Silakan coba lagi.';
+      } finally {
+        this.loading = false;
       }
     },
     filterUsers() {
@@ -324,21 +337,29 @@ export default {
     async toggleUserStatus(user) {
       try {
         const newStatus = user.status === 'active' ? 'inactive' : 'active';
-        user.status = newStatus;
-        console.log(`User ${user.id} status changed to ${newStatus}`);
-        await this.loadUsers();
+        const confirmMessage = `Apakah Anda yakin ingin ${newStatus === 'active' ? 'mengaktifkan' : 'menonaktifkan'} pengguna ${user.name}?`;
+        
+        if (confirm(confirmMessage)) {
+          await axios.patch(`/users/${user.id}/status`, { status: newStatus });
+          user.status = newStatus;
+          await this.loadUsers();
+        }
       } catch (error) {
         console.error('Error updating user status:', error);
+        alert('Gagal mengubah status pengguna. Silakan coba lagi.');
       }
     },
     async deleteUser(userId) {
-      if (confirm('Are you sure you want to delete this user?')) {
+      const user = this.users.find(u => u.id === userId);
+      if (confirm(`Apakah Anda yakin ingin menghapus pengguna ${user?.name}? Tindakan ini tidak dapat dibatalkan.`)) {
         try {
+          await axios.delete(`/users/${userId}`);
           this.users = this.users.filter(user => user.id !== userId);
           this.filterUsers();
-          console.log(`User ${userId} deleted`);
+          alert('Pengguna berhasil dihapus.');
         } catch (error) {
           console.error('Error deleting user:', error);
+          alert('Gagal menghapus pengguna. Silakan coba lagi.');
         }
       }
     },
@@ -346,26 +367,34 @@ export default {
       try {
         if (this.showAddUserModal) {
           // Add new user logic
-          const newUser = {
-            ...this.userForm,
-            id: Date.now(),
-            created_at: new Date().toISOString(),
-            last_login: null
-          };
-          this.users.push(newUser);
+          const response = await axios.post('/users', this.userForm);
+          this.users.push(response.data);
+          alert('Pengguna baru berhasil dibuat.');
         } else {
-          // Update existing user logic
+          // Update existing user logic - exclude password if empty
+          const updateData = { ...this.userForm };
+          if (!updateData.password) {
+            delete updateData.password;
+          }
+          
+          await axios.put(`/users/${this.userForm.id}`, updateData);
           const index = this.users.findIndex(user => user.id === this.userForm.id);
           if (index !== -1) {
-            this.users[index] = { ...this.userForm };
+            this.users[index] = { ...this.users[index], ...updateData };
           }
+          alert('Data pengguna berhasil diperbarui.');
         }
         
         this.closeModals();
         this.filterUsers();
-        console.log('User saved successfully');
+        await this.loadUsers(); // Refresh data from server
       } catch (error) {
         console.error('Error saving user:', error);
+        if (error.response && error.response.data && error.response.data.message) {
+          alert(`Gagal menyimpan pengguna: ${error.response.data.message}`);
+        } else {
+          alert('Gagal menyimpan pengguna. Silakan coba lagi.');
+        }
       }
     },
     closeModals() {

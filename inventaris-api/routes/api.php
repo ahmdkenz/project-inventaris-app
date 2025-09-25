@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Auth routes (tidak perlu middleware)
@@ -36,4 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/financial', [ReportController::class, 'financialReport']);
     Route::get('/reports/export', [ReportController::class, 'exportReport']);
     Route::post('/reports/custom', [ReportController::class, 'generateCustomReport']);
+    
+    // User Management
+    Route::apiResource('users', UserController::class);
+    Route::patch('/users/{user}/status', [UserController::class, 'updateStatus']);
 });
