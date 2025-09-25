@@ -18,13 +18,13 @@ const routes = [
   {
     path: '/dashboard',
     name: 'StaffDashboard',
-    component: () => import('../views/dashboard/DashboardView.vue'),
+    component: () => import('../views/dashboard/StaffDashboard.vue'),
     meta: { requiresAuth: true, role: 'staff' }
   },
   {
     path: '/admin/dashboard',
     name: 'AdminDashboard',
-    component: () => import('../views/dashboard/DashboardView.vue'),
+    component: () => import('../views/dashboard/AdminDashboard.vue'),
     meta: { requiresAuth: true, role: 'admin' }
   },
   // Product routes
