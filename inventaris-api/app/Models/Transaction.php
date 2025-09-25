@@ -11,6 +11,9 @@ class Transaction extends Model
         'quantity',
         'description',
         'user_id',
+        'old_stock',
+        'new_stock',
+        'price',
     ];
 
     public function product()
