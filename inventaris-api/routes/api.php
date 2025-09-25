@@ -27,9 +27,14 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Stock Management
     Route::apiResource('stocks', StockController::class)->except(['store', 'destroy']);
-    Route::post('/stocks/{stock}/adjust', [StockController::class, 'adjust']);
-    Route::get('/stocks-alerts', [StockController::class, 'alerts']);
-    Route::get('/stocks-movements', [StockController::class, 'movements']);
+    Route::post('/stocks/adjust', [StockController::class, 'adjust']);
+    Route::get('/stocks/{productId}/history', [StockController::class, 'history']);
+    Route::get('/stocks-low-alerts', [StockController::class, 'lowStockAlerts']);
+    Route::post('/stocks/bulk-adjust', [StockController::class, 'bulkAdjust']);
+    
+    // Transactions
+    Route::get('/transactions/recent', [App\Http\Controllers\TransactionController::class, 'recent']);
+    Route::get('/transactions/product/{productId}', [App\Http\Controllers\TransactionController::class, 'byProduct']);
     
     // Reports
     Route::get('/reports/sales', [ReportController::class, 'salesReport']);

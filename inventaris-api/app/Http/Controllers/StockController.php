@@ -135,7 +135,7 @@ class StockController extends Controller
                 'old_stock' => $oldStock,
                 'new_stock' => $newStock,
                 'price' => $product->price,
-                'reason' => $request->reason,
+                'reason' => $request->reason ?? 'No reason provided',
                 'notes' => $request->notes,
             ]);
 
