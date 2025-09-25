@@ -100,11 +100,17 @@ export default {
   },
   async mounted() {
     this.loadUserData();
-    await this.loadDashboardData();
+    await Promise.all([
+      this.loadDashboardData(),
+      this.loadTotalUsers()
+    ]);
 
     // Polling untuk realtime refresh
     this._dashboardInterval = setInterval(async () => {
-      await this.loadDashboardData();
+      await Promise.all([
+        this.loadDashboardData(),
+        this.loadTotalUsers()
+      ]);
     }, 10000); // Refresh setiap 10 detik
   },
   beforeUnmount() {
@@ -117,6 +123,22 @@ export default {
         this.user = JSON.parse(userData);
       }
     },
+    
+    async loadTotalUsers() {
+      try {
+        // Load total users directly from users endpoint
+        const response = await axios.get('/users');
+        
+        if (response.data && Array.isArray(response.data)) {
+          // Update stats for total users
+          this.stats.totalUsers = response.data.length;
+          console.log('Total users loaded from database:', this.stats.totalUsers);
+        }
+      } catch (error) {
+        console.error('Error loading users data:', error);
+        // Don't reset totalUsers here, keep the value from loadDashboardData()
+      }
+    },
     async loadDashboardData() {
       try {
         // Load dashboard statistics from API
@@ -126,20 +148,27 @@ export default {
         ]);
         
         if (statsResponse.data) {
-          this.stats = statsResponse.data;
+          // Pastikan data dari API digunakan, tidak diganti dengan mock data
+          this.stats = {
+            totalProducts: statsResponse.data.totalProducts || 0,
+            lowStock: statsResponse.data.lowStock || 0,
+            recentTransactions: statsResponse.data.recentTransactions || 0,
+            totalUsers: statsResponse.data.totalUsers || 0
+          };
+          console.log('Stats loaded from database:', this.stats);
         }
         
-        if (activitiesResponse.data) {
+        if (activitiesResponse.data && Array.isArray(activitiesResponse.data)) {
           this.recentActivities = activitiesResponse.data;
         }
       } catch (error) {
         console.error('Error loading dashboard data:', error);
         // Fallback to mock data if API fails
         this.stats = {
-          totalProducts: 150,
-          lowStock: 5,
-          recentTransactions: 23,
-          totalUsers: 12
+          totalProducts: 0,
+          lowStock: 0,
+          recentTransactions: 0,
+          totalUsers: 0
         };
         
         this.recentActivities = [
@@ -162,6 +191,24 @@ export default {
             created_at: new Date(Date.now() - 7200000).toISOString()
           }
         ];
+        
+        // Mencoba load data langsung dari endpoint products dan users jika stats endpoint gagal
+        try {
+          const productsResponse = await axios.get('/products');
+          if (productsResponse.data && Array.isArray(productsResponse.data.data)) {
+            this.stats.totalProducts = productsResponse.data.data.length;
+            this.stats.lowStock = productsResponse.data.data.filter(
+              product => product.stock <= (product.min_stock || 10)
+            ).length;
+          }
+          
+          const usersResponse = await axios.get('/users');
+          if (usersResponse.data && Array.isArray(usersResponse.data.data)) {
+            this.stats.totalUsers = usersResponse.data.data.length;
+          }
+        } catch (secondaryError) {
+          console.error('Secondary API call failed:', secondaryError);
+        }
       }
     },
     formatDate(dateString) {
