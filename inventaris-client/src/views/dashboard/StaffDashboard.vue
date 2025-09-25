@@ -11,6 +11,7 @@
     <nav class="dashboard-nav">
       <router-link to="/products" class="nav-item">📦 Products</router-link>
       <router-link to="/stocks/adjustment" class="nav-item">📊 Stock Management</router-link>
+      <router-link to="/orders" class="nav-item">🛒 Orders</router-link>
       <router-link to="/reports" class="nav-item">📈 Reports</router-link>
     </nav>
 
@@ -46,7 +47,13 @@
           <router-link to="/stocks/adjustment" class="action-btn">Adjust Stock</router-link>
         </div>
         <div class="action-card">
-          <div class="icon">📈</div>
+          <div class="icon">�</div>
+          <h4>Manage Orders</h4>
+          <p>Sales and purchase orders</p>
+          <router-link to="/orders" class="action-btn">Manage Orders</router-link>
+        </div>
+        <div class="action-card">
+          <div class="icon">�📈</div>
           <h4>View Reports</h4>
           <p>Access available reports</p>
           <router-link to="/reports" class="action-btn">View Reports</router-link>
@@ -148,4 +155,5 @@ export default {
 
 <style scoped>
 @import "../../styles/dashboard.css";
+@import "../../styles/orders.css";
 </style>

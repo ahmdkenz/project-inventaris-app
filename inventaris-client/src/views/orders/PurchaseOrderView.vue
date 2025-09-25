@@ -1,7 +1,10 @@
 <template>
   <div class="purchase-orders">
     <div class="page-header">
-      <h1>Purchase Orders</h1>
+      <div class="header-left">
+        <router-link to="/orders" class="back-link">← Back to Orders</router-link>
+        <h1>Purchase Orders</h1>
+      </div>
       <button v-if="canCreate" @click="showCreateModal" class="btn-primary">
         <span class="icon">➕</span>
         New Purchase Order

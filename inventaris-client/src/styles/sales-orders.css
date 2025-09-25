@@ -14,21 +14,42 @@
   border-bottom: 2px solid #e1e5e9;
 }
 
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .page-header h1 {
   margin: 0;
-  color: #2c3e50;
+  color: #1a1a1a; /* Darker color for better contrast */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow for readability */
   font-size: 2rem;
   font-weight: 600;
+}
+
+.back-link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
 }
 
 /* Filters */
 .filters {
   display: flex;
-  gap: 15px;
+  gap: 10px; /* Reduced gap for a cleaner look */
   margin-bottom: 25px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  padding: 15px; /* Adjusted padding */
+  background: #ffffff; /* Ensure white background */
+  border: 1px solid #ddd; /* Subtle border */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
   flex-wrap: wrap;
 }
 
@@ -38,28 +59,23 @@
   align-items: center;
 }
 
-.search-input {
-  width: 300px;
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+.filter-group label {
+  font-weight: bold;
+  color: #333333; /* Darker text for better contrast */
+}
+
+.search-input, .filter-select, .filter-input {
+  background: #f9f9f9; /* Light background for inputs */
+  border: 1px solid #ccc; /* Softer border */
+  border-radius: 4px; /* Slightly rounded corners */
+  padding: 8px 10px; /* Adjusted padding */
   font-size: 14px;
+  color: #333333; /* Darker text for better readability */
 }
 
-.filter-select, .filter-input {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  background: white;
-}
-
-.filter-select {
-  min-width: 150px;
-}
-
-.filter-input {
-  width: 140px;
+.search-input:focus, .filter-select:focus, .filter-input:focus {
+  border-color: #007bff; /* Highlight on focus */
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Subtle focus shadow */
 }
 
 /* Table */
@@ -77,8 +93,8 @@
 }
 
 .data-table th {
-  background: #e74c3c;
-  color: white;
+  background: #c0392b; /* Ensure header stands out */
+  color: #ffffff; /* White text for contrast */
   padding: 15px 12px;
   text-align: left;
   font-weight: 600;
@@ -90,10 +106,39 @@
   padding: 12px;
   border-bottom: 1px solid #eee;
   vertical-align: middle;
+  color: #333333; /* Darker text for better readability */
 }
 
 .data-table tbody tr:hover {
   background-color: #f8f9fa;
+}
+
+/* Peningkatan kontras teks dan latar belakang untuk tabel detail */
+.items-table {
+  background: #ffffff; /* Pastikan latar belakang putih */
+  border: 1px solid #ddd; /* Tambahkan border halus */
+  border-radius: 8px; /* Sudut membulat */
+  width: 100%;
+  margin: 15px 0;
+  border-collapse: collapse;
+}
+
+.items-table th {
+  background: #f4f4f4; /* Latar belakang header tabel */
+  color: #333333; /* Teks lebih gelap untuk kontras */
+  font-weight: bold;
+  padding: 12px;
+  text-align: left;
+}
+
+.items-table td {
+  color: #555555; /* Teks lebih terang untuk diferensiasi */
+  padding: 10px;
+  border-bottom: 1px solid #ddd; /* Garis bawah untuk pemisah */
+}
+
+.items-table tbody tr:hover {
+  background-color: #f9f9f9; /* Highlight baris saat hover */
 }
 
 /* Status badges */
@@ -390,6 +435,11 @@
 /* Order Details */
 .order-details {
   margin-top: 15px;
+  background: #ffffff; /* Ensure white background */
+  border: 1px solid #ddd; /* Subtle border */
+  border-radius: 8px; /* Rounded corners */
+  padding: 20px; /* Adequate padding */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
 }
 
 .detail-row {
@@ -401,9 +451,12 @@
 }
 
 .detail-row label {
-  font-weight: 600;
-  color: #555;
-  margin: 0;
+  font-weight: bold;
+  color: #333333; /* Darker text for better contrast */
+}
+
+.detail-row span {
+  color: #555555; /* Slightly lighter text for differentiation */
 }
 
 .total-amount {
@@ -413,21 +466,30 @@
 }
 
 .items-table {
+  background: #ffffff; /* Pastikan latar belakang putih */
+  border: 1px solid #ddd; /* Tambahkan border halus */
+  border-radius: 8px; /* Sudut membulat */
   width: 100%;
   margin: 15px 0;
   border-collapse: collapse;
-  border: 1px solid #ddd;
-}
-
-.items-table th, .items-table td {
-  padding: 10px 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
 }
 
 .items-table th {
-  background: #f8f9fa;
-  font-weight: 600;
+  background: #f4f4f4; /* Latar belakang header tabel */
+  color: #333333; /* Teks lebih gelap untuk kontras */
+  font-weight: bold;
+  padding: 12px;
+  text-align: left;
+}
+
+.items-table td {
+  color: #555555; /* Teks lebih terang untuk diferensiasi */
+  padding: 10px;
+  border-bottom: 1px solid #ddd; /* Garis bawah untuk pemisah */
+}
+
+.items-table tbody tr:hover {
+  background-color: #f9f9f9; /* Highlight baris saat hover */
 }
 
 .shipping-info {
