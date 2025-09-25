@@ -15,6 +15,7 @@
     </nav>
 
     <main class="dashboard-content">
+      <!-- Stats Grid -->
       <div class="stats-grid">
         <div class="stat-card">
           <h3>Total Products</h3>
@@ -27,6 +28,40 @@
         <div class="stat-card">
           <h3>Recent Transactions</h3>
           <p class="stat-number">{{ stats.recentTransactions }}</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <div class="action-card">
+          <div class="icon">📦</div>
+          <h4>View Products</h4>
+          <p>Browse and search products</p>
+          <router-link to="/products" class="action-btn">View Products</router-link>
+        </div>
+        <div class="action-card">
+          <div class="icon">📊</div>
+          <h4>Stock Adjustment</h4>
+          <p>Adjust inventory stock levels</p>
+          <router-link to="/stocks/adjustment" class="action-btn">Adjust Stock</router-link>
+        </div>
+        <div class="action-card">
+          <div class="icon">📈</div>
+          <h4>View Reports</h4>
+          <p>Access available reports</p>
+          <router-link to="/reports" class="action-btn">View Reports</router-link>
+        </div>
+      </div>
+
+      <!-- Recent Activities -->
+      <div class="recent-activities">
+        <h2>My Recent Activities</h2>
+        <div class="activity-list">
+          <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
+            <span class="activity-desc">{{ activity.description }}</span>
+            <span class="activity-user">by {{ activity.user_name }}</span>
+            <span class="activity-time">{{ formatDate(activity.created_at) }}</span>
+          </div>
         </div>
       </div>
     </main>
@@ -45,7 +80,8 @@ export default {
         totalProducts: 0,
         lowStock: 0,
         recentTransactions: 0
-      }
+      },
+      recentActivities: []
     };
   },
   async mounted() {
@@ -61,14 +97,39 @@ export default {
     },
     async loadDashboardData() {
       try {
+        // Mock data - replace with actual API calls
         this.stats = {
           totalProducts: 150,
           lowStock: 5,
           recentTransactions: 23
         };
+        
+        this.recentActivities = [
+          {
+            id: 1,
+            description: 'Updated stock for Mouse Wireless',
+            user_name: this.user.name || 'Staff',
+            created_at: new Date().toISOString()
+          },
+          {
+            id: 2,
+            description: 'Viewed product details for Laptop Dell',
+            user_name: this.user.name || 'Staff',
+            created_at: new Date(Date.now() - 3600000).toISOString()
+          },
+          {
+            id: 3,
+            description: 'Generated stock report',
+            user_name: this.user.name || 'Staff',
+            created_at: new Date(Date.now() - 7200000).toISOString()
+          }
+        ];
       } catch (error) {
         console.error('Error loading dashboard data:', error);
       }
+    },
+    formatDate(dateString) {
+      return new Date(dateString).toLocaleString();
     },
     async logout() {
       try {
@@ -86,86 +147,5 @@ export default {
 </script>
 
 <style scoped>
-h1 {
-  color: green;
-}
-.dashboard {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.dashboard-header {
-  background-color: #f8f9fa;
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-}
-
-.logout-btn {
-  margin-left: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  cursor: pointer;
-}
-
-.logout-btn:hover {
-  background-color: #0056b3;
-}
-
-.dashboard-nav {
-  background-color: #343a40;
-  padding: 0.5rem 1rem;
-  display: flex;
-  gap: 1rem;
-}
-
-.nav-item {
-  color: white;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-}
-
-.nav-item:hover {
-  background-color: #495057;
-}
-
-.dashboard-content {
-  flex: 1;
-  padding: 1rem;
-  background-color: #ffffff;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.stat-card {
-  background-color: #f1f3f5;
-  padding: 1rem;
-  border-radius: 0.25rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.stat-number {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.warning {
-  color: #dc3545;
-}
+@import "../../styles/dashboard.css";
 </style>

@@ -18,6 +18,7 @@
     </nav>
 
     <main class="dashboard-content">
+      <!-- Stats Grid -->
       <div class="stats-grid">
         <div class="stat-card">
           <h3>Total Products</h3>
@@ -34,6 +35,46 @@
         <div class="stat-card">
           <h3>Total Users</h3>
           <p class="stat-number">{{ stats.totalUsers }}</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <div class="action-card">
+          <div class="icon">📦</div>
+          <h4>Add Product</h4>
+          <p>Add new products to inventory</p>
+          <router-link to="/products/create" class="action-btn">Add Product</router-link>
+        </div>
+        <div class="action-card">
+          <div class="icon">👥</div>
+          <h4>Manage Users</h4>
+          <p>Create and manage user accounts</p>
+          <router-link to="/settings/users" class="action-btn">Manage Users</router-link>
+        </div>
+        <div class="action-card">
+          <div class="icon">📊</div>
+          <h4>View Reports</h4>
+          <p>Generate and export reports</p>
+          <router-link to="/reports" class="action-btn">View Reports</router-link>
+        </div>
+        <div class="action-card">
+          <div class="icon">⚙️</div>
+          <h4>System Settings</h4>
+          <p>Configure system preferences</p>
+          <router-link to="/settings/system" class="action-btn">Settings</router-link>
+        </div>
+      </div>
+
+      <!-- Recent Activities -->
+      <div class="recent-activities">
+        <h2>Recent Activities</h2>
+        <div class="activity-list">
+          <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
+            <span class="activity-desc">{{ activity.description }}</span>
+            <span class="activity-user">by {{ activity.user_name }}</span>
+            <span class="activity-time">{{ formatDate(activity.created_at) }}</span>
+          </div>
         </div>
       </div>
     </main>
@@ -53,7 +94,8 @@ export default {
         lowStock: 0,
         recentTransactions: 0,
         totalUsers: 0
-      }
+      },
+      recentActivities: []
     };
   },
   async mounted() {
@@ -69,15 +111,40 @@ export default {
     },
     async loadDashboardData() {
       try {
+        // Mock data - replace with actual API calls
         this.stats = {
           totalProducts: 150,
           lowStock: 5,
           recentTransactions: 23,
           totalUsers: 12
         };
+        
+        this.recentActivities = [
+          {
+            id: 1,
+            description: 'New product added: Laptop Dell XPS 13',
+            user_name: this.user.name || 'Admin',
+            created_at: new Date().toISOString()
+          },
+          {
+            id: 2,
+            description: 'User John Doe created',
+            user_name: 'System',
+            created_at: new Date(Date.now() - 3600000).toISOString()
+          },
+          {
+            id: 3,
+            description: 'Stock updated for Product #123',
+            user_name: 'Admin',
+            created_at: new Date(Date.now() - 7200000).toISOString()
+          }
+        ];
       } catch (error) {
         console.error('Error loading dashboard data:', error);
       }
+    },
+    formatDate(dateString) {
+      return new Date(dateString).toLocaleString();
     },
     async logout() {
       try {
@@ -95,91 +162,5 @@ export default {
 </script>
 
 <style scoped>
-h1 {
-  color: blue;
-}
-.dashboard {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-}
-
-.logout-btn {
-  margin-left: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  cursor: pointer;
-}
-
-.logout-btn:hover {
-  background-color: #0056b3;
-}
-
-.dashboard-nav {
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-  background-color: #343a40;
-  color: white;
-  flex: 0 0 250px;
-}
-
-.nav-item {
-  padding: 0.75rem 1rem;
-  color: white;
-  text-decoration: none;
-  border-radius: 0.25rem;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-}
-
-.nav-item:hover {
-  background-color: #495057;
-}
-
-.admin-only {
-  display: none;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
-  flex: 1;
-}
-
-.stat-card {
-  background-color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 0.25rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.stat-number {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.warning {
-  color: #dc3545;
-}
+@import "../../styles/dashboard.css";
 </style>
