@@ -220,5 +220,6 @@ export default {
 </script>
 
 <style scoped>
+@import "../../styles/stock-adjustment.css";
 @import "../../styles/stocks.css";
 </style>

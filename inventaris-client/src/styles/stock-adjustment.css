@@ -1,0 +1,257 @@
+/* Stock Adjustment Styles */
+.stock-adjustment {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #212529;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.filters {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  color: #212529;
+  background-color: #ffffff;
+}
+
+.table-container {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.stock-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stock-table th {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.stock-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  color: #212529;
+}
+
+.stock-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.low-stock {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status.critical {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status.warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status.normal {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.page-info {
+  font-weight: 500;
+  color: #495057;
+}
+
+/* Ensure text visibility in Recent Stock Adjustments table */
+.adjustments-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff; /* White background for better contrast */
+  color: #212529; /* Dark text color */
+}
+
+.adjustments-table th {
+  background-color: #f8f9fa; /* Light gray for header */
+  color: #495057; /* Darker text for header */
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.adjustments-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  color: inherit; /* Inherit text color for consistency */
+}
+
+.adjustments-table tbody tr:hover {
+  background-color: #e9ecef; /* Slightly darker gray on hover */
+}
+
+.type.increase {
+  color: #28a745; /* Green for increase */
+  font-weight: bold;
+}
+
+.type.decrease {
+  color: #dc3545; /* Red for decrease */
+  font-weight: bold;
+}
+
+.status.approved {
+  background-color: #d4edda; /* Light green for approved */
+  color: #155724;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: capitalize;
+}
+
+.status.pending {
+  background-color: #fff3cd; /* Light yellow for pending */
+  color: #856404;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: capitalize;
+}
+
+/* Clean up background for Create Stock Adjustment */
+.adjustment-form {
+  background-color: #ffffff; /* Latar belakang putih untuk kontras */
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Tambahkan sedikit bayangan untuk kedalaman */
+}
+
+.adjustment-form h2 {
+  color: #212529; /* Warna teks gelap untuk keterbacaan */
+  margin-bottom: 1rem;
+}
+
+.adjustment-form .form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.adjustment-form .form-group {
+  flex: 1;
+}
+
+.adjustment-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #495057; /* Warna teks label yang lebih lembut */
+}
+
+.adjustment-form input,
+.adjustment-form select,
+.adjustment-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  font-size: 1rem;
+  color: #212529; /* Warna teks gelap untuk kontras */
+  background-color: #ffffff; /* Pastikan elemen input memiliki latar belakang putih */
+}
+
+.adjustment-form button {
+  margin-top: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stock-adjustment {
+    padding: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .stock-table {
+    min-width: 600px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}
