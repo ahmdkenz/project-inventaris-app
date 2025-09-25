@@ -1,70 +1,84 @@
 <template>
-  <div class="register-container">
-    <div class="register-card">
-      <h1>Register</h1>
-      <form @submit.prevent="handleRegister">
-        <div class="form-group">
-          <label for="name">Name:</label>
-          <input
-            id="name"
-            v-model="name"
-            type="text"
-            placeholder="Enter your name"
-            required
-          />
+  <div class="app-layout">
+    <div class="auth-container">
+      <div class="auth-card">
+        <h1>Register</h1>
+        <form @submit.prevent="handleRegister" class="auth-form">
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="name">Name:</label>
+              <input
+                id="name"
+                v-model="name"
+                type="text"
+                class="form-control"
+                placeholder="Enter your name"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email:</label>
+              <input
+                id="email"
+                v-model="email"
+                type="email"
+                class="form-control"
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password:</label>
+              <input
+                id="password"
+                v-model="password"
+                type="password"
+                class="form-control"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password_confirmation">Confirm Password:</label>
+              <input
+                id="password_confirmation"
+                v-model="passwordConfirmation"
+                type="password"
+                class="form-control"
+                placeholder="Confirm your password"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="role">Role:</label>
+            <select id="role" v-model="role" class="form-control" required>
+              <option value="">Select Role</option>
+              <option value="admin">Admin</option>
+              <option value="staff">Staff</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Creating Account...' : 'Register' }}
+          </button>
+
+          <div v-if="errorMessage" class="error">
+            {{ errorMessage }}
+          </div>
+
+          <div v-if="successMessage" class="success">
+            {{ successMessage }}
+          </div>
+        </form>
+
+        <div class="auth-link">
+          <p>Already have an account? <router-link to="/login">Login here</router-link></p>
         </div>
-
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            placeholder="Enter your email"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            placeholder="Enter your password"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="password_confirmation">Confirm Password:</label>
-          <input
-            id="password_confirmation"
-            v-model="passwordConfirmation"
-            type="password"
-            placeholder="Confirm your password"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="role">Role:</label>
-          <select id="role" v-model="role" required>
-            <option value="">Select Role</option>
-            <option value="admin">Admin</option>
-            <option value="staff">Staff</option>
-          </select>
-        </div>
-
-        <button type="submit" class="btn-primary">Register</button>
-      </form>
-
-      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-
-      <div class="login-link">
-        <p
-          >Already have an account? <router-link to="/login">Login here</router-link>
-        </p>
       </div>
     </div>
   </div>
@@ -83,27 +97,34 @@ export default {
       passwordConfirmation: "",
       role: "",
       errorMessage: "",
+      successMessage: "",
+      isSubmitting: false,
     };
   },
   methods: {
     async handleRegister() {
+      this.isSubmitting = true;
+      this.errorMessage = "";
+      this.successMessage = "";
+      
       // Validasi client-side
       if (this.password !== this.passwordConfirmation) {
         this.errorMessage = "Password and confirmation do not match.";
+        this.isSubmitting = false;
         return;
       }
 
       if (this.password.length < 8) {
         this.errorMessage = "Password must be at least 8 characters long.";
+        this.isSubmitting = false;
         return;
       }
 
       if (!this.role) {
         this.errorMessage = "Please select a role.";
+        this.isSubmitting = false;
         return;
       }
-
-      this.errorMessage = ""; // Clear previous errors
 
       try {
         const response = await axios.post("/register", {
@@ -113,11 +134,14 @@ export default {
           password_confirmation: this.passwordConfirmation,
           role: this.role,
         });
+        
         console.log("Registration successful:", response.data);
-        alert(
-          `Registration successful! User ${response.data.user.name} created with role ${response.data.user.role}.`
-        );
-        this.$router.push("/login");
+        this.successMessage = `Registration successful! User ${response.data.user.name} created with role ${response.data.user.role}.`;
+        
+        // Redirect after 2 seconds
+        setTimeout(() => {
+          this.$router.push("/login");
+        }, 2000);
       } catch (error) {
         console.error("Registration error:", error.response);
         if (error.response?.data?.errors) {
@@ -130,6 +154,8 @@ export default {
             error.response?.data?.message ||
             "Registration failed. Please try again.";
         }
+      } finally {
+        this.isSubmitting = false;
       }
     },
   },
@@ -137,92 +163,82 @@ export default {
 </script>
 
 <style scoped>
-.register-container {
+@import "../../styles/layout.css";
+
+.auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.register-card {
-  background: #fff;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.auth-card {
+  background: white;
+  padding: 3rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
-  text-align: center;
+  max-width: 600px;
 }
 
-h1 {
-  margin-bottom: 20px;
-  font-size: 24px;
+.auth-card h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
   color: #333;
 }
 
-.form-group {
-  margin-bottom: 15px;
-  text-align: left;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 14px;
-  color: #555;
-}
-
-input,
-select {
+.auth-form {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.3s;
 }
 
-input:focus,
-select:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-.btn-primary {
+.btn-block {
   width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  padding: 0.75rem;
+  font-size: 1rem;
+  margin-top: 1rem;
 }
 
-.btn-primary:hover {
-  background-color: #0056b3;
+.auth-link {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
 }
 
-.error-message {
-  margin-top: 15px;
-  color: #dc3545;
-  font-size: 14px;
+.auth-link p {
+  margin: 0;
+  color: #666;
 }
 
-.login-link {
-  margin-top: 20px;
-  font-size: 14px;
-}
-
-.login-link a {
-  color: #007bff;
+.auth-link a {
+  color: var(--link-color, #007bff);
   text-decoration: none;
+  font-weight: 500;
 }
 
-.login-link a:hover {
+.auth-link a:hover {
   text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 1rem;
+  }
+  
+  .auth-card {
+    padding: 2rem;
+  }
+  
+  .auth-card h1 {
+    font-size: 1.5rem;
+  }
+  
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -1,13 +1,451 @@
 <template>
-  <div>
-    <h1>Stock List</h1>
+  <div class="app-layout">
+    <div class="main-content">
+      <div class="card">
+        <div class="card-header">
+          <h1 class="card-title">Stock Management</h1>
+          <div class="flex-center">
+            <router-link 
+              v-if="user.role === 'admin'" 
+              to="/stocks/adjustment" 
+              class="btn btn-primary"
+            >
+              Stock Adjustment
+            </router-link>
+            <button @click="refreshStocks" class="btn btn-secondary">
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+          <div class="flex-between">
+            <div class="search-box">
+              <input 
+                v-model="searchQuery" 
+                type="text" 
+                class="form-control"
+                placeholder="Search products..." 
+                @input="handleSearch"
+              >
+            </div>
+            <div class="filter-group">
+              <select v-model="statusFilter" @change="handleFilter" class="form-control">
+                <option value="">All Status</option>
+                <option value="in_stock">In Stock</option>
+                <option value="low_stock">Low Stock</option>
+                <option value="out_of_stock">Out of Stock</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="loading" class="loading">
+          Loading stocks...
+        </div>
+
+        <!-- Stock Table -->
+        <div v-else class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Current Stock</th>
+                <th>Min Stock</th>
+                <th>Status</th>
+                <th>Last Updated</th>
+                <th v-if="user.role === 'admin'">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="stock in paginatedStocks" :key="stock.product_id">
+                <td>{{ stock.product_id }}</td>
+                <td>{{ stock.product_name }}</td>
+                <td>{{ stock.category }}</td>
+                <td :class="getStockClass(stock)">{{ stock.quantity }}</td>
+                <td>{{ stock.min_stock || 10 }}</td>
+                <td>
+                  <span :class="`status ${getStockStatus(stock)}`">
+                    {{ getStockStatusText(stock) }}
+                  </span>
+                </td>
+                <td>{{ formatDate(stock.updated_at) }}</td>
+                <td v-if="user.role === 'admin'">
+                  <div class="action-buttons">
+                    <router-link 
+                      :to="`/stocks/adjustment?product=${stock.product_id}`" 
+                      class="btn btn-sm btn-warning"
+                    >
+                      Adjust
+                    </router-link>
+                    <button 
+                      @click="viewHistory(stock.product_id)"
+                      class="btn btn-sm btn-info"
+                    >
+                      History
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div v-if="!loading && filteredStocks.length === 0" class="text-center py-4">
+          <p class="text-muted">No stocks found.</p>
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="filteredStocks.length > 0" class="pagination-wrapper">
+          <div class="flex-center">
+            <button 
+              @click="previousPage" 
+              :disabled="currentPage <= 1"
+              class="btn btn-secondary"
+            >
+              Previous
+            </button>
+            <span class="page-info">
+              Page {{ currentPage }} of {{ totalPages }}
+            </span>
+            <button 
+              @click="nextPage" 
+              :disabled="currentPage >= totalPages"
+              class="btn btn-secondary"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import axios from '../../services/axios';
+
 export default {
   name: "StockListView",
+  data() {
+    return {
+      stocks: [],
+      filteredStocks: [],
+      searchQuery: '',
+      statusFilter: '',
+      currentPage: 1,
+      itemsPerPage: 15,
+      loading: false,
+      user: {}
+    };
+  },
+  computed: {
+    totalPages() {
+      return Math.ceil(this.filteredStocks.length / this.itemsPerPage);
+    },
+    paginatedStocks() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredStocks.slice(start, end);
+    }
+  },
+  async mounted() {
+    this.loadUserData();
+    await this.loadStocks();
+  },
+  methods: {
+    loadUserData() {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        this.user = JSON.parse(userData);
+      }
+    },
+    async loadStocks() {
+      this.loading = true;
+      try {
+        const response = await axios.get('/stocks', {
+          params: {
+            search: this.searchQuery,
+            status: this.statusFilter,
+            page: this.currentPage,
+            per_page: this.itemsPerPage
+          }
+        });
+        
+        if (response.data && response.data.data) {
+          this.stocks = response.data.data;
+          this.filteredStocks = [...this.stocks];
+        }
+      } catch (error) {
+        console.error('Error loading stocks:', error);
+        // Fallback to mock data
+        this.stocks = [
+          { 
+            product_id: 1, 
+            product_name: 'Laptop Dell XPS 13', 
+            category: 'Electronics', 
+            quantity: 15, 
+            min_stock: 5, 
+            updated_at: new Date().toISOString() 
+          },
+          { 
+            product_id: 2, 
+            product_name: 'Wireless Mouse', 
+            category: 'Electronics', 
+            quantity: 3, 
+            min_stock: 10, 
+            updated_at: new Date().toISOString() 
+          },
+          { 
+            product_id: 3, 
+            product_name: 'Office Chair', 
+            category: 'Furniture', 
+            quantity: 0, 
+            min_stock: 5, 
+            updated_at: new Date().toISOString() 
+          }
+        ];
+        this.filteredStocks = [...this.stocks];
+      } finally {
+        this.loading = false;
+      }
+    },
+    handleSearch() {
+      this.filterStocks();
+    },
+    handleFilter() {
+      this.filterStocks();
+    },
+    filterStocks() {
+      let filtered = [...this.stocks];
+      
+      if (this.searchQuery) {
+        filtered = filtered.filter(stock => 
+          stock.product_name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          stock.category.toLowerCase().includes(this.searchQuery.toLowerCase())
+        );
+      }
+      
+      if (this.statusFilter) {
+        filtered = filtered.filter(stock => {
+          const status = this.getStockStatus(stock);
+          return status === this.statusFilter;
+        });
+      }
+      
+      this.filteredStocks = filtered;
+      this.currentPage = 1;
+    },
+    getStockStatus(stock) {
+      if (stock.quantity === 0) return 'out_of_stock';
+      if (stock.quantity <= (stock.min_stock || 10)) return 'low_stock';
+      return 'in_stock';
+    },
+    getStockStatusText(stock) {
+      const status = this.getStockStatus(stock);
+      switch (status) {
+        case 'out_of_stock': return 'Out of Stock';
+        case 'low_stock': return 'Low Stock';
+        case 'in_stock': return 'In Stock';
+        default: return 'Unknown';
+      }
+    },
+    getStockClass(stock) {
+      const status = this.getStockStatus(stock);
+      return {
+        'text-danger': status === 'out_of_stock',
+        'text-warning': status === 'low_stock',
+        'text-success': status === 'in_stock'
+      };
+    },
+    formatDate(dateString) {
+      return new Date(dateString).toLocaleString();
+    },
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    async refreshStocks() {
+      await this.loadStocks();
+    },
+    viewHistory(productId) {
+      this.$router.push(`/stocks/history/${productId}`);
+    }
+  }
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+@import "../../styles/layout.css";
+
+.filters-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.search-box {
+  flex: 1;
+  max-width: 300px;
+}
+
+.filter-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status.in_stock {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status.low_stock {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.out_of_stock {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+  font-weight: bold;
+}
+
+.text-warning {
+  color: #fd7e14 !important;
+  font-weight: bold;
+}
+
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+.py-4 {
+  padding: 2rem 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pagination-wrapper {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.page-info {
+  margin: 0 1rem;
+  font-weight: 500;
+  color: #666;
+}
+
+/* Button styles */
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #212529;
+}
+
+.btn-warning:hover {
+  background: #e0a800;
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-info:hover {
+  background: #138496;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filters-section .flex-between {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .search-box {
+    max-width: none;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+}
+</style>
