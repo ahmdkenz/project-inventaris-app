@@ -10,10 +10,11 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  background: white;
+  background: #ffffff; /* White background for better contrast */
   padding: 1.5rem;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #212529; /* Darker text color */
 }
 
 .page-header h1 {
@@ -108,6 +109,7 @@
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
+  color: #212529; /* Darker text color for better contrast */
 }
 
 .stat-card h3 {
@@ -146,6 +148,8 @@
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 1rem;
+  background-color: #ffffff; /* White background for better contrast */
+  color: #212529; /* Darker text color */
 }
 
 .filter-group {
@@ -159,6 +163,8 @@
   border-radius: 5px;
   font-size: 1rem;
   min-width: 120px;
+  background-color: #ffffff; /* White background for better contrast */
+  color: #212529; /* Darker text color */
 }
 
 /* Table */
@@ -187,6 +193,7 @@
 .users-table td {
   padding: 1rem;
   border-bottom: 1px solid #dee2e6;
+  color: #212529; /* Darker text color for better contrast */
 }
 
 .users-table tbody tr:hover {
@@ -348,6 +355,7 @@
   border-radius: 5px;
   font-size: 1rem;
   transition: border-color 0.3s;
+  color: #212529; /* Darker text color for better contrast */
 }
 
 .form-group input:focus,
