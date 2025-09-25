@@ -1,37 +1,71 @@
 <template>
   <div class="register-container">
-    <h1>Register</h1>
-    <form @submit.prevent="handleRegister">
-      <label for="name">Name:</label>
-      <input id="name" v-model="name" type="text" required />
+    <div class="register-card">
+      <h1>Register</h1>
+      <form @submit.prevent="handleRegister">
+        <div class="form-group">
+          <label for="name">Name:</label>
+          <input
+            id="name"
+            v-model="name"
+            type="text"
+            placeholder="Enter your name"
+            required
+          />
+        </div>
 
-      <label for="email">Email:</label>
-      <input id="email" v-model="email" type="email" required />
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            placeholder="Enter your email"
+            required
+          />
+        </div>
 
-      <label for="password">Password:</label>
-      <input id="password" v-model="password" type="password" required />
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            placeholder="Enter your password"
+            required
+          />
+        </div>
 
-      <label for="password_confirmation">Confirm Password:</label>
-      <input
-        id="password_confirmation"
-        v-model="passwordConfirmation"
-        type="password"
-        required
-      />
+        <div class="form-group">
+          <label for="password_confirmation">Confirm Password:</label>
+          <input
+            id="password_confirmation"
+            v-model="passwordConfirmation"
+            type="password"
+            placeholder="Confirm your password"
+            required
+          />
+        </div>
 
-      <label for="role">Role:</label>
-      <select id="role" v-model="role" required>
-        <option value="">Select Role</option>
-        <option value="admin">Admin</option>
-        <option value="staff">Staff</option>
-      </select>
+        <div class="form-group">
+          <label for="role">Role:</label>
+          <select id="role" v-model="role" required>
+            <option value="">Select Role</option>
+            <option value="admin">Admin</option>
+            <option value="staff">Staff</option>
+          </select>
+        </div>
 
-      <button type="submit">Register</button>
-    </form>
-    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-    
-    <div class="login-link">
-      <p>Already have an account? <router-link to="/login">Login here</router-link></p>
+        <button type="submit" class="btn-primary">Register</button>
+      </form>
+
+      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+      <div class="login-link">
+        <p
+          >Already have an account? <router-link to="/login">Login here</router-link>
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -80,7 +114,9 @@ export default {
           role: this.role,
         });
         console.log("Registration successful:", response.data);
-        alert(`Registration successful! User ${response.data.user.name} created with role ${response.data.user.role}.`);
+        alert(
+          `Registration successful! User ${response.data.user.name} created with role ${response.data.user.role}.`
+        );
         this.$router.push("/login");
       } catch (error) {
         console.error("Registration error:", error.response);
@@ -102,93 +138,88 @@ export default {
 
 <style scoped>
 .register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.register-card {
+  background: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
   max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 h1 {
-  text-align: center;
   margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
 }
 
 label {
   display: block;
   margin-bottom: 5px;
+  font-size: 14px;
+  color: #555;
 }
 
-input, select {
+input,
+select {
   width: 100%;
   padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   font-size: 14px;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s;
 }
 
-input:focus, select:focus {
-  outline: none;
+input:focus,
+select:focus {
   border-color: #007bff;
+  outline: none;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-select {
-  background-color: white;
-  cursor: pointer;
-}
-
-button {
+.btn-primary {
   width: 100%;
-  padding: 12px;
-  background-color: #28a745;
-  color: white;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
   border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  border-radius: 4px;
   font-size: 16px;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-button:hover {
-  background-color: #218838;
-}
-
-button:active {
-  transform: translateY(1px);
+.btn-primary:hover {
+  background-color: #0056b3;
 }
 
 .error-message {
-  color: #dc3545;
-  text-align: center;
   margin-top: 15px;
-  padding: 10px;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 5px;
+  color: #dc3545;
   font-size: 14px;
 }
 
 .login-link {
-  text-align: center;
   margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid #eee;
-}
-
-.login-link p {
-  margin: 0;
-  color: #666;
+  font-size: 14px;
 }
 
 .login-link a {
   color: #007bff;
   text-decoration: none;
-  font-weight: 500;
 }
 
 .login-link a:hover {
