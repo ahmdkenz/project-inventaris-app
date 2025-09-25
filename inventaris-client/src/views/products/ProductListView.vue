@@ -49,8 +49,11 @@
           <tr>
             <th>ID</th>
             <th>Name</th>
+            <th>Description</th>
+            <th>SKU</th>
             <th>Category</th>
-            <th>Price</th>
+            <th>Purchase Price</th>
+            <th>Selling Price</th>
             <th>Stock</th>
             <th>Status</th>
             <th>Actions</th>
@@ -60,8 +63,11 @@
           <tr v-for="product in paginatedProducts" :key="product.id">
             <td>{{ product.id }}</td>
             <td>{{ product.name }}</td>
+            <td>{{ product.description }}</td>
+            <td>{{ product.sku }}</td>
             <td>{{ product.category }}</td>
-            <td>${{ product.price }}</td>
+            <td>${{ product.purchase_price }}</td>
+            <td>${{ product.selling_price }}</td>
             <td :class="{ 'low-stock': product.stock < 10 }">{{ product.stock }}</td>
             <td>
               <span :class="`status ${product.status}`">{{ product.status }}</span>
@@ -228,12 +234,15 @@ export default {
       await this.loadProducts();
     },
     async deleteProduct(id) {
+      console.log('Deleting product with ID:', id); // Log ID produk yang akan dihapus
       if (confirm('Are you sure you want to delete this product?')) {
         try {
-          await axios.delete(`/products/${id}`);
+          const response = await axios.delete(`/products/${id}`);
+          console.log('Delete response:', response.data); // Log respons dari API
           await this.loadProducts();
         } catch (error) {
-          console.error('Error deleting product:', error);
+          console.error('Error deleting product:', error.response || error.message);
+          alert('Failed to delete product. Please try again.');
         }
       }
     }
