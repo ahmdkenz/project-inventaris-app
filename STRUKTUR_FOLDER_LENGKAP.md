@@ -195,15 +195,58 @@ purchase_orders: id, supplier_id, total_amount, status, created_at, updated_at
 sales_orders: id, customer_name, total_amount, status, created_at, updated_at
 ```
 
-## Teknologi Tambahan yang Disarankan
+## Progres Proyek
 
 ### Backend:
+
+1. **Autentikasi**:
+   - Login dan register menggunakan Laravel Sanctum.
+   - Middleware untuk melindungi rute API.
+2. **Dashboard**:
+   - Statistik produk, stok, dan transaksi.
+   - Aktivitas terbaru pengguna.
+3. **Manajemen Produk**:
+   - CRUD produk dengan validasi.
+   - Filter dan pencarian produk.
+4. **Laporan**:
+   - Laporan penjualan, stok, dan keuangan.
+   - Ekspor laporan dalam format CSV dan Excel.
+   - Laporan khusus berdasarkan rentang tanggal.
+5. **Manajemen Role**:
+   - Role `admin` dan `staff` dengan akses berbeda.
+   - Proteksi rute berdasarkan role.
+
+### Frontend:
+
+1. **Autentikasi**:
+   - Halaman login dan register dengan validasi.
+   - Penyimpanan token autentikasi di `localStorage`.
+2. **Dashboard**:
+   - **Admin Dashboard**:
+     - Statistik pengguna, produk, dan transaksi.
+     - Akses ke laporan keuangan.
+   - **Staff Dashboard**:
+     - Statistik produk dan stok.
+     - Akses ke laporan stok dan penjualan.
+3. **Laporan**:
+   - Halaman laporan dengan metrik utama seperti total pendapatan, stok rendah, dll.
+   - Ekspor laporan dalam format Excel dan CSV.
+   - Laporan khusus berdasarkan rentang tanggal.
+4. **Manajemen Produk**:
+   - Pencarian dan filter produk berdasarkan kategori dan status.
+   - Navigasi halaman untuk daftar produk.
+5. **Manajemen Role**:
+   - Proteksi rute frontend berdasarkan role pengguna.
+
+### Teknologi Tambahan yang Disarankan
+
+#### Backend:
 
 - Laravel Sanctum: Untuk API authentication
 - Laravel Excel: Untuk export/import data
 - Spatie Permission: Untuk role & permission management
 
-### Frontend:
+#### Frontend:
 
 - Chart.js/ApexCharts: Untuk visualisasi data
 - Vue-toastification: Untuk notifikasi
