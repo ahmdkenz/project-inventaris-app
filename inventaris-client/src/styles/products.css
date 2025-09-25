@@ -1,7 +1,10 @@
 /* Product List Styles */
 .product-list {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
   padding: 2rem;
-  background: #f8f9fa;
+  box-sizing: border-box;
   min-height: 100vh;
 }
 

@@ -1,7 +1,10 @@
 /* Dashboard Styles */
 .dashboard {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  width: 100%;
+  background: linear-gradient(135deg, #e0eafc, #cfdef3);
+  display: flex;
+  flex-direction: column;
 }
 
 .dashboard-header {
@@ -46,19 +49,20 @@
 }
 
 .dashboard-nav {
-  background: white;
+  background: var(--background-light);
   padding: 1rem 2rem;
   display: flex;
   gap: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
   overflow-x: auto;
+  border-radius: 8px;
 }
 
 .nav-item {
   padding: 0.75rem 1rem;
   text-decoration: none;
-  color: #666;
+  color: var(--color-dark);
   border-radius: 5px;
   transition: all 0.3s ease;
   white-space: nowrap;
@@ -67,7 +71,7 @@
 
 .nav-item:hover,
 .nav-item.router-link-active {
-  background-color: #007bff;
+  background-color: var(--link-color);
   color: white;
   transform: translateY(-1px);
 }
@@ -79,7 +83,12 @@
 }
 
 .dashboard-content {
-  padding: 0 2rem 2rem;
+  flex: 1;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .stats-grid {

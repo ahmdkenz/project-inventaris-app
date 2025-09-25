@@ -1,25 +1,45 @@
 <template>
-  <div class="login-container">
-    <div class="login-card">
-      <h1>Login</h1>
-      <form @submit.prevent="handleLogin">
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input id="email" v-model="email" type="email" placeholder="Enter your email" required />
+  <div class="app-layout">
+    <div class="auth-container">
+      <div class="auth-card">
+        <h1>Login</h1>
+        <form @submit.prevent="handleLogin" class="auth-form">
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input 
+              id="email" 
+              v-model="email" 
+              type="email" 
+              class="form-control"
+              placeholder="Enter your email" 
+              required 
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input 
+              id="password" 
+              v-model="password" 
+              type="password" 
+              class="form-control"
+              placeholder="Enter your password" 
+              required 
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Logging in...' : 'Login' }}
+          </button>
+
+          <div v-if="errorMessage" class="error">
+            {{ errorMessage }}
+          </div>
+        </form>
+
+        <div class="auth-link">
+          <p>Don't have an account? <router-link to="/register">Register here</router-link></p>
         </div>
-
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input id="password" v-model="password" type="password" placeholder="Enter your password" required />
-        </div>
-
-        <button type="submit" class="btn-primary">Login</button>
-
-        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-      </form>
-
-      <div class="register-link">
-        <p>Don't have an account? <router-link to="/register">Register here</router-link></p>
       </div>
     </div>
   </div>
@@ -35,10 +55,14 @@ export default {
       email: "",
       password: "",
       errorMessage: "",
+      isSubmitting: false,
     };
   },
   methods: {
     async handleLogin() {
+      this.isSubmitting = true;
+      this.errorMessage = "";
+      
       try {
         const response = await axios.post("/login", {
           email: this.email,
@@ -63,6 +87,8 @@ export default {
       } catch (error) {
         this.errorMessage =
           error.response?.data?.message || "Login failed. Please try again.";
+      } finally {
+        this.isSubmitting = false;
       }
     },
   },
@@ -70,90 +96,77 @@ export default {
 </script>
 
 <style scoped>
-.login-container {
+@import "../../styles/layout.css";
+
+.auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding: 2rem;
 }
 
-.login-card {
-  background: #fff;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.auth-card {
+  background: white;
+  padding: 3rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
-  text-align: center;
+  max-width: 450px;
 }
 
-h1 {
-  margin-bottom: 20px;
-  font-size: 24px;
+.auth-card h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
   color: #333;
 }
 
-.form-group {
-  margin-bottom: 15px;
-  text-align: left;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 14px;
-  color: #555;
-}
-
-input {
+.auth-form {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.3s;
 }
 
-input:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-.btn-primary {
+.btn-block {
   width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  padding: 0.75rem;
+  font-size: 1rem;
+  margin-top: 1rem;
 }
 
-.btn-primary:hover {
-  background-color: #0056b3;
+.auth-link {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
 }
 
-.error-message {
-  margin-top: 15px;
-  color: #dc3545;
-  font-size: 14px;
+.auth-link p {
+  margin: 0;
+  color: #666;
 }
 
-.register-link {
-  margin-top: 20px;
-  font-size: 14px;
-}
-
-.register-link a {
-  color: #007bff;
+.auth-link a {
+  color: var(--link-color, #007bff);
   text-decoration: none;
+  font-weight: 500;
 }
 
-.register-link a:hover {
+.auth-link a:hover {
   text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 1rem;
+  }
+  
+  .auth-card {
+    padding: 2rem;
+  }
+  
+  .auth-card h1 {
+    font-size: 1.5rem;
+  }
 }
 </style>

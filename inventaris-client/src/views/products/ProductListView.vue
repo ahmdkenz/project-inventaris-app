@@ -159,7 +159,25 @@ export default {
     },
     async loadProducts() {
       try {
-        // Mock data - replace with actual API call
+        const response = await axios.get('/products', {
+          params: {
+            search: this.searchQuery,
+            category: this.categoryFilter,
+            status: this.statusFilter,
+            page: this.currentPage,
+            per_page: this.itemsPerPage
+          }
+        });
+        
+        if (response.data && response.data.data) {
+          this.products = response.data.data;
+          this.filteredProducts = [...this.products];
+          // Extract unique categories from products
+          this.categories = [...new Set(this.products.map(product => product.category))];
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+        // Fallback to mock data if API fails
         this.products = [
           { id: 1, name: 'Laptop Dell', category: 'Electronics', price: 999, stock: 15, status: 'active' },
           { id: 2, name: 'Mouse Wireless', category: 'Electronics', price: 25, stock: 5, status: 'active' },
@@ -167,8 +185,6 @@ export default {
           { id: 4, name: 'Programming Book', category: 'Books', price: 45, stock: 8, status: 'inactive' }
         ];
         this.filteredProducts = [...this.products];
-      } catch (error) {
-        console.error('Error loading products:', error);
       }
     },
     handleSearch() {

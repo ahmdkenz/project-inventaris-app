@@ -111,7 +111,22 @@ export default {
     },
     async loadDashboardData() {
       try {
-        // Mock data - replace with actual API calls
+        // Load dashboard statistics from API
+        const [statsResponse, activitiesResponse] = await Promise.all([
+          axios.get('/dashboard/stats'),
+          axios.get('/dashboard/activities')
+        ]);
+        
+        if (statsResponse.data) {
+          this.stats = statsResponse.data;
+        }
+        
+        if (activitiesResponse.data) {
+          this.recentActivities = activitiesResponse.data;
+        }
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        // Fallback to mock data if API fails
         this.stats = {
           totalProducts: 150,
           lowStock: 5,
@@ -139,8 +154,6 @@ export default {
             created_at: new Date(Date.now() - 7200000).toISOString()
           }
         ];
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
       }
     },
     formatDate(dateString) {
@@ -162,5 +175,71 @@ export default {
 </script>
 
 <style scoped>
+@import "../../styles/layout.css";
 @import "../../styles/dashboard.css";
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0eafc, #cfdef3);
+}
+
+.dashboard-header {
+  background: #ffffff;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-nav {
+  background: #ffffff;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  position: relative;
+}
+
+.nav-item:hover {
+  color: #007bff;
+}
+
+.admin-only {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .admin-only {
+    display: block;
+  }
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.quick-actions {
+  margin-top: 2rem;
+}
+
+.recent-activities {
+  margin-top: 2rem;
+}
 </style>
