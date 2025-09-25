@@ -141,74 +141,18 @@ export default {
     },
     async loadDashboardData() {
       try {
-        // Load dashboard statistics from API
-        const [statsResponse, activitiesResponse] = await Promise.all([
-          axios.get('/dashboard/stats'),
-          axios.get('/dashboard/activities')
-        ]);
-        
+        const statsResponse = await axios.get('/dashboard/stats');
+
         if (statsResponse.data) {
           // Pastikan data dari API digunakan, tidak diganti dengan mock data
-          this.stats = {
-            totalProducts: statsResponse.data.totalProducts || 0,
-            lowStock: statsResponse.data.lowStock || 0,
-            recentTransactions: statsResponse.data.recentTransactions || 0,
-            totalUsers: statsResponse.data.totalUsers || 0
-          };
+          this.stats.totalProducts = statsResponse.data.totalProducts || 0;
+          this.stats.lowStock = statsResponse.data.lowStock || 0;
+          this.stats.recentTransactions = statsResponse.data.recentTransactions || 0;
           console.log('Stats loaded from database:', this.stats);
-        }
-        
-        if (activitiesResponse.data && Array.isArray(activitiesResponse.data)) {
-          this.recentActivities = activitiesResponse.data;
         }
       } catch (error) {
         console.error('Error loading dashboard data:', error);
-        // Fallback to mock data if API fails
-        this.stats = {
-          totalProducts: 0,
-          lowStock: 0,
-          recentTransactions: 0,
-          totalUsers: 0
-        };
-        
-        this.recentActivities = [
-          {
-            id: 1,
-            description: 'New product added: Laptop Dell XPS 13',
-            user_name: this.user.name || 'Admin',
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            description: 'User John Doe created',
-            user_name: 'System',
-            created_at: new Date(Date.now() - 3600000).toISOString()
-          },
-          {
-            id: 3,
-            description: 'Stock updated for Product #123',
-            user_name: 'Admin',
-            created_at: new Date(Date.now() - 7200000).toISOString()
-          }
-        ];
-        
-        // Mencoba load data langsung dari endpoint products dan users jika stats endpoint gagal
-        try {
-          const productsResponse = await axios.get('/products');
-          if (productsResponse.data && Array.isArray(productsResponse.data.data)) {
-            this.stats.totalProducts = productsResponse.data.data.length;
-            this.stats.lowStock = productsResponse.data.data.filter(
-              product => product.stock <= (product.min_stock || 10)
-            ).length;
-          }
-          
-          const usersResponse = await axios.get('/users');
-          if (usersResponse.data && Array.isArray(usersResponse.data.data)) {
-            this.stats.totalUsers = usersResponse.data.data.length;
-          }
-        } catch (secondaryError) {
-          console.error('Secondary API call failed:', secondaryError);
-        }
+        // Fallback ke nilai sebelumnya jika API gagal
       }
     },
     formatDate(dateString) {

@@ -104,35 +104,23 @@ export default {
     },
     async loadDashboardData() {
       try {
-        // Mock data - replace with actual API calls
-        this.stats = {
-          totalProducts: 150,
-          lowStock: 5,
-          recentTransactions: 23
-        };
-        
-        this.recentActivities = [
-          {
-            id: 1,
-            description: 'Updated stock for Mouse Wireless',
-            user_name: this.user.name || 'Staff',
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            description: 'Viewed product details for Laptop Dell',
-            user_name: this.user.name || 'Staff',
-            created_at: new Date(Date.now() - 3600000).toISOString()
-          },
-          {
-            id: 3,
-            description: 'Generated stock report',
-            user_name: this.user.name || 'Staff',
-            created_at: new Date(Date.now() - 7200000).toISOString()
-          }
-        ];
+        const statsResponse = await axios.get('/dashboard/stats');
+
+        if (statsResponse.data) {
+          this.stats = {
+            totalProducts: statsResponse.data.totalProducts || 0,
+            lowStock: statsResponse.data.lowStock || 0,
+            recentTransactions: statsResponse.data.recentTransactions || 0
+          };
+        }
       } catch (error) {
         console.error('Error loading dashboard data:', error);
+        // Fallback to mock data if API fails
+        this.stats = {
+          totalProducts: 0,
+          lowStock: 0,
+          recentTransactions: 0
+        };
       }
     },
     formatDate(dateString) {
