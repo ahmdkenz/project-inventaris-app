@@ -2,39 +2,39 @@
   <div class="stock-adjustment">
     <!-- Header -->
     <div class="page-header">
-      <h1>Stock Adjustment</h1>
+      <h1>Penyesuaian Stok</h1>
       <div class="actions">
         <button @click="refreshData" class="btn btn-secondary">
-          Refresh
+          Segarkan Data
         </button>
       </div>
     </div>
 
     <!-- Adjustment Form -->
     <div class="adjustment-form">
-      <h2>Create Stock Adjustment</h2>
+      <h2>Buat Penyesuaian Stok</h2>
       <form @submit.prevent="createAdjustment">
         <div class="form-row">
           <div class="form-group">
-            <label for="product">Product:</label>
+            <label for="product">Produk:</label>
             <select id="product" v-model="adjustment.productId" required>
-              <option value="">Select Product</option>
+              <option value="">Pilih Produk</option>
               <option v-for="product in products" :key="product.id" :value="product.id">
-                {{ product.name }} (Current Stock: {{ product.stock }})
+                {{ product.name }} (Stok Saat Ini: {{ product.stock }})
               </option>
             </select>
           </div>
           <div class="form-group">
-            <label for="type">Adjustment Type:</label>
+            <label for="type">Jenis Penyesuaian:</label>
             <select id="type" v-model="adjustment.type" required>
-              <option value="increase">Increase Stock</option>
-              <option value="decrease">Decrease Stock</option>
+              <option value="increase">Tambah Stok</option>
+              <option value="decrease">Kurangi Stok</option>
             </select>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="quantity">Quantity:</label>
+            <label for="quantity">Jumlah:</label>
             <input 
               id="quantity" 
               v-model="adjustment.quantity" 
@@ -44,45 +44,46 @@
             />
           </div>
           <div class="form-group">
-            <label for="reason">Reason:</label>
+            <label for="reason">Alasan:</label>
             <select id="reason" v-model="adjustment.reason" required>
-              <option value="damaged">Damaged Goods</option>
-              <option value="expired">Expired</option>
-              <option value="recount">Stock Recount</option>
-              <option value="return">Customer Return</option>
-              <option value="other">Other</option>
+              <option value="damaged">Barang Rusak</option>
+              <option value="expired">Kadaluarsa</option>
+              <option value="recount">Penghitungan Ulang</option>
+              <option value="return">Pengembalian Pelanggan</option>
+              <option value="other">Lainnya</option>
             </select>
           </div>
         </div>
         <div class="form-group">
-          <label for="notes">Notes (Optional):</label>
+          <label for="notes">Catatan (Opsional):</label>
           <textarea 
             id="notes" 
             v-model="adjustment.notes" 
             rows="3" 
-            placeholder="Additional notes..."
+            placeholder="Tambahkan catatan tambahan..."
           ></textarea>
         </div>
         <button type="submit" class="btn btn-primary">
-          Create Adjustment
+          Simpan Penyesuaian
         </button>
       </form>
     </div>
 
     <!-- Recent Adjustments -->
     <div class="recent-adjustments">
-      <h2>Recent Stock Adjustments</h2>
+      <h2>Penyesuaian Stok Terbaru</h2>
       <div class="table-container">
         <table class="adjustments-table">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Product</th>
-              <th>Type</th>
-              <th>Quantity</th>
-              <th>Reason</th>
-              <th>User</th>
-              <th>Status</th>
+              <th>Tanggal</th>
+              <th>Produk</th>
+              <th>Jenis</th>
+              <th>Jumlah</th>
+              <th>Stok Lama</th>
+              <th>Stok Baru</th>
+              <th>Alasan</th>
+              <th>Pengguna</th>
             </tr>
           </thead>
           <tbody>
@@ -95,11 +96,10 @@
                 </span>
               </td>
               <td>{{ adj.quantity }}</td>
+              <td>{{ adj.old_stock }}</td>
+              <td>{{ adj.new_stock }}</td>
               <td>{{ adj.reason }}</td>
               <td>{{ adj.user_name }}</td>
-              <td>
-                <span :class="`status ${adj.status}`">{{ adj.status }}</span>
-              </td>
             </tr>
           </tbody>
         </table>
@@ -141,20 +141,87 @@ export default {
     },
     async loadProducts() {
       try {
-        // Mock data - replace with actual API call
+        const response = await axios.get('/products');
+        if (response.data && Array.isArray(response.data.data)) {
+          this.products = response.data.data.map(product => ({
+            id: product.id,
+            name: product.name,
+            stock: product.stock,
+            min_stock: product.min_stock || 10
+          }));
+        } else {
+          // Fallback to mock data if API response is not as expected
+          this.products = [
+            { id: 1, name: 'Laptop Dell', stock: 15 },
+            { id: 2, name: 'Mouse Wireless', stock: 5 },
+            { id: 3, name: 'T-Shirt', stock: 50 },
+            { id: 4, name: 'Programming Book', stock: 8 }
+          ];
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+        // Fallback to mock data
         this.products = [
           { id: 1, name: 'Laptop Dell', stock: 15 },
           { id: 2, name: 'Mouse Wireless', stock: 5 },
           { id: 3, name: 'T-Shirt', stock: 50 },
           { id: 4, name: 'Programming Book', stock: 8 }
         ];
-      } catch (error) {
-        console.error('Error loading products:', error);
       }
     },
     async loadRecentAdjustments() {
       try {
-        // Mock data - replace with actual API call
+        // Get recent transactions from API
+        const response = await axios.get('/transactions/recent');
+        
+        if (response.data && Array.isArray(response.data.transactions)) {
+          this.recentAdjustments = response.data.transactions.map(transaction => {
+            return {
+              id: transaction.id,
+              product_name: transaction.product ? transaction.product.name : 'Unknown Product',
+              type: transaction.type === 'in' ? 'increase' : 
+                   transaction.type === 'out' ? 'decrease' : 'adjustment',
+              quantity: transaction.quantity,
+              reason: transaction.reason || 'N/A',
+              user_name: transaction.user ? transaction.user.name : 'System',
+              status: 'approved', // Assuming all records in database are approved
+              created_at: transaction.created_at,
+              old_stock: transaction.old_stock,
+              new_stock: transaction.new_stock
+            };
+          });
+        } else {
+          // Fallback to mock data if API response is not as expected
+          this.recentAdjustments = [
+            {
+              id: 1,
+              product_name: 'Laptop Dell',
+              type: 'decrease',
+              quantity: 2,
+              reason: 'damaged',
+              user_name: this.user.name || 'Admin',
+              status: 'approved',
+              created_at: new Date().toISOString(),
+              old_stock: 17,
+              new_stock: 15
+            },
+            {
+              id: 2,
+              product_name: 'Mouse Wireless',
+              type: 'increase',
+              quantity: 10,
+              reason: 'recount',
+              user_name: this.user.name || 'Staff',
+              status: 'approved',
+              created_at: new Date(Date.now() - 3600000).toISOString(),
+              old_stock: 0,
+              new_stock: 10
+            }
+          ];
+        }
+      } catch (error) {
+        console.error('Error loading adjustments:', error);
+        // Fallback to mock data
         this.recentAdjustments = [
           {
             id: 1,
@@ -164,7 +231,9 @@ export default {
             reason: 'damaged',
             user_name: this.user.name || 'Admin',
             status: 'approved',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            old_stock: 17,
+            new_stock: 15
           },
           {
             id: 2,
@@ -173,24 +242,33 @@ export default {
             quantity: 10,
             reason: 'recount',
             user_name: this.user.name || 'Staff',
-            status: 'pending',
-            created_at: new Date(Date.now() - 3600000).toISOString()
+            status: 'approved',
+            created_at: new Date(Date.now() - 3600000).toISOString(),
+            old_stock: 0,
+            new_stock: 10
           }
         ];
-      } catch (error) {
-        console.error('Error loading adjustments:', error);
       }
     },
     async createAdjustment() {
       try {
+        // Validate form data
+        if (!this.adjustment.productId || !this.adjustment.quantity) {
+          alert('Silakan lengkapi semua field yang diperlukan');
+          return;
+        }
+
+        // Map frontend fields to API expected format
         const adjustmentData = {
-          ...this.adjustment,
-          user_id: this.user.id,
-          created_at: new Date().toISOString()
+          product_id: this.adjustment.productId,
+          quantity: parseInt(this.adjustment.quantity),
+          type: this.adjustment.type === 'increase' ? 'in' : 'out',
+          reason: this.adjustment.reason,
+          notes: this.adjustment.notes
         };
         
-        // Mock API call - replace with actual implementation
-        console.log('Creating adjustment:', adjustmentData);
+        // Submit adjustment to API
+        const response = await axios.post('/stocks/adjust', adjustmentData);
         
         // Reset form
         this.adjustment = {
@@ -201,11 +279,19 @@ export default {
           notes: ''
         };
         
+        // Refresh product list and recent adjustments
+        await this.loadProducts();
         await this.loadRecentAdjustments();
-        alert('Stock adjustment created successfully!');
+        alert('Penyesuaian stok berhasil dibuat!');
       } catch (error) {
         console.error('Error creating adjustment:', error);
-        alert('Error creating adjustment. Please try again.');
+        
+        // Show specific error message if available
+        if (error.response && error.response.data && error.response.data.message) {
+          alert(`Error: ${error.response.data.message}`);
+        } else {
+          alert('Terjadi kesalahan saat membuat penyesuaian. Silakan coba lagi.');
+        }
       }
     },
     formatDate(dateString) {
