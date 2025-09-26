@@ -11,10 +11,21 @@
         >
           Add New Product
         </router-link>
-        <button @click="refreshProducts" class="btn btn-secondary">
-          Refresh
+        <button 
+          @click="refreshProducts" 
+          class="btn btn-secondary" 
+          :disabled="isRefreshing"
+        >
+          <span v-if="isRefreshing">Refreshing...</span>
+          <span v-else>Refresh</span>
         </button>
       </div>
+    </div>
+    
+    <!-- Refresh Notification -->
+    <div v-if="showRefreshMessage" class="refresh-message">
+      <span>✅ Product list has been updated</span>
+      <span v-if="lastUpdate" class="update-time">Last updated: {{ formatUpdateTime() }}</span>
     </div>
 
     <!-- Search and Filter -->
@@ -139,7 +150,10 @@ export default {
       categories: ['Electronics', 'Clothing', 'Books', 'Home & Garden'],
       currentPage: 1,
       itemsPerPage: 10,
-      user: {}
+      user: {},
+      lastUpdate: null,
+      isRefreshing: false,
+      showRefreshMessage: false
     };
   },
   computed: {
@@ -155,6 +169,17 @@ export default {
   async mounted() {
     this.loadUserData();
     await this.loadProducts();
+    
+    // Setup auto refresh interval
+    this._refreshInterval = setInterval(() => {
+      this.refreshProducts(true);
+    }, 30000); // Auto refresh every 30 seconds
+  },
+  
+  beforeUnmount() {
+    if (this._refreshInterval) {
+      clearInterval(this._refreshInterval);
+    }
   },
   methods: {
     loadUserData() {
@@ -171,7 +196,9 @@ export default {
             category: this.categoryFilter,
             status: this.statusFilter,
             page: this.currentPage,
-            per_page: this.itemsPerPage
+            per_page: this.itemsPerPage,
+            sort_by: 'updated_at',
+            sort_order: 'desc'
           }
         });
         
@@ -179,18 +206,23 @@ export default {
           this.products = response.data.data;
           this.filteredProducts = [...this.products];
           // Extract unique categories from products
-          this.categories = [...new Set(this.products.map(product => product.category))];
+          this.categories = [...new Set(this.products.map(product => product.category).filter(Boolean))];
+          
+          // Save last update timestamp
+          this.lastUpdate = new Date();
         }
       } catch (error) {
         console.error('Error loading products:', error);
-        // Fallback to mock data if API fails
-        this.products = [
-          { id: 1, name: 'Laptop Dell', category: 'Electronics', price: 999, stock: 15, status: 'active' },
-          { id: 2, name: 'Mouse Wireless', category: 'Electronics', price: 25, stock: 5, status: 'active' },
-          { id: 3, name: 'T-Shirt', category: 'Clothing', price: 20, stock: 50, status: 'active' },
-          { id: 4, name: 'Programming Book', category: 'Books', price: 45, stock: 8, status: 'inactive' }
-        ];
-        this.filteredProducts = [...this.products];
+        // Only use fallback mock data if no products are loaded yet
+        if (!this.products.length) {
+          this.products = [
+            { id: 1, name: 'Laptop Dell', category: 'Electronics', purchase_price: 800, selling_price: 999, stock: 15, status: 'active' },
+            { id: 2, name: 'Mouse Wireless', category: 'Electronics', purchase_price: 15, selling_price: 25, stock: 5, status: 'active' },
+            { id: 3, name: 'T-Shirt', category: 'Clothing', purchase_price: 10, selling_price: 20, stock: 50, status: 'active' },
+            { id: 4, name: 'Programming Book', category: 'Books', purchase_price: 30, selling_price: 45, stock: 8, status: 'inactive' }
+          ];
+          this.filteredProducts = [...this.products];
+        }
       }
     },
     handleSearch() {
@@ -230,8 +262,24 @@ export default {
         this.currentPage++;
       }
     },
-    async refreshProducts() {
+    async refreshProducts(silent = false) {
+      if (!silent) {
+        // Show loading indicator only if manually refreshed
+        this.isRefreshing = true;
+      }
+      
       await this.loadProducts();
+      
+      if (!silent) {
+        // Show success message
+        this.showRefreshMessage = true;
+        this.isRefreshing = false;
+        
+        // Hide message after 3 seconds
+        setTimeout(() => {
+          this.showRefreshMessage = false;
+        }, 3000);
+      }
     },
     async deleteProduct(id) {
       console.log('Deleting product with ID:', id); // Log ID produk yang akan dihapus
@@ -245,6 +293,11 @@ export default {
           alert('Failed to delete product. Please try again.');
         }
       }
+    },
+    
+    formatUpdateTime() {
+      if (!this.lastUpdate) return '';
+      return this.lastUpdate.toLocaleTimeString();
     }
   }
 };
@@ -252,4 +305,50 @@ export default {
 
 <style scoped>
 @import "../../styles/products.css";
+
+.refresh-message {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  border-radius: 4px;
+  padding: 10px 15px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: fadeIn 0.3s;
+}
+
+.update-time {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.low-stock {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  text-transform: capitalize;
+}
+
+.status.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status.inactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
 </style>

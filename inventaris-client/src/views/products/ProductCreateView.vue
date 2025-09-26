@@ -32,10 +32,23 @@
             </div>
             
             <div class="form-group">
-              <label for="price">Price *</label>
+              <label for="purchase_price">Purchase Price *</label>
               <input 
-                id="price" 
-                v-model="product.price" 
+                id="purchase_price" 
+                v-model="product.purchase_price" 
+                type="number" 
+                step="0.01" 
+                class="form-control"
+                required 
+                placeholder="0.00"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label for="selling_price">Selling Price *</label>
+              <input 
+                id="selling_price" 
+                v-model="product.selling_price" 
                 type="number" 
                 step="0.01" 
                 class="form-control"
@@ -53,6 +66,17 @@
                 class="form-control"
                 required 
                 placeholder="0"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label for="min_stock">Minimum Stock</label>
+              <input 
+                id="min_stock" 
+                v-model="product.min_stock" 
+                type="number" 
+                class="form-control"
+                placeholder="10"
               />
             </div>
           </div>
@@ -93,9 +117,11 @@ export default {
       product: {
         name: '',
         description: '',
-        price: '',
+        purchase_price: '',
+        selling_price: '',
         stock: '',
-        category: ''
+        category: '',
+        min_stock: 10
       },
       categories: [
         'Electronics',
@@ -122,9 +148,10 @@ export default {
           name: this.product.name,
           description: this.product.description || null,
           category: this.product.category,
-          purchase_price: parseFloat(this.product.price),
-          selling_price: parseFloat(this.product.price) + 50,
+          purchase_price: parseFloat(this.product.purchase_price),
+          selling_price: parseFloat(this.product.selling_price),
           stock: Number(this.product.stock),
+          min_stock: Number(this.product.min_stock || 10),
         });
 
         console.log('API response:', response.data);
