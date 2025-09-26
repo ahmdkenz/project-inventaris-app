@@ -34,7 +34,8 @@ class StockController extends Controller
             if ($request->has('status') && $request->status) {
                 $status = $request->status;
                 if ($status === 'low_stock') {
-                    $query->whereColumn('stock', '<=', 'min_stock');
+                    $query->whereRaw('CAST(stock AS UNSIGNED) <= CAST(min_stock AS UNSIGNED)')
+                          ->where('stock', '>', 0);
                 } elseif ($status === 'out_of_stock') {
                     $query->where('stock', 0);
                 } elseif ($status === 'in_stock') {
@@ -54,7 +55,8 @@ class StockController extends Controller
                     'category' => $product->category,
                     'quantity' => $product->stock,
                     'min_stock' => $product->min_stock ?? 10,
-                    'price' => $product->price,
+                    'purchase_price' => $product->purchase_price,
+                    'selling_price' => $product->selling_price,
                     'updated_at' => $product->updated_at,
                     'status' => $this->getStockStatus($product->stock, $product->min_stock ?? 10)
                 ];
@@ -134,7 +136,7 @@ class StockController extends Controller
                 'quantity' => $request->quantity,
                 'old_stock' => $oldStock,
                 'new_stock' => $newStock,
-                'price' => $product->price,
+                'price' => $product->selling_price,
                 'reason' => $request->reason ?? 'No reason provided',
                 'notes' => $request->notes,
             ]);
@@ -187,8 +189,11 @@ class StockController extends Controller
     public function lowStockAlerts(Request $request)
     {
         try {
-            $lowStockProducts = Product::whereColumn('stock', '<=', 'min_stock')
-                ->orWhere('stock', 0)
+            $lowStockProducts = Product::where(function($query) {
+                    $query->whereRaw('CAST(stock AS UNSIGNED) <= CAST(min_stock AS UNSIGNED)')
+                          ->where('stock', '>', 0); // Produk dengan stok rendah tapi tidak nol
+                })
+                ->orWhere('stock', 0) // Produk dengan stok kosong
                 ->orderBy('stock', 'asc')
                 ->get()
                 ->map(function ($product) {
@@ -270,7 +275,7 @@ class StockController extends Controller
                     'quantity' => $adjustment['quantity'],
                     'old_stock' => $oldStock,
                     'new_stock' => $newStock,
-                    'price' => $product->price,
+                    'price' => $product->selling_price,
                     'reason' => $adjustment['reason'] ?? 'Bulk adjustment',
                 ]);
 
@@ -303,6 +308,10 @@ class StockController extends Controller
      */
     private function getStockStatus($currentStock, $minStock)
     {
+        // Convert to integers for proper comparison
+        $currentStock = (int)$currentStock;
+        $minStock = (int)$minStock;
+        
         if ($currentStock === 0) {
             return 'out_of_stock';
         } elseif ($currentStock <= $minStock) {

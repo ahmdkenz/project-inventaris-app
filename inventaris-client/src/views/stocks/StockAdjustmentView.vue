@@ -46,11 +46,9 @@
           <div class="form-group">
             <label for="reason">Alasan:</label>
             <select id="reason" v-model="adjustment.reason" required>
-              <option value="damaged">Barang Rusak</option>
-              <option value="expired">Kadaluarsa</option>
-              <option value="recount">Penghitungan Ulang</option>
-              <option value="return">Pengembalian Pelanggan</option>
-              <option value="other">Lainnya</option>
+              <option v-for="option in reasonOptions[adjustment.type]" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
             </select>
           </div>
         </div>
@@ -124,13 +122,46 @@ export default {
         notes: ''
       },
       recentAdjustments: [],
-      user: {}
+      user: {},
+      reasonOptions: {
+        increase: [
+          { value: 'recount', label: 'Penghitungan Ulang' },
+          { value: 'return', label: 'Pengembalian Barang' }
+        ],
+        decrease: [
+          { value: 'sold', label: 'Terjual' },
+          { value: 'return', label: 'Pengembalian Barang' },
+          { value: 'damaged', label: 'Barang Rusak' }
+        ]
+      }
     };
   },
   async mounted() {
     this.loadUserData();
     await this.loadProducts();
     await this.loadRecentAdjustments();
+    
+    // Set polling untuk update produk secara otomatis setiap 30 detik
+    this._productUpdateInterval = setInterval(async () => {
+      await this.loadProducts();
+    }, 30000);
+  },
+  beforeUnmount() {
+    if (this._productUpdateInterval) clearInterval(this._productUpdateInterval);
+  },
+  watch: {
+    'adjustment.type': {
+      immediate: true,
+      handler(newType) {
+        // Set alasan default berdasarkan jenis penyesuaian
+        const defaultReason = newType === 'increase' ? 'recount' : 'sold';
+        // Hanya ubah alasan jika alasan saat ini tidak ada di opsi baru
+        const availableReasons = this.reasonOptions[newType].map(option => option.value);
+        if (!availableReasons.includes(this.adjustment.reason)) {
+          this.adjustment.reason = defaultReason;
+        }
+      }
+    }
   },
   methods: {
     loadUserData() {
@@ -141,16 +172,44 @@ export default {
     },
     async loadProducts() {
       try {
-        const response = await axios.get('/products');
+        // Permintaan dengan parameter sort untuk mendapatkan produk terbaru di awal
+        const response = await axios.get('/products', {
+          params: {
+            sort_by: 'created_at',
+            sort_order: 'desc',
+            per_page: 100 // Ambil lebih banyak produk
+          }
+        });
+        
         if (response.data && Array.isArray(response.data.data)) {
-          this.products = response.data.data.map(product => ({
+          // Pertahankan produk yang sudah ada dan tambahkan produk baru
+          const updatedProducts = response.data.data.map(product => ({
             id: product.id,
             name: product.name,
             stock: product.stock,
             min_stock: product.min_stock || 10
           }));
+          
+          // Perbarui daftar produk
+          this.products = updatedProducts;
+          
+          console.log(`Loaded ${this.products.length} products from API`);
         } else {
-          // Fallback to mock data if API response is not as expected
+          console.warn('Unexpected API response format for products');
+          // Jangan gunakan fallback mock data jika sudah ada produk yang dimuat sebelumnya
+          if (this.products.length === 0) {
+            this.products = [
+              { id: 1, name: 'Laptop Dell', stock: 15 },
+              { id: 2, name: 'Mouse Wireless', stock: 5 },
+              { id: 3, name: 'T-Shirt', stock: 50 },
+              { id: 4, name: 'Programming Book', stock: 8 }
+            ];
+          }
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+        // Jangan gunakan fallback mock data jika sudah ada produk yang dimuat sebelumnya
+        if (this.products.length === 0) {
           this.products = [
             { id: 1, name: 'Laptop Dell', stock: 15 },
             { id: 2, name: 'Mouse Wireless', stock: 5 },
@@ -158,15 +217,6 @@ export default {
             { id: 4, name: 'Programming Book', stock: 8 }
           ];
         }
-      } catch (error) {
-        console.error('Error loading products:', error);
-        // Fallback to mock data
-        this.products = [
-          { id: 1, name: 'Laptop Dell', stock: 15 },
-          { id: 2, name: 'Mouse Wireless', stock: 5 },
-          { id: 3, name: 'T-Shirt', stock: 50 },
-          { id: 4, name: 'Programming Book', stock: 8 }
-        ];
       }
     },
     async loadRecentAdjustments() {
@@ -258,10 +308,17 @@ export default {
           return;
         }
 
+        // Validasi bahwa kuantitas harus angka positif
+        const quantity = parseInt(this.adjustment.quantity);
+        if (isNaN(quantity) || quantity <= 0) {
+          alert('Jumlah harus berupa angka positif');
+          return;
+        }
+
         // Map frontend fields to API expected format
         const adjustmentData = {
           product_id: this.adjustment.productId,
-          quantity: parseInt(this.adjustment.quantity),
+          quantity: quantity,
           type: this.adjustment.type === 'increase' ? 'in' : 'out',
           reason: this.adjustment.reason,
           notes: this.adjustment.notes
@@ -270,12 +327,15 @@ export default {
         // Submit adjustment to API
         const response = await axios.post('/stocks/adjust', adjustmentData);
         
-        // Reset form
+        // Reset form dengan default alasan yang sesuai
+        const defaultType = 'increase';
+        const defaultReason = this.reasonOptions[defaultType][0].value;
+        
         this.adjustment = {
           productId: '',
-          type: 'increase',
+          type: defaultType,
           quantity: '',
-          reason: 'recount',
+          reason: defaultReason,
           notes: ''
         };
         
