@@ -24,6 +24,17 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
+
+        // Block inactive user
+        if ($user->status === 'inactive') {
+            Auth::logout();
+            return response()->json(['message' => 'Account is inactive'], 403);
+        }
+
+        // Update last login timestamp
+        $user->last_login = now();
+        $user->save();
+
         $token = $user->createToken('authToken')->plainTextToken;
 
         return response()->json([
@@ -32,6 +43,8 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role, // Include role in the response
+                'status' => $user->status,
+                'last_login' => $user->last_login,
             ],
             'token' => $token,
         ]);

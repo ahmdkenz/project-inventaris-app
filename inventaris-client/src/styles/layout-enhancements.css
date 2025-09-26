@@ -1,0 +1,82 @@
+/* Non-intrusive layout enhancements (grid compaction) */
+.detail-sections-grid,
+.compact-sections {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.detail-sections-grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  align-items: start;
+}
+
+.compact-sections {
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  align-items: start;
+}
+
+.compact-sections .settings-section {
+  margin-bottom: 0 !important; /* override existing margin to prevent vertical stacking */
+  height: fit-content;  /* Ensure card height fits content */
+}
+
+.two-column-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+/* Support for full-width items in grid */
+.two-column-fields .info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .compact-sections {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-sections-grid,
+  .compact-sections {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .two-column-fields {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  /* Smaller margins on mobile */
+  .product-info-card, .settings-section {
+    margin-bottom: 1rem;
+  }
+}
+
+.product-info-card, .settings-section.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden; /* Prevent overflow issues */
+}
+
+/* utility: reduce vertical white space inside cards when in grid */
+.detail-sections-grid .product-info-card h2,
+.compact-sections .settings-section h3 {
+  margin-top: 0.25rem;
+}
+
+/* Prevent tables from breaking the layout in grid */
+.detail-sections-grid .product-info-card:has(.transactions-table) {
+  overflow-x: auto; /* Allow horizontal scroll for tables */
+  grid-column: 1 / -1; /* Make transaction table full width */
+}
+
+/* Ensure actions grid fits in card */
+.quick-actions .actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}

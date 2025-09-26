@@ -26,10 +26,23 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+    if (error.response) {
+      // Handle unauthorized (expired/invalid token)
+      if (error.response.status === 401) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+      
+      // Handle inactive account
+      if (error.response.status === 403 && 
+          error.response.data && 
+          error.response.data.message === 'Account is inactive') {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        // Redirect with message
+        window.location.href = '/login?error=inactive';
+      }
     }
     return Promise.reject(error);
   }

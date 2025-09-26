@@ -10,7 +10,7 @@ class Product extends Model
         'sku',
         'description',
         'category',
-    'category_id',
+        'category_id',
         'purchase_price',
         'selling_price',
         'stock',
@@ -22,7 +22,7 @@ class Product extends Model
     protected $casts = [
         'purchase_price' => 'decimal:2',
         'selling_price' => 'decimal:2',
-        'stock' => 'integer'
+        'stock' => 'integer',
     ];
 
     public function stocks()
@@ -33,5 +33,15 @@ class Product extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+    
+    /**
+     * Get the stock relationship attribute.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function stockRelation()
+    {
+        return $this->hasOne(Stock::class)->latest();
     }
 }

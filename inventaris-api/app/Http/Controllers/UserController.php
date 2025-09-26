@@ -17,7 +17,7 @@ class UserController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $users = User::select('id', 'name', 'email', 'role', 'status', 'created_at', 'email_verified_at')
+            $users = User::select('id', 'name', 'email', 'role', 'status', 'created_at', 'last_login')
                 ->orderBy('created_at', 'desc')
                 ->get()
                 ->map(function ($user) {
@@ -28,7 +28,7 @@ class UserController extends Controller
                         'role' => $user->role ?? 'staff',
                         'status' => $user->status ?? 'active',
                         'created_at' => optional($user->created_at)->toIso8601String(),
-                        'last_login' => optional($user->email_verified_at)->toIso8601String(),
+                        'last_login' => optional($user->last_login)->toIso8601String(),
                     ];
                 });
 
@@ -102,7 +102,7 @@ class UserController extends Controller
                 'role' => $user->role ?? 'staff',
                 'status' => $user->status ?? 'active',
                 'created_at' => optional($user->created_at)->toIso8601String(),
-                'last_login' => optional($user->email_verified_at)->toIso8601String(),
+                'last_login' => optional($user->last_login)->toIso8601String(),
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -150,7 +150,7 @@ class UserController extends Controller
                 'role' => $user->role,
                 'status' => $user->status,
                 'created_at' => $user->created_at->toISOString(),
-                'last_login' => $user->email_verified_at ? $user->email_verified_at->toISOString() : null,
+                'last_login' => $user->last_login ? $user->last_login->toISOString() : null,
             ]);
         } catch (\Exception $e) {
             return response()->json([

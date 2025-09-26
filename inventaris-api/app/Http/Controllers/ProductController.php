@@ -126,10 +126,12 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         try {
+            $productData = $product->load(['transactions' => function ($query) {
+                $query->with('user')->latest()->take(10);
+            }]);
+            
             return response()->json([
-                'product' => $product->load(['transactions' => function ($query) {
-                    $query->with('user')->latest()->take(10);
-                }])
+                'product' => $productData
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -220,12 +222,35 @@ class ProductController extends Controller
                 ->sort()
                 ->values();
 
+            // Fallback default categories jika tidak ada data dari database
+            if ($categories->isEmpty()) {
+                $categories = collect([
+                    'Elektronik',
+                    'Pakaian',
+                    'Buku',
+                    'Rumah & Taman',
+                    'Olahraga',
+                    'Mainan',
+                    'Otomotif',
+                    'Kesehatan & Kecantikan'
+                ]);
+            }
+
             return response()->json($categories);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Failed to fetch categories',
-                'message' => $e->getMessage()
-            ], 500);
+            // Fallback jika terjadi error
+            $defaultCategories = [
+                'Elektronik',
+                'Pakaian',
+                'Buku',
+                'Rumah & Taman',
+                'Olahraga',
+                'Mainan',
+                'Otomotif',
+                'Kesehatan & Kecantikan'
+            ];
+            
+            return response()->json($defaultCategories);
         }
     }
 
