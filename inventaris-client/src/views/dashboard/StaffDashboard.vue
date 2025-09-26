@@ -105,22 +105,15 @@ export default {
     async loadDashboardData() {
       try {
         const statsResponse = await axios.get('/dashboard/stats');
+        const lowStockItems = await axios.get('/products?filter[stock_lt]=10');
 
         if (statsResponse.data) {
-          this.stats = {
-            totalProducts: statsResponse.data.totalProducts || 0,
-            lowStock: statsResponse.data.lowStock || 0,
-            recentTransactions: statsResponse.data.recentTransactions || 0
-          };
+          this.stats.totalProducts = statsResponse.data.totalProducts || 0;
+          this.stats.lowStock = lowStockItems.data.length || 0; // Menampilkan jumlah item dengan stok di bawah 10
         }
       } catch (error) {
         console.error('Error loading dashboard data:', error);
-        // Fallback to mock data if API fails
-        this.stats = {
-          totalProducts: 0,
-          lowStock: 0,
-          recentTransactions: 0
-        };
+        // Fallback ke nilai sebelumnya jika API gagal
       }
     },
     formatDate(dateString) {

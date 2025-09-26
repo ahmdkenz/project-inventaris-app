@@ -144,9 +144,8 @@ export default {
         const statsResponse = await axios.get('/dashboard/stats');
 
         if (statsResponse.data) {
-          // Pastikan data dari API digunakan, tidak diganti dengan mock data
           this.stats.totalProducts = statsResponse.data.totalProducts || 0;
-          this.stats.lowStock = statsResponse.data.lowStock || 0;
+          this.stats.lowStock = statsResponse.data.lowStock || 0; // Menggunakan nilai lowStock langsung dari backend
           this.stats.recentTransactions = statsResponse.data.recentTransactions || 0;
           console.log('Stats loaded from database:', this.stats);
         }
