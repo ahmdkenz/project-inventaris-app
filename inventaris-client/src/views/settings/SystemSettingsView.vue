@@ -659,6 +659,7 @@ export default {
 @import "../../styles/settings.css";
 @import "../../styles/settings-additional.css";
 @import "../../styles/layout-enhancements.css";
+@import "../../styles/responsive-fixes.css";
 
 /* Enhance card sizing in settings */
 .settings-section.card {

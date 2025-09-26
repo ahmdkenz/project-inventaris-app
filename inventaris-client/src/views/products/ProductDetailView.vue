@@ -257,6 +257,7 @@ export default {
 <style scoped>
 /* Menghapus inline CSS yang sudah dipindahkan */
 @import "../../styles/layout-enhancements.css";
+@import "../../styles/responsive-fixes.css";
 
 /* Fix for transaction table */
 .transactions-table {

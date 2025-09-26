@@ -139,6 +139,7 @@
 <script>
 import axios from '../../services/axios';
 import '../../styles/product-edit.css';
+import '../../styles/responsive-fixes.css';
 
 export default {
   name: "ProductEditView",

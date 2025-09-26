@@ -182,4 +182,5 @@ export default {
 
 <style scoped>
 @import "../../styles/product-create.css";
+@import "../../styles/responsive-fixes.css";
 </style>

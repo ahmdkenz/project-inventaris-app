@@ -194,6 +194,7 @@ export default {
 
 <style scoped>
 @import "../../styles/orders.css";
+@import "../../styles/responsive-fixes.css";
 
 .page-header {
   margin-bottom: 2rem;

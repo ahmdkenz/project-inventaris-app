@@ -175,6 +175,7 @@ export default {
 <style scoped>
 @import "../../styles/layout.css";
 @import "../../styles/dashboard.css";
+@import "../../styles/responsive-fixes.css";
 
 .dashboard {
   display: flex;

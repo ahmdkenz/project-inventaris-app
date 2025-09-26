@@ -431,4 +431,5 @@ export default {
 
 <style scoped>
 @import "../../styles/users.css";
+@import "../../styles/responsive-fixes.css";
 </style>

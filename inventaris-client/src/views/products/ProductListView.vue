@@ -306,6 +306,7 @@ export default {
 
 <style scoped>
 @import "../../styles/products.css";
+@import "../../styles/responsive-fixes.css";
 
 .refresh-message {
   background-color: #d4edda;

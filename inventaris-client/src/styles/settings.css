@@ -1,7 +1,7 @@
 /* General styles for settings page */
 .settings-container {
-  padding: var(--spacing-lg);
-  max-width: 1200px;
+  padding: 2rem;
+  max-width: 1600px; /* Increased from 1200px */
   margin: 0 auto;
   color: #333;
   background-color: #f5f7fa;
@@ -68,7 +68,7 @@
 /* Form styles */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Increased from 250px */
   gap: 1.5rem;
 }
 
@@ -170,9 +170,47 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1440px) {
+  .settings-container {
+    max-width: 1200px;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .settings-container {
+    max-width: 960px;
+  }
+  
+  .form-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .settings-container {
+    padding: 1.25rem;
+  }
+  
+  .card-content {
+    padding: 1.25rem;
+  }
+}
+
 @media (max-width: 768px) {
   .settings-container {
-    padding: var(--spacing-md);
+    padding: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .backup-actions {
@@ -181,5 +219,32 @@
 
   .info-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .card-content {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-container {
+    padding: 0.75rem;
+  }
+  
+  .form-control {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .toggle-container {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

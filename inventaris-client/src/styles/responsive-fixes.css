@@ -1,0 +1,142 @@
+/**
+ * responsive-fixes.css
+ * 
+ * This file contains additional responsive fixes to ensure the application
+ * displays correctly across different screen resolutions.
+ */
+
+/* Extra large screens (1920px and above) */
+@media (min-width: 1920px) {
+  .main-content,
+  .product-list,
+  .dashboard-content,
+  .settings-container {
+    max-width: 1800px;
+    padding: 2.5rem;
+  }
+  
+  .table {
+    min-width: 900px;
+  }
+  
+  .grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+  
+  .grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+  
+  .grid-4 {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+/* Fix for tables that may have too much horizontal overflow */
+.table-responsive {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  scrollbar-width: thin; /* For Firefox */
+  position: relative;
+}
+
+/* Custom scrollbar for table container */
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Prevent content from overflowing container */
+img, svg, video, canvas, audio, iframe, embed, object {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix for card layouts to prevent squishing on narrow screens */
+.card {
+  min-width: 0;
+}
+
+/* Fix for content that may be hidden on certain devices */
+.hidden-overflow {
+  overflow: auto;
+  max-width: 100%;
+}
+
+/* Ensure buttons don't wrap text awkwardly */
+.btn {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Fix for navigation items on medium screens */
+@media (max-width: 1200px) and (min-width: 769px) {
+  .nav-item, .nav-item-responsive {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .dashboard-nav {
+    flex-wrap: wrap;
+  }
+}
+
+/* Fix for form elements getting too narrow */
+@media (max-width: 576px) {
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+  
+  .form-control {
+    min-height: 38px;
+  }
+  
+  .btn {
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Fix for container padding on very small screens */
+@media (max-width: 360px) {
+  .main-content,
+  .product-list,
+  .dashboard-content,
+  .settings-container {
+    padding: 0.5rem;
+  }
+  
+  .card {
+    padding: 0.75rem !important;
+    border-radius: 5px !important;
+  }
+}
+
+/* Print styles enhancements */
+@media print {
+  .main-content {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  
+  .card {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}

@@ -538,6 +538,7 @@ export default {
 
 <style scoped>
 @import "../../styles/layout.css";
+@import "../../styles/responsive-fixes.css";
 
 /* Reports Container */
 .reports-container {

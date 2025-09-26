@@ -137,4 +137,5 @@ export default {
 <style scoped>
 @import "../../styles/dashboard.css";
 @import "../../styles/orders.css";
+@import "../../styles/responsive-fixes.css";
 </style>
