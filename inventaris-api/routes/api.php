@@ -46,4 +46,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // User Management
     Route::apiResource('users', UserController::class);
     Route::patch('/users/{user}/status', [UserController::class, 'updateStatus']);
+    
+    // Settings and System
+    Route::get('/settings', [App\Http\Controllers\SettingController::class, 'index']);
+    Route::post('/settings', [App\Http\Controllers\SettingController::class, 'update']);
+    Route::post('/settings/reset', [App\Http\Controllers\SettingController::class, 'reset']);
+    Route::get('/system-info', [App\Http\Controllers\SettingController::class, 'systemInfo']);
+    Route::post('/system/backup', [App\Http\Controllers\SettingController::class, 'createBackup']);
+    Route::get('/system/backup/latest', [App\Http\Controllers\SettingController::class, 'downloadBackup']);
 });

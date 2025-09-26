@@ -541,7 +541,7 @@ export default {
       this.error = null;
 
       try {
-        const response = await axios.get('/api/settings');
+        const response = await axios.get('/settings');
         if (response.data?.settings) {
           this.settings = { ...this.settings, ...response.data.settings };
         }
@@ -555,7 +555,7 @@ export default {
 
     async loadSystemInfo() {
       try {
-        const response = await axios.get('/api/system-info');
+        const response = await axios.get('/system-info');
         if (response.data?.info) {
           this.systemInfo = { ...this.systemInfo, ...response.data.info };
         }
@@ -569,7 +569,7 @@ export default {
       this.successMessage = '';
 
       try {
-        await axios.post('/api/settings', { settings: this.settings });
+        await axios.post('/settings', { settings: this.settings });
         this.successMessage = 'Settings saved successfully!';
         
         setTimeout(() => {
@@ -589,7 +589,7 @@ export default {
       }
 
       try {
-        await axios.post('/api/settings/reset');
+        await axios.post('/settings/reset');
         await this.loadSettings();
         this.successMessage = 'Settings reset to defaults successfully!';
         
@@ -606,7 +606,7 @@ export default {
       this.creatingBackup = true;
 
       try {
-        await axios.post('/api/system/backup');
+        await axios.post('/system/backup');
         this.successMessage = 'Backup created successfully!';
         await this.loadSystemInfo(); // Refresh system info
         
@@ -623,7 +623,7 @@ export default {
 
     async downloadBackup() {
       try {
-        const response = await axios.get('/api/system/backup/latest', {
+        const response = await axios.get('/system/backup/latest', {
           responseType: 'blob'
         });
 
@@ -656,195 +656,6 @@ export default {
 
 <style scoped>
 @import "../../styles/layout.css";
-
-.settings-container {
-  padding: var(--spacing-lg);
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.settings-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-.settings-section {
-  background: var(--color-white);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-border);
-}
-
-/* Toggle Switches */
-.toggle-container {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.toggle-input {
-  display: none;
-}
-
-.toggle-label {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  cursor: pointer;
-  user-select: none;
-}
-
-.toggle-switch {
-  width: 48px;
-  height: 24px;
-  background: var(--color-border);
-  border-radius: 12px;
-  position: relative;
-  transition: background-color 0.2s ease;
-}
-
-.toggle-switch::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
-  background: var(--color-white);
-  border-radius: 50%;
-  transition: transform 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.toggle-input:checked + .toggle-label .toggle-switch {
-  background: var(--color-primary);
-}
-
-.toggle-input:checked + .toggle-label .toggle-switch::before {
-  transform: translateX(24px);
-}
-
-.toggle-text {
-  font-size: 0.9rem;
-  color: var(--color-text);
-}
-
-/* Checkbox List */
-.notification-types {
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--color-border);
-}
-
-.notification-types h4 {
-  margin: 0 0 var(--spacing-md) 0;
-  font-size: 1rem;
-  color: var(--color-text);
-}
-
-.checkbox-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.checkbox-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.checkbox-input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--color-primary);
-}
-
-.checkbox-label {
-  font-size: 0.9rem;
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-/* Info Grid */
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-md);
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm);
-  background: var(--color-background-secondary);
-  border-radius: var(--border-radius-sm);
-}
-
-.info-label {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-  font-weight: 500;
-}
-
-.info-value {
-  font-size: 0.95rem;
-  color: var(--color-text);
-  font-weight: 600;
-}
-
-.info-value.status-online {
-  color: var(--color-success);
-}
-
-/* Backup Actions */
-.backup-actions {
-  display: flex;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--color-border);
-}
-
-/* Success Banner */
-.success-banner {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: var(--color-success);
-  color: white;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
-  z-index: 1000;
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .settings-container {
-    padding: var(--spacing-md);
-  }
-  
-  .backup-actions {
-    flex-direction: column;
-  }
-  
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-}
+@import "../../styles/settings.css";
+@import "../../styles/settings-additional.css";
 </style>
