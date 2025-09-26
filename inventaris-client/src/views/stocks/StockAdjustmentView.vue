@@ -324,6 +324,8 @@ export default {
           notes: this.adjustment.notes
         };
         
+        console.log('Sending stock adjustment:', adjustmentData);
+        
         // Submit adjustment to API
         const response = await axios.post('/stocks/adjust', adjustmentData);
         

@@ -58,6 +58,13 @@ export default {
       isSubmitting: false,
     };
   },
+  created() {
+    // Check if redirected with error=inactive
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === 'inactive') {
+      this.errorMessage = "Your account is inactive. Please contact administrator.";
+    }
+  },
   methods: {
     async handleLogin() {
       this.isSubmitting = true;

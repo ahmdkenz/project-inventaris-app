@@ -32,8 +32,8 @@
       </div>
     </div>
 
-    <!-- Settings Content -->
-    <div v-else class="settings-content">
+  <!-- Settings Content -->
+  <div v-else class="settings-content compact-sections">
       <!-- General Settings -->
       <div class="settings-section card">
         <div class="card-header">
@@ -658,4 +658,22 @@ export default {
 @import "../../styles/layout.css";
 @import "../../styles/settings.css";
 @import "../../styles/settings-additional.css";
+@import "../../styles/layout-enhancements.css";
+
+/* Enhance card sizing in settings */
+.settings-section.card {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make sure toggles don't overflow */
+.toggle-container {
+  flex-wrap: wrap;
+}
 </style>
