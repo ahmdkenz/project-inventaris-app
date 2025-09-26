@@ -17,9 +17,12 @@ class DashboardController extends Controller
     public function stats(Request $request)
     {
         try {
+            // Untuk lowStock, kita pastikan stock bernilai numerik dan lebih kecil atau sama dengan min_stock yang juga numerik
             $stats = [
                 'totalProducts' => Product::count(),
-                'lowStock' => Product::whereColumn('stock', '<=', 'min_stock')->count(),
+                'lowStock' => Product::whereRaw('CAST(stock AS UNSIGNED) <= CAST(min_stock AS UNSIGNED)')
+                    ->where('stock', '>', 0) // Pastikan tidak menghitung stok 0
+                    ->count(),
                 'recentTransactions' => Transaction::where('created_at', '>=', now()->subDays(7))->count(),
                 'totalUsers' => User::count(),
             ];
@@ -115,7 +118,9 @@ class DashboardController extends Controller
             $data = [
                 'stats' => [
                     'totalProducts' => Product::count(),
-                    'lowStock' => Product::whereColumn('stock', '<=', 'min_stock')->count(),
+                    'lowStock' => Product::whereRaw('CAST(stock AS UNSIGNED) <= CAST(min_stock AS UNSIGNED)')
+                        ->where('stock', '>', 0) // Tidak menghitung produk dengan stok 0
+                        ->count(),
                     'totalUsers' => User::count(),
                     'recentTransactions' => Transaction::where('created_at', '>=', now()->subDays(7))->count(),
                     'totalRevenue' => Transaction::join('products', 'transactions.product_id', '=', 'products.id')
@@ -123,7 +128,8 @@ class DashboardController extends Controller
                         ->where('transactions.created_at', '>=', now()->subMonth())
                         ->sum(DB::raw('transactions.quantity * products.selling_price')),
                 ],
-                'lowStockProducts' => Product::whereColumn('stock', '<=', 'min_stock')
+                'lowStockProducts' => Product::whereRaw('CAST(stock AS UNSIGNED) <= CAST(min_stock AS UNSIGNED)')
+                    ->where('stock', '>', 0) // Tidak menghitung produk dengan stok 0
                     ->select(['id', 'name', 'stock', 'min_stock'])
                     ->limit(5)
                     ->get(),
