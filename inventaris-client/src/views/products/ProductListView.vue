@@ -95,6 +95,7 @@
                   v-if="user.role === 'admin'"
                   :to="`/products/${product.id}/edit`" 
                   class="btn btn-sm btn-warning"
+                  title="Edit produk ini"
                 >
                   Edit
                 </router-link>

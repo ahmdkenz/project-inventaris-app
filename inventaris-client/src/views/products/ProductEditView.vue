@@ -3,32 +3,36 @@
     <div class="main-content">
       <div class="card">
         <div class="card-header">
-          <h1 class="card-title">Edit Product</h1>
-          <router-link :to="`/products/${$route.params.id}`" class="btn btn-secondary">Cancel</router-link>
+          <h1 class="card-title">Edit Produk</h1>
+          <div>
+            <router-link :to="`/products/${$route.params.id}`" class="btn btn-secondary">Batal</router-link>
+            <router-link to="/products" class="btn btn-secondary ml-2">← Kembali ke Daftar Produk</router-link>
+          </div>
         </div>
         
         <div v-if="loading" class="loading-spinner">
-          Loading product data...
+          <div class="spinner"></div>
+          <p>Memuat data produk...</p>
         </div>
 
         <form v-else @submit.prevent="updateProduct" class="product-form">
           <div class="grid-2">
             <div class="form-group">
-              <label for="name">Product Name *</label>
+              <label for="name">Nama Produk *</label>
               <input 
                 id="name" 
                 v-model="product.name" 
                 type="text" 
                 class="form-control"
                 required 
-                placeholder="Enter product name"
+                placeholder="Masukkan nama produk"
               />
             </div>
             
             <div class="form-group">
-              <label for="category">Category *</label>
+              <label for="category">Kategori *</label>
               <select id="category" v-model="product.category" class="form-control" required>
-                <option value="">Select Category</option>
+                <option value="">Pilih Kategori</option>
                 <option v-for="category in categories" :key="category" :value="category">
                   {{ category }}
                 </option>
@@ -36,7 +40,7 @@
             </div>
             
             <div class="form-group">
-              <label for="purchase_price">Purchase Price *</label>
+              <label for="purchase_price">Harga Beli *</label>
               <input 
                 id="purchase_price" 
                 v-model="product.purchase_price" 
@@ -49,7 +53,7 @@
             </div>
             
             <div class="form-group">
-              <label for="selling_price">Selling Price *</label>
+              <label for="selling_price">Harga Jual *</label>
               <input 
                 id="selling_price" 
                 v-model="product.selling_price" 
@@ -62,7 +66,7 @@
             </div>
             
             <div class="form-group">
-              <label for="stock">Stock *</label>
+              <label for="stock">Stok *</label>
               <input 
                 id="stock" 
                 v-model="product.stock" 
@@ -74,7 +78,7 @@
             </div>
             
             <div class="form-group">
-              <label for="min_stock">Minimum Stock</label>
+              <label for="min_stock">Stok Minimum</label>
               <input 
                 id="min_stock" 
                 v-model="product.min_stock" 
@@ -91,7 +95,7 @@
                 v-model="product.sku" 
                 type="text" 
                 class="form-control"
-                placeholder="SKU will be generated if empty"
+                placeholder="SKU akan dibuat otomatis jika kosong"
                 readonly
               />
             </div>
@@ -99,32 +103,33 @@
             <div class="form-group">
               <label for="status">Status</label>
               <select id="status" v-model="product.status" class="form-control">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Tidak Aktif</option>
               </select>
             </div>
           </div>
           
           <div class="form-group">
-            <label for="description">Description</label>
+            <label for="description">Deskripsi</label>
             <textarea 
               id="description" 
               v-model="product.description" 
               rows="4"
               class="form-control"
-              placeholder="Enter product description"
+              placeholder="Masukkan deskripsi produk"
             ></textarea>
           </div>
           
           <div class="flex-center">
             <button type="submit" class="btn btn-primary btn-lg" :disabled="isSubmitting">
-              {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+              {{ isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan' }}
             </button>
           </div>
         </form>
         
         <div v-if="error" class="error">
-          {{ error }}
+          <div class="error-icon">⚠️</div>
+          <div class="error-message">{{ error }}</div>
         </div>
       </div>
     </div>
@@ -133,9 +138,13 @@
 
 <script>
 import axios from '../../services/axios';
+import '../../styles/product-edit.css';
 
 export default {
   name: "ProductEditView",
+  created() {
+    console.log('ProductEditView created with route params:', this.$route.params);
+  },
   data() {
     return {
       product: {
@@ -150,14 +159,14 @@ export default {
         status: 'active'
       },
       categories: [
-        'Electronics',
-        'Clothing', 
-        'Books',
-        'Home & Garden',
-        'Sports',
-        'Toys',
-        'Automotive',
-        'Health & Beauty'
+        'Elektronik',
+        'Pakaian', 
+        'Buku',
+        'Rumah & Taman',
+        'Olahraga',
+        'Mainan',
+        'Otomotif',
+        'Kesehatan & Kecantikan'
       ],
       isSubmitting: false,
       loading: true,
@@ -165,6 +174,7 @@ export default {
     };
   },
   async mounted() {
+    console.log('ProductEditView mounted, ID:', this.$route.params.id);
     await this.loadProductData();
     await this.loadCategories();
   },
@@ -172,10 +182,20 @@ export default {
     async loadProductData() {
       try {
         const productId = this.$route.params.id;
+        console.log('Loading product data for ID:', productId);
+        
+        if (!productId) {
+          this.error = 'Product ID is missing. Please return to the product list and try again.';
+          this.loading = false;
+          return;
+        }
+        
         const response = await axios.get(`/products/${productId}`);
+        console.log('API response:', response);
         
         if (response.data && response.data.product) {
           const productData = response.data.product;
+          console.log('Product data loaded:', productData);
           
           // Set product data
           this.product = {
@@ -189,19 +209,32 @@ export default {
             sku: productData.sku || '',
             status: productData.status || 'active'
           };
+        } else if (response.data) {
+          console.error('Invalid response format:', response.data);
+          this.error = 'Received invalid product data format from server';
         } else {
           this.error = 'Product data not found';
         }
       } catch (error) {
         console.error('Error loading product:', error);
-        this.error = 'Failed to load product data. Please try again.';
+        if (error.response) {
+          console.error('Error response:', error.response);
+          this.error = `Failed to load product data: ${error.response.data?.message || error.response.statusText || 'Server error'}`;
+        } else if (error.request) {
+          this.error = 'Network error - server did not respond. Please check your connection.';
+        } else {
+          this.error = `Error loading product data: ${error.message}`;
+        }
       } finally {
         this.loading = false;
       }
     },
     async loadCategories() {
       try {
+        console.log('Loading product categories...');
         const response = await axios.get('/products-categories');
+        console.log('Categories response:', response.data);
+        
         if (response.data && Array.isArray(response.data)) {
           // Add current category if not in the list
           if (!response.data.includes(this.product.category) && this.product.category) {
@@ -209,10 +242,41 @@ export default {
           } else {
             this.categories = response.data;
           }
+          console.log('Categories loaded successfully:', this.categories);
+        } else if (response.data) {
+          console.warn('Unexpected categories data format:', response.data);
+          // Try to extract categories if the API returns a different format
+          if (typeof response.data === 'object') {
+            try {
+              // Handle if categories are in a nested property
+              if (response.data.categories && Array.isArray(response.data.categories)) {
+                this.categories = response.data.categories;
+              }
+              // If categories are key-value pairs
+              else {
+                const extractedCategories = [];
+                for (const key in response.data) {
+                  if (typeof response.data[key] === 'string') {
+                    extractedCategories.push(response.data[key]);
+                  }
+                }
+                if (extractedCategories.length > 0) {
+                  this.categories = extractedCategories.sort();
+                }
+              }
+              console.log('Categories extracted from non-standard format:', this.categories);
+            } catch (extractError) {
+              console.error('Failed to extract categories from response:', extractError);
+            }
+          }
         }
       } catch (error) {
         console.error('Error loading categories:', error);
+        if (error.response) {
+          console.error('Error response details:', error.response.data);
+        }
         // Keep default categories if API fails
+        console.log('Using default categories:', this.categories);
       }
     },
     async updateProduct() {
@@ -220,17 +284,60 @@ export default {
       this.error = null;
 
       try {
-        // Validation
-        if (!this.product.name || !this.product.category || 
-            !this.product.purchase_price || !this.product.selling_price) {
-          this.error = 'Please fill all required fields';
+        // Extended validation
+        if (!this.product.name) {
+          this.error = 'Nama produk tidak boleh kosong';
+          this.isSubmitting = false;
+          return;
+        }
+        
+        if (!this.product.category) {
+          this.error = 'Kategori produk harus dipilih';
+          this.isSubmitting = false;
+          return;
+        }
+        
+        if (!this.product.purchase_price) {
+          this.error = 'Harga beli produk tidak boleh kosong';
+          this.isSubmitting = false;
+          return;
+        }
+        
+        if (!this.product.selling_price) {
+          this.error = 'Harga jual produk tidak boleh kosong';
+          this.isSubmitting = false;
+          return;
+        }
+        
+        if (parseFloat(this.product.purchase_price) < 0) {
+          this.error = 'Harga beli produk tidak boleh negatif';
+          this.isSubmitting = false;
+          return;
+        }
+        
+        if (parseFloat(this.product.selling_price) < 0) {
+          this.error = 'Harga jual produk tidak boleh negatif';
+          this.isSubmitting = false;
+          return;
+        }
+        
+        if (parseInt(this.product.stock) < 0) {
+          this.error = 'Stok produk tidak boleh negatif';
           this.isSubmitting = false;
           return;
         }
         
         // Send update request to API
         const productId = this.$route.params.id;
-        const response = await axios.put(`/products/${productId}`, {
+        console.log('Updating product with ID:', productId);
+        
+        if (!productId) {
+          this.error = 'Product ID is missing. Please return to the product list and try again.';
+          this.isSubmitting = false;
+          return;
+        }
+        
+        const productData = {
           name: this.product.name,
           description: this.product.description,
           category: this.product.category,
@@ -239,20 +346,39 @@ export default {
           stock: parseInt(this.product.stock),
           min_stock: parseInt(this.product.min_stock),
           status: this.product.status
-        });
+        };
+        
+        console.log('Sending product data:', productData);
+        const response = await axios.put(`/products/${productId}`, productData);
 
         console.log('Update response:', response.data);
 
         // Redirect to product detail page on success
         this.$router.push(`/products/${productId}`);
       } catch (error) {
-        console.error('Error updating product:', error.response || error.message);
-        if (error.response?.status === 422) {
-          const errs = error.response.data.errors || {};
-          const firstKey = Object.keys(errs)[0];
-          this.error = errs[firstKey]?.[0] || 'Form validation failed. Please review your input.';
+        console.error('Error updating product:', error);
+        if (error.response) {
+          console.error('Error response details:', error.response.data);
+          
+          if (error.response.status === 422) {
+            const errs = error.response.data.errors || {};
+            if (Object.keys(errs).length > 0) {
+              const firstKey = Object.keys(errs)[0];
+              this.error = `Kesalahan validasi: ${errs[firstKey]?.[0]}`;
+            } else {
+              this.error = 'Validasi formulir gagal. Silakan periksa input Anda.';
+            }
+          } else if (error.response.status === 404) {
+            this.error = 'Produk tidak ditemukan. Produk mungkin telah dihapus.';
+          } else if (error.response.status === 403) {
+            this.error = 'Anda tidak memiliki izin untuk mengedit produk ini.';
+          } else {
+            this.error = `Gagal memperbarui produk: ${error.response.data?.message || error.response.statusText || 'Kesalahan server'}`;
+          }
+        } else if (error.request) {
+          this.error = 'Kesalahan jaringan - server tidak merespons. Silakan periksa koneksi Anda.';
         } else {
-          this.error = error.response?.data?.message || 'Failed to update product. Please try again.';
+          this.error = `Gagal memperbarui produk: ${error.message}`;
         }
       } finally {
         this.isSubmitting = false;
@@ -263,114 +389,5 @@ export default {
 </script>
 
 <style scoped>
-@import "../../styles/product-edit.css";
-
-.card {
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin: 1.5rem auto;
-  max-width: 900px;
-  overflow: hidden;
-}
-
-.card-header {
-  align-items: center;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
-  display: flex;
-  justify-content: space-between;
-  padding: 1.5rem 2rem;
-}
-
-.card-title {
-  color: #212529;
-  font-size: 1.5rem;
-  margin: 0;
-}
-
-.product-form {
-  padding: 2rem;
-}
-
-.grid-2 {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  color: #495057;
-  display: block;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.form-control {
-  background-color: #fff;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  color: #495057;
-  display: block;
-  font-size: 1rem;
-  line-height: 1.5;
-  padding: 0.5rem 0.75rem;
-  transition: border-color 0.15s ease-in-out;
-  width: 100%;
-}
-
-.form-control:focus {
-  border-color: #80bdff;
-  outline: 0;
-}
-
-.btn {
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  text-align: center;
-  transition: all 0.2s;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-lg {
-  font-size: 1.1rem;
-  padding: 0.75rem 1.5rem;
-}
-
-.flex-center {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-.error {
-  background-color: #f8d7da;
-  border-radius: 4px;
-  color: #721c24;
-  margin: 1rem 2rem;
-  padding: 1rem;
-}
-
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  padding: 2rem;
-}
+/* Menghapus aturan inline CSS yang sudah dipindahkan */
 </style>

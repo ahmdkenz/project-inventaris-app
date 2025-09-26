@@ -40,6 +40,18 @@ const routes = [
     component: () => import('../views/products/ProductCreateView.vue'),
     meta: { requiresAuth: true, role: 'admin' }
   },
+  {
+    path: '/products/:id',
+    name: 'ProductDetail',
+    component: () => import('../views/products/ProductDetailView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/products/:id/edit',
+    name: 'ProductEdit',
+    component: () => import('../views/products/ProductEditView.vue'),
+    meta: { requiresAuth: true, role: 'admin' }
+  },
   // Stock routes
   {
     path: '/stocks/adjustment',
