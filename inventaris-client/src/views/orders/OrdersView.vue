@@ -1,101 +1,107 @@
 <template>
-  <div class="orders-page">
-    <div class="page-header">
-      <h1>Order Management</h1>
-    </div>
-    
-    <!-- Orders Navigation -->
-    <nav class="orders-nav">
-      <router-link to="/orders/purchase" class="order-nav-item">
-        <span class="icon">📥</span>
-        <span class="label">Purchase Orders</span>
-      </router-link>
-      <router-link to="/orders/sales" class="order-nav-item">
-        <span class="icon">📤</span>
-        <span class="label">Sales Orders</span>
-      </router-link>
-    </nav>
-    
-    <!-- Orders Statistics -->
-    <div class="order-stats">
-      <div class="order-stat-card sales">
-        <div class="icon">📤</div>
-        <h3>Sales Orders</h3>
-        <div class="value">{{ stats.totalSalesOrders }}</div>
-        <div class="trend up" v-if="stats.salesOrdersTrend > 0">
-          +{{ stats.salesOrdersTrend }}% from last month
-        </div>
-        <div class="trend down" v-else-if="stats.salesOrdersTrend < 0">
-          {{ stats.salesOrdersTrend }}% from last month
-        </div>
-        <div class="trend" v-else>
-          Same as last month
-        </div>
+  <AppLayout>
+    <div class="orders-page">
+      <div class="page-header">
+        <h1>Order Management</h1>
       </div>
       
-      <div class="order-stat-card purchase">
-        <div class="icon">📥</div>
-        <h3>Purchase Orders</h3>
-        <div class="value">{{ stats.totalPurchaseOrders }}</div>
-        <div class="trend up" v-if="stats.purchaseOrdersTrend > 0">
-          +{{ stats.purchaseOrdersTrend }}% from last month
-        </div>
-        <div class="trend down" v-else-if="stats.purchaseOrdersTrend < 0">
-          {{ stats.purchaseOrdersTrend }}% from last month
-        </div>
-        <div class="trend" v-else>
-          Same as last month
-        </div>
-      </div>
-      
-      <div class="order-stat-card pending">
-        <div class="icon">⌛</div>
-        <h3>Pending Orders</h3>
-        <div class="value">{{ stats.pendingOrders }}</div>
-      </div>
-      
-      <div class="order-stat-card completed">
-        <div class="icon">✅</div>
-        <h3>Completed Orders</h3>
-        <div class="value">{{ stats.completedOrders }}</div>
-      </div>
-    </div>
-    
-    <!-- Recent Orders -->
-    <div class="recent-orders">
-      <h2>
-        Recent Orders 
-        <router-link to="/orders/all" class="view-all">
-          View All <span>→</span>
+      <!-- Orders Navigation -->
+      <nav class="orders-nav">
+        <router-link to="/orders/purchase" class="order-nav-item">
+          <span class="icon">📥</span>
+          <span class="label">Purchase Orders</span>
         </router-link>
-      </h2>
+        <router-link to="/orders/sales" class="order-nav-item">
+          <span class="icon">📤</span>
+          <span class="label">Sales Orders</span>
+        </router-link>
+      </nav>
       
-      <div class="order-list">
-        <div v-for="order in recentOrders" :key="order.id" class="order-item">
-          <div :class="['order-type', order.type]">
-            {{ order.type === 'sales' ? '📤' : '📥' }}
+      <!-- Orders Statistics -->
+      <div class="order-stats">
+        <div class="order-stat-card sales">
+          <div class="icon">📤</div>
+          <h3>Sales Orders</h3>
+          <div class="value">{{ stats.totalSalesOrders }}</div>
+          <div class="trend up" v-if="stats.salesOrdersTrend > 0">
+            +{{ stats.salesOrdersTrend }}% from last month
           </div>
-          <div class="order-info">
-            <div class="order-number">{{ order.number }}</div>
-            <div class="order-details">
-              {{ order.type === 'sales' ? order.customer : order.supplier }} • {{ formatCurrency(order.amount) }}
+          <div class="trend down" v-else-if="stats.salesOrdersTrend < 0">
+            {{ stats.salesOrdersTrend }}% from last month
+          </div>
+          <div class="trend" v-else>
+            Same as last month
+          </div>
+        </div>
+        
+        <div class="order-stat-card purchase">
+          <div class="icon">📥</div>
+          <h3>Purchase Orders</h3>
+          <div class="value">{{ stats.totalPurchaseOrders }}</div>
+          <div class="trend up" v-if="stats.purchaseOrdersTrend > 0">
+            +{{ stats.purchaseOrdersTrend }}% from last month
+          </div>
+          <div class="trend down" v-else-if="stats.purchaseOrdersTrend < 0">
+            {{ stats.purchaseOrdersTrend }}% from last month
+          </div>
+          <div class="trend" v-else>
+            Same as last month
+          </div>
+        </div>
+        
+        <div class="order-stat-card pending">
+          <div class="icon">⌛</div>
+          <h3>Pending Orders</h3>
+          <div class="value">{{ stats.pendingOrders }}</div>
+        </div>
+        
+        <div class="order-stat-card completed">
+          <div class="icon">✅</div>
+          <h3>Completed Orders</h3>
+          <div class="value">{{ stats.completedOrders }}</div>
+        </div>
+      </div>
+      
+      <!-- Recent Orders -->
+      <div class="recent-orders">
+        <h2>
+          Recent Orders 
+          <router-link to="/orders/all" class="view-all">
+            View All <span>→</span>
+          </router-link>
+        </h2>
+        
+        <div class="order-list">
+          <div v-for="order in recentOrders" :key="order.id" class="order-item">
+            <div :class="['order-type', order.type]">
+              {{ order.type === 'sales' ? '📤' : '📥' }}
             </div>
+            <div class="order-info">
+              <div class="order-number">{{ order.number }}</div>
+              <div class="order-details">
+                {{ order.type === 'sales' ? order.customer : order.supplier }} • {{ formatCurrency(order.amount) }}
+              </div>
+            </div>
+            <span :class="['order-status', 'status-' + order.status]">
+              {{ order.status }}
+            </span>
+            <div class="order-date">{{ formatDate(order.date) }}</div>
           </div>
-          <span :class="['order-status', 'status-' + order.status]">
-            {{ order.status }}
-          </span>
-          <div class="order-date">{{ formatDate(order.date) }}</div>
         </div>
       </div>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script>
 import axios from '../../services/axios';
+import AppLayout from '../../components/layout/AppLayout.vue';
 
 export default {
   name: 'OrdersView',
+  components: {
+    AppLayout
+  },
   data() {
     return {
       user: {},

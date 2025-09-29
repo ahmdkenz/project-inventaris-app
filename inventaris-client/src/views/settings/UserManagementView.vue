@@ -1,7 +1,6 @@
 <template>
-  <div class="user-management">
-    <!-- Header -->
-    <div class="page-header">
+  <AppLayout>
+    <div class="header">
       <h1>Manajemen Pengguna</h1>
       <div class="actions">
         <button @click="showAddUserModal = true" class="btn btn-primary">
@@ -223,14 +222,18 @@
         </form>
       </div>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script>
-import axios from '../../services/axios';
+import axios from '@/services/axios';
+import AppLayout from '@/components/layout/AppLayout.vue';
 
 export default {
   name: 'UserManagementView',
+  components: {
+    AppLayout
+  },
   data() {
     return {
       users: [],
@@ -430,6 +433,6 @@ export default {
 </script>
 
 <style scoped>
-@import "../../styles/users.css";
-@import "../../styles/responsive-fixes.css";
+@import "@/styles/users.css";
+@import "@/styles/responsive-fixes.css";
 </style>

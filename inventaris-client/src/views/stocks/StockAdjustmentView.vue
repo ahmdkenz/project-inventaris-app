@@ -1,7 +1,6 @@
 <template>
-  <div class="stock-adjustment">
-    <!-- Header -->
-    <div class="page-header">
+  <AppLayout>
+    <div class="header">
       <h1>Penyesuaian Stok</h1>
       <div class="actions">
         <button @click="refreshData" class="btn btn-secondary">
@@ -103,14 +102,18 @@
         </table>
       </div>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script>
-import axios from '../../services/axios';
+import axios from '@/services/axios';
+import AppLayout from '@/components/layout/AppLayout.vue';
 
 export default {
   name: 'StockAdjustmentView',
+  components: {
+    AppLayout
+  },
   data() {
     return {
       products: [],

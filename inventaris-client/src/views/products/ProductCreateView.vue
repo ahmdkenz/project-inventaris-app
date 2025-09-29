@@ -1,117 +1,117 @@
 <template>
-  <div class="app-layout">
-    <div class="main-content">
-      <div class="card">
-        <div class="card-header">
-          <h1 class="card-title">Buat Produk Baru</h1>
-          <router-link to="/products" class="btn btn-secondary">← Kembali ke Daftar Produk</router-link>
+  <AppLayout>
+    <FormWrapper
+      title="Buat Produk Baru"
+      backLink="/products"
+      backText="Kembali ke Daftar Produk"
+      :error="error"
+    >
+      <form @submit.prevent="createProduct" class="product-form">
+      <div class="grid grid-2">
+        <div class="form-group">
+          <label for="name">Nama Produk *</label>
+          <input 
+            id="name" 
+            v-model="product.name" 
+            type="text" 
+            class="form-control"
+            required 
+            placeholder="Masukkan nama produk"
+          />
         </div>
         
-        <form @submit.prevent="createProduct" class="product-form">
-          <div class="grid-2">
-            <div class="form-group">
-              <label for="name">Nama Produk *</label>
-              <input 
-                id="name" 
-                v-model="product.name" 
-                type="text" 
-                class="form-control"
-                required 
-                placeholder="Masukkan nama produk"
-              />
-            </div>
-            
-            <div class="form-group">
-              <label for="category">Kategori *</label>
-              <select id="category" v-model="product.category" class="form-control" required>
-                <option value="">Pilih Kategori</option>
-                <option v-for="category in categories" :key="category" :value="category">
-                  {{ category }}
-                </option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="purchase_price">Harga Beli *</label>
-              <input 
-                id="purchase_price" 
-                v-model="product.purchase_price" 
-                type="number" 
-                step="0.01" 
-                class="form-control"
-                required 
-                placeholder="0.00"
-              />
-            </div>
-            
-            <div class="form-group">
-              <label for="selling_price">Harga Jual *</label>
-              <input 
-                id="selling_price" 
-                v-model="product.selling_price" 
-                type="number" 
-                step="0.01" 
-                class="form-control"
-                required 
-                placeholder="0.00"
-              />
-            </div>
-            
-            <div class="form-group">
-              <label for="stock">Stok Awal *</label>
-              <input 
-                id="stock" 
-                v-model="product.stock" 
-                type="number" 
-                class="form-control"
-                required 
-                placeholder="0"
-              />
-            </div>
-            
-            <div class="form-group">
-              <label for="min_stock">Stok Minimum</label>
-              <input 
-                id="min_stock" 
-                v-model="product.min_stock" 
-                type="number" 
-                class="form-control"
-                placeholder="10"
-              />
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="description">Deskripsi</label>
-            <textarea 
-              id="description" 
-              v-model="product.description" 
-              rows="4"
-              class="form-control"
-              placeholder="Masukkan deskripsi produk"
-            ></textarea>
-          </div>
-          
-          <div class="flex-center">
-            <button type="submit" class="btn btn-primary btn-lg" :disabled="isSubmitting">
-              {{ isSubmitting ? 'Sedang Membuat...' : 'Buat Produk' }}
-            </button>
-          </div>
-        </form>
+        <div class="form-group">
+          <label for="category">Kategori *</label>
+          <select id="category" v-model="product.category" class="form-control" required>
+            <option value="">Pilih Kategori</option>
+            <option v-for="category in categories" :key="category" :value="category">
+              {{ category }}
+            </option>
+          </select>
+        </div>
         
-        <div v-if="error" class="error">
-          {{ error }}
+        <div class="form-group">
+          <label for="purchase_price">Harga Beli *</label>
+          <input 
+            id="purchase_price" 
+            v-model="product.purchase_price" 
+            type="number" 
+            step="0.01" 
+            class="form-control"
+            required 
+            placeholder="0.00"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="selling_price">Harga Jual *</label>
+          <input 
+            id="selling_price" 
+            v-model="product.selling_price" 
+            type="number" 
+            step="0.01" 
+            class="form-control"
+            required 
+            placeholder="0.00"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="stock">Stok Awal *</label>
+          <input 
+            id="stock" 
+            v-model="product.stock" 
+            type="number" 
+            class="form-control"
+            required 
+            placeholder="0"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="min_stock">Stok Minimum</label>
+          <input 
+            id="min_stock" 
+            v-model="product.min_stock" 
+            type="number" 
+            class="form-control"
+            placeholder="10"
+          />
         </div>
       </div>
-    </div>
-  </div>
+      
+      <div class="form-group">
+        <label for="description">Deskripsi</label>
+        <textarea 
+          id="description" 
+          v-model="product.description" 
+          rows="4"
+          class="form-control"
+          placeholder="Masukkan deskripsi produk"
+        ></textarea>
+      </div>
+      
+      <div class="flex-center">
+        <button type="submit" class="btn btn-primary btn-lg" :disabled="isSubmitting">
+          {{ isSubmitting ? 'Sedang Membuat...' : 'Buat Produk' }}
+        </button>
+      </div>
+    </form>
+  </FormWrapper>
+  </AppLayout>
 </template>
 
 <script>
-import axios from '../../services/axios';
+import FormWrapper from '@/components/common/FormWrapper.vue';
+import AppLayout from '@/components/layout/AppLayout.vue';
+import axios from '@/services/axios';
 
 export default {
   name: 'ProductCreateView',
+  components: {
+    FormWrapper,
+    AppLayout
+  },
   data() {
     return {
       product: {
@@ -180,7 +180,6 @@ export default {
 };
 </script>
 
-<style scoped>
-@import "../../styles/product-create.css";
-@import "../../styles/responsive-fixes.css";
+<style>
+@import '@/styles/product-form.css';
 </style>

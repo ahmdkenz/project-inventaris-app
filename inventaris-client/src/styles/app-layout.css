@@ -1,0 +1,52 @@
+/* App Layout Styles */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f0f2f5; /* Latar belakang abu-abu untuk seluruh halaman */
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Membuat kontainer ini mengisi sisa ruang */
+  margin-left: 250px; /* Sesuaikan dengan lebar sidebar */
+  width: calc(100% - 250px);
+  transition: all 0.3s ease;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 24px;
+  min-height: calc(100vh - 64px); /* Adjust based on header height */
+}
+
+.content-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .main-container {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    margin-left: 60px;
+    width: calc(100% - 60px);
+  }
+  
+  .main-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .content-container {
+    padding: 0 8px;
+  }
+}

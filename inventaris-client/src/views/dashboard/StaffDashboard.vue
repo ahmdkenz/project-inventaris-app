@@ -1,19 +1,12 @@
 <template>
-  <div class="dashboard">
-    <header class="dashboard-header">
+  <AppLayout>
+    <template #header>
       <h1>Staff Dashboard</h1>
       <div class="user-info">
         <span>Welcome, {{ user.name }}</span>
         <button @click="logout" class="logout-btn">Logout</button>
       </div>
-    </header>
-
-    <nav class="dashboard-nav">
-      <router-link to="/products" class="nav-item">📦 Products</router-link>
-      <router-link to="/stocks/adjustment" class="nav-item">📊 Stock Management</router-link>
-      <router-link to="/orders" class="nav-item">🛒 Orders</router-link>
-      <router-link to="/reports" class="nav-item">📈 Reports</router-link>
-    </nav>
+    </template>
 
     <main class="dashboard-content">
       <!-- Stats Grid -->
@@ -72,14 +65,18 @@
         </div>
       </div>
     </main>
-  </div>
+  </AppLayout>
 </template>
 
 <script>
-import axios from '../../services/axios';
+import axios from '@/services/axios';
+import AppLayout from '@/components/layout/AppLayout.vue';
 
 export default {
   name: 'StaffDashboard',
+  components: {
+    AppLayout
+  },
   data() {
     return {
       user: {},

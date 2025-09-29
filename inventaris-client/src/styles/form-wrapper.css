@@ -1,0 +1,31 @@
+/* Form Wrapper Component Styles */
+
+/* Custom alert styling for form validation messages */
+.card .alert {
+  margin: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Specific card body padding for form-wrapper */
+.card-body {
+  padding: 24px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 16px;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .card-header .btn {
+    margin-top: 1rem;
+    width: 100%;
+    text-align: center;
+  }
+}

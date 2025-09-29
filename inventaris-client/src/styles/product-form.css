@@ -1,0 +1,39 @@
+/* Product Form Styles */
+
+.product-form {
+  width: 100%;
+}
+
+.product-form .form-group:last-of-type {
+  margin-bottom: 2rem;
+}
+
+/* Make sure button container is properly aligned */
+.product-form .flex-center {
+  margin-top: 1.5rem;
+  justify-content: center;
+}
+
+/* Custom styling for product descriptions */
+.product-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Price input fields styling */
+.product-form input[type="number"] {
+  text-align: right; /* Better alignment for numeric values */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .product-form .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-form .btn-lg {
+    width: 100%;
+  }
+}

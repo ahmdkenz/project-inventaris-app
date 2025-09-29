@@ -1,6 +1,6 @@
 <template>
-  <div class="app-layout">
-    <div class="main-content">
+  <AppLayout>
+    <div class="product-edit-container">
       <div class="card">
         <div class="card-header">
           <h1 class="card-title">Edit Produk</h1>
@@ -133,16 +133,20 @@
         </div>
       </div>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script>
-import axios from '../../services/axios';
-import '../../styles/product-edit.css';
-import '../../styles/responsive-fixes.css';
+import axios from '@/services/axios';
+import AppLayout from '@/components/layout/AppLayout.vue';
+import '@/styles/product-edit.css';
+import '@/styles/responsive-fixes.css';
 
 export default {
   name: "ProductEditView",
+  components: {
+    AppLayout
+  },
   created() {
     console.log('ProductEditView created with route params:', this.$route.params);
   },

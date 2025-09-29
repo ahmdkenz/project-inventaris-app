@@ -1,6 +1,6 @@
 <template>
-  <div class="app-layout">
-    <div class="main-content">
+  <AppLayout>
+    <div class="stock-list-container">
       <div class="card">
         <div class="card-header">
           <h1 class="card-title">Stock Management</h1>
@@ -124,14 +124,18 @@
         </div>
       </div>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script>
 import axios from '../../services/axios';
+import AppLayout from '../../components/layout/AppLayout.vue';
 
 export default {
   name: "StockListView",
+  components: {
+    AppLayout
+  },
   data() {
     return {
       stocks: [],

@@ -1,26 +1,29 @@
 <template>
-  <div class="product-list">
-    <!-- Header -->
-    <div class="page-header">
+  <AppLayout>
+    <div class="header">
       <h1>Product Management</h1>
-      <div class="actions">
-        <router-link 
-          v-if="user.role === 'admin'" 
-          to="/products/create" 
-          class="btn btn-primary"
-        >
-          Add New Product
-        </router-link>
-        <button 
-          @click="refreshProducts" 
-          class="btn btn-secondary" 
-          :disabled="isRefreshing"
-        >
-          <span v-if="isRefreshing">Refreshing...</span>
-          <span v-else>Refresh</span>
-        </button>
-      </div>
     </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <div class="actions flex-between">
+          <router-link 
+            v-if="user.role === 'admin'" 
+            to="/products/create" 
+            class="btn btn-primary"
+          >
+            Add New Product
+          </router-link>
+          <button 
+            @click="refreshProducts" 
+            class="btn btn-secondary" 
+            :disabled="isRefreshing"
+          >
+            <span v-if="isRefreshing">Refreshing...</span>
+            <span v-else>Refresh</span>
+          </button>
+        </div>
+      </div>
     
     <!-- Refresh Notification -->
     <div v-if="showRefreshMessage" class="refresh-message">
@@ -133,14 +136,19 @@
         Next
       </button>
     </div>
-  </div>
+    </div>
+  </AppLayout>
 </template>
 
 <script>
-import axios from '../../services/axios';
+import axios from '@/services/axios';
+import AppLayout from '@/components/layout/AppLayout.vue';
 
 export default {
   name: 'ProductListView',
+  components: {
+    AppLayout
+  },
   data() {
     return {
       products: [],
@@ -304,53 +312,6 @@ export default {
 };
 </script>
 
-<style scoped>
-@import "../../styles/products.css";
-@import "../../styles/responsive-fixes.css";
-
-.refresh-message {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-  border-radius: 4px;
-  padding: 10px 15px;
-  margin: 10px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  animation: fadeIn 0.3s;
-}
-
-.update-time {
-  font-size: 0.9em;
-  opacity: 0.8;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.low-stock {
-  color: #dc3545;
-  font-weight: bold;
-}
-
-.status {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.85em;
-  text-transform: capitalize;
-}
-
-.status.active {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status.inactive {
-  background-color: #f8d7da;
-  color: #721c24;
-}
+<style>
+@import "@/styles/products.css";
 </style>

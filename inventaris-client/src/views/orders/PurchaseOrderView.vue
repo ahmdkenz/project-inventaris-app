@@ -1,274 +1,280 @@
 <template>
-  <div class="purchase-orders">
-    <div class="page-header">
-      <div class="header-left">
-        <router-link to="/orders" class="back-link">← Back to Orders</router-link>
-        <h1>Purchase Orders</h1>
-      </div>
-      <button v-if="canCreate" @click="showCreateModal" class="btn-primary">
-        <span class="icon">➕</span>
-        New Purchase Order
-      </button>
-    </div>
-
-    <!-- Filters -->
-    <div class="filters">
-      <div class="filter-group">
-        <input 
-          v-model="searchQuery" 
-          type="text" 
-          placeholder="Search purchase orders..."
-          class="search-input"
-        >
-      </div>
-      <div class="filter-group">
-        <select v-model="statusFilter" class="filter-select">
-          <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="received">Received</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <input 
-          v-model="dateFrom" 
-          type="date" 
-          class="filter-input"
-          placeholder="Date From"
-        >
-        <input 
-          v-model="dateTo" 
-          type="date" 
-          class="filter-input"
-          placeholder="Date To"
-        >
-      </div>
-    </div>
-
-    <!-- Purchase Orders Table -->
-    <div class="table-container">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>PO Number</th>
-            <th>Supplier</th>
-            <th>Order Date</th>
-            <th>Total Amount</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="order in filteredOrders" :key="order.id">
-            <td>{{ order.po_number }}</td>
-            <td>{{ order.supplier_name }}</td>
-            <td>{{ formatDate(order.order_date) }}</td>
-            <td>{{ formatCurrency(order.total_amount) }}</td>
-            <td>
-              <span :class="'status status-' + order.status">
-                {{ order.status }}
-              </span>
-            </td>
-            <td class="actions">
-              <button @click="viewOrder(order)" class="btn-info" title="View Details">
-                👁️
-              </button>
-              <button v-if="canEdit && order.status === 'pending'" @click="editOrder(order)" class="btn-warning" title="Edit">
-                ✏️
-              </button>
-              <button v-if="canApprove && order.status === 'pending'" @click="approveOrder(order)" class="btn-success" title="Approve">
-                ✅
-              </button>
-              <button v-if="canReceive && order.status === 'approved'" @click="receiveOrder(order)" class="btn-primary" title="Mark as Received">
-                📦
-              </button>
-              <button v-if="canDelete && order.status === 'pending'" @click="deleteOrder(order)" class="btn-danger" title="Delete">
-                🗑️
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination">
-      <button 
-        @click="currentPage--" 
-        :disabled="currentPage === 1"
-        class="pagination-btn"
-      >
-        Previous
-      </button>
-      <span class="pagination-info">
-        Page {{ currentPage }} of {{ totalPages }}
-      </span>
-      <button 
-        @click="currentPage++" 
-        :disabled="currentPage === totalPages"
-        class="pagination-btn"
-      >
-        Next
-      </button>
-    </div>
-
-    <!-- Create/Edit Modal -->
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <h2>{{ editingOrder ? 'Edit' : 'Create' }} Purchase Order</h2>
-          <button @click="closeModal" class="close-btn">×</button>
+  <AppLayout>
+    <div class="purchase-orders">
+      <div class="page-header">
+        <div class="header-left">
+          <router-link to="/orders" class="back-link">← Back to Orders</router-link>
+          <h1>Purchase Orders</h1>
         </div>
-        <div class="modal-body">
-          <form @submit.prevent="submitOrder">
-            <div class="form-group">
-              <label>PO Number</label>
-              <input 
-                v-model="form.po_number" 
-                type="text" 
-                :readonly="editingOrder"
-                required
-              >
-            </div>
-            <div class="form-group">
-              <label>Supplier</label>
-              <select v-model="form.supplier_id" required>
-                <option value="">Select Supplier</option>
-                <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
-                  {{ supplier.name }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Order Date</label>
-              <input 
-                v-model="form.order_date" 
-                type="date" 
-                required
-              >
-            </div>
-            <div class="form-group">
-              <label>Expected Delivery</label>
-              <input 
-                v-model="form.expected_delivery" 
-                type="date"
-              >
-            </div>
-            
-            <!-- Order Items -->
-            <div class="order-items">
-              <h3>Order Items</h3>
-              <div v-for="(item, index) in form.items" :key="index" class="item-row">
-                <select v-model="item.product_id" class="item-select" required>
-                  <option value="">Select Product</option>
-                  <option v-for="product in products" :key="product.id" :value="product.id">
-                    {{ product.name }}
+        <button v-if="canCreate" @click="showCreateModal" class="btn-primary">
+          <span class="icon">➕</span>
+          New Purchase Order
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <div class="filter-group">
+          <input 
+            v-model="searchQuery" 
+            type="text" 
+            placeholder="Search purchase orders..."
+            class="search-input"
+          >
+        </div>
+        <div class="filter-group">
+          <select v-model="statusFilter" class="filter-select">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="received">Received</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <input 
+            v-model="dateFrom" 
+            type="date" 
+            class="filter-input"
+            placeholder="Date From"
+          >
+          <input 
+            v-model="dateTo" 
+            type="date" 
+            class="filter-input"
+            placeholder="Date To"
+          >
+        </div>
+      </div>
+
+      <!-- Purchase Orders Table -->
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>PO Number</th>
+              <th>Supplier</th>
+              <th>Order Date</th>
+              <th>Total Amount</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="order in filteredOrders" :key="order.id">
+              <td>{{ order.po_number }}</td>
+              <td>{{ order.supplier_name }}</td>
+              <td>{{ formatDate(order.order_date) }}</td>
+              <td>{{ formatCurrency(order.total_amount) }}</td>
+              <td>
+                <span :class="'status status-' + order.status">
+                  {{ order.status }}
+                </span>
+              </td>
+              <td class="actions">
+                <button @click="viewOrder(order)" class="btn-info" title="View Details">
+                  👁️
+                </button>
+                <button v-if="canEdit && order.status === 'pending'" @click="editOrder(order)" class="btn-warning" title="Edit">
+                  ✏️
+                </button>
+                <button v-if="canApprove && order.status === 'pending'" @click="approveOrder(order)" class="btn-success" title="Approve">
+                  ✅
+                </button>
+                <button v-if="canReceive && order.status === 'approved'" @click="receiveOrder(order)" class="btn-primary" title="Mark as Received">
+                  📦
+                </button>
+                <button v-if="canDelete && order.status === 'pending'" @click="deleteOrder(order)" class="btn-danger" title="Delete">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button 
+          @click="currentPage--" 
+          :disabled="currentPage === 1"
+          class="pagination-btn"
+        >
+          Previous
+        </button>
+        <span class="pagination-info">
+          Page {{ currentPage }} of {{ totalPages }}
+        </span>
+        <button 
+          @click="currentPage++" 
+          :disabled="currentPage === totalPages"
+          class="pagination-btn"
+        >
+          Next
+        </button>
+      </div>
+
+      <!-- Create/Edit Modal -->
+      <div v-if="showModal" class="modal-overlay" @click="closeModal">
+        <div class="modal" @click.stop>
+          <div class="modal-header">
+            <h2>{{ editingOrder ? 'Edit' : 'Create' }} Purchase Order</h2>
+            <button @click="closeModal" class="close-btn">×</button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="submitOrder">
+              <div class="form-group">
+                <label>PO Number</label>
+                <input 
+                  v-model="form.po_number" 
+                  type="text" 
+                  :readonly="editingOrder"
+                  required
+                >
+              </div>
+              <div class="form-group">
+                <label>Supplier</label>
+                <select v-model="form.supplier_id" required>
+                  <option value="">Select Supplier</option>
+                  <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
+                    {{ supplier.name }}
                   </option>
                 </select>
-                <input 
-                  v-model.number="item.quantity" 
-                  type="number" 
-                  placeholder="Quantity" 
-                  min="1"
-                  required
-                >
-                <input 
-                  v-model.number="item.unit_price" 
-                  type="number" 
-                  step="0.01"
-                  placeholder="Unit Price"
-                  required
-                >
-                <button type="button" @click="removeItem(index)" class="btn-danger">Remove</button>
               </div>
-              <button type="button" @click="addItem" class="btn-secondary">Add Item</button>
-            </div>
+              <div class="form-group">
+                <label>Order Date</label>
+                <input 
+                  v-model="form.order_date" 
+                  type="date" 
+                  required
+                >
+              </div>
+              <div class="form-group">
+                <label>Expected Delivery</label>
+                <input 
+                  v-model="form.expected_delivery" 
+                  type="date"
+                >
+              </div>
+              
+              <!-- Order Items -->
+              <div class="order-items">
+                <h3>Order Items</h3>
+                <div v-for="(item, index) in form.items" :key="index" class="item-row">
+                  <select v-model="item.product_id" class="item-select" required>
+                    <option value="">Select Product</option>
+                    <option v-for="product in products" :key="product.id" :value="product.id">
+                      {{ product.name }}
+                    </option>
+                  </select>
+                  <input 
+                    v-model.number="item.quantity" 
+                    type="number" 
+                    placeholder="Quantity" 
+                    min="1"
+                    required
+                  >
+                  <input 
+                    v-model.number="item.unit_price" 
+                    type="number" 
+                    step="0.01"
+                    placeholder="Unit Price"
+                    required
+                  >
+                  <button type="button" @click="removeItem(index)" class="btn-danger">Remove</button>
+                </div>
+                <button type="button" @click="addItem" class="btn-secondary">Add Item</button>
+              </div>
 
-            <div class="form-group">
-              <label>Notes</label>
-              <textarea v-model="form.notes" rows="3"></textarea>
-            </div>
+              <div class="form-group">
+                <label>Notes</label>
+                <textarea v-model="form.notes" rows="3"></textarea>
+              </div>
 
-            <div class="modal-footer">
-              <button type="button" @click="closeModal" class="btn-secondary">Cancel</button>
-              <button type="submit" class="btn-primary">
-                {{ editingOrder ? 'Update' : 'Create' }} Order
-              </button>
-            </div>
-          </form>
+              <div class="modal-footer">
+                <button type="button" @click="closeModal" class="btn-secondary">Cancel</button>
+                <button type="submit" class="btn-primary">
+                  {{ editingOrder ? 'Update' : 'Create' }} Order
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- View Modal -->
-    <div v-if="showViewModal" class="modal-overlay" @click="closeViewModal">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <h2>Purchase Order Details</h2>
-          <button @click="closeViewModal" class="close-btn">×</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="selectedOrder" class="order-details">
-            <div class="detail-row">
-              <label>PO Number:</label>
-              <span>{{ selectedOrder.po_number }}</span>
-            </div>
-            <div class="detail-row">
-              <label>Supplier:</label>
-              <span>{{ selectedOrder.supplier_name }}</span>
-            </div>
-            <div class="detail-row">
-              <label>Order Date:</label>
-              <span>{{ formatDate(selectedOrder.order_date) }}</span>
-            </div>
-            <div class="detail-row">
-              <label>Status:</label>
-              <span :class="'status status-' + selectedOrder.status">
-                {{ selectedOrder.status }}
-              </span>
-            </div>
-            <div class="detail-row">
-              <label>Total Amount:</label>
-              <span class="total-amount">{{ formatCurrency(selectedOrder.total_amount) }}</span>
-            </div>
-            
-            <h3>Order Items</h3>
-            <table class="items-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Unit Price</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in selectedOrder.items" :key="item.id">
-                  <td>{{ item.product_name }}</td>
-                  <td>{{ item.quantity }}</td>
-                  <td>{{ formatCurrency(item.unit_price) }}</td>
-                  <td>{{ formatCurrency(item.quantity * item.unit_price) }}</td>
-                </tr>
-              </tbody>
-            </table>
+      <!-- View Modal -->
+      <div v-if="showViewModal" class="modal-overlay" @click="closeViewModal">
+        <div class="modal" @click.stop>
+          <div class="modal-header">
+            <h2>Purchase Order Details</h2>
+            <button @click="closeViewModal" class="close-btn">×</button>
+          </div>
+          <div class="modal-body">
+            <div v-if="selectedOrder" class="order-details">
+              <div class="detail-row">
+                <label>PO Number:</label>
+                <span>{{ selectedOrder.po_number }}</span>
+              </div>
+              <div class="detail-row">
+                <label>Supplier:</label>
+                <span>{{ selectedOrder.supplier_name }}</span>
+              </div>
+              <div class="detail-row">
+                <label>Order Date:</label>
+                <span>{{ formatDate(selectedOrder.order_date) }}</span>
+              </div>
+              <div class="detail-row">
+                <label>Status:</label>
+                <span :class="'status status-' + selectedOrder.status">
+                  {{ selectedOrder.status }}
+                </span>
+              </div>
+              <div class="detail-row">
+                <label>Total Amount:</label>
+                <span class="total-amount">{{ formatCurrency(selectedOrder.total_amount) }}</span>
+              </div>
+              
+              <h3>Order Items</h3>
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in selectedOrder.items" :key="item.id">
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ formatCurrency(item.unit_price) }}</td>
+                    <td>{{ formatCurrency(item.quantity * item.unit_price) }}</td>
+                  </tr>
+                </tbody>
+              </table>
 
-            <div v-if="selectedOrder.notes" class="notes">
-              <label>Notes:</label>
-              <p>{{ selectedOrder.notes }}</p>
+              <div v-if="selectedOrder.notes" class="notes">
+                <label>Notes:</label>
+                <p>{{ selectedOrder.notes }}</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script>
 import axios from '../../services/axios';
+import AppLayout from '../../components/layout/AppLayout.vue';
 
 export default {
   name: 'PurchaseOrderView',
+  components: {
+    AppLayout
+  },
   data() {
     return {
       orders: [],

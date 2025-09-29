@@ -1,34 +1,35 @@
 <template>
-  <div class="sales-orders">
-    <div class="page-header">
-      <div class="header-left">
-        <router-link to="/orders" class="back-link">← Back to Orders</router-link>
-        <h1>Sales Orders</h1>
+  <AppLayout>
+    <div class="sales-orders">
+      <div class="page-header">
+        <div class="header-left">
+          <router-link to="/orders" class="back-link">← Kembali ke Pesanan</router-link>
+          <h1>Pesanan Penjualan</h1>
+        </div>
+        <button v-if="canCreate" @click="showCreateModal" class="btn-primary">
+          <span class="icon">➕</span>
+          Pesanan Baru
+        </button>
       </div>
-      <button v-if="canCreate" @click="showCreateModal" class="btn-primary">
-        <span class="icon">➕</span>
-        New Sales Order
-      </button>
-    </div>
 
-    <!-- Filters -->
+    <!-- Filter -->
     <div class="filters">
       <div class="filter-group">
         <input 
           v-model="searchQuery" 
           type="text" 
-          placeholder="Search sales orders..."
+          placeholder="Cari pesanan penjualan..."
           class="search-input"
         >
       </div>
       <div class="filter-group">
         <select v-model="statusFilter" class="filter-select">
-          <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="shipped">Shipped</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="">Semua Status</option>
+          <option value="pending">Menunggu</option>
+          <option value="confirmed">Dikonfirmasi</option>
+          <option value="shipped">Dikirim</option>
+          <option value="delivered">Diterima</option>
+          <option value="cancelled">Dibatalkan</option>
         </select>
       </div>
       <div class="filter-group">
@@ -36,28 +37,28 @@
           v-model="dateFrom" 
           type="date" 
           class="filter-input"
-          placeholder="Date From"
+          placeholder="Tanggal Mulai"
         >
         <input 
           v-model="dateTo" 
           type="date" 
           class="filter-input"
-          placeholder="Date To"
+          placeholder="Tanggal Selesai"
         >
       </div>
     </div>
 
-    <!-- Sales Orders Table -->
+    <!-- Tabel Pesanan Penjualan -->
     <div class="table-container">
       <table class="data-table">
         <thead>
           <tr>
-            <th>SO Number</th>
-            <th>Customer</th>
-            <th>Order Date</th>
-            <th>Total Amount</th>
+            <th>Nomor SO</th>
+            <th>Pelanggan</th>
+            <th>Tanggal Pesanan</th>
+            <th>Total</th>
             <th>Status</th>
-            <th>Actions</th>
+            <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -68,26 +69,26 @@
             <td>{{ formatCurrency(order.total_amount) }}</td>
             <td>
               <span :class="'status status-' + order.status">
-                {{ order.status }}
+                {{ translateStatus(order.status) }}
               </span>
             </td>
             <td class="actions">
-              <button @click="viewOrder(order)" class="btn-info" title="View Details">
+              <button @click="viewOrder(order)" class="btn-info" title="Lihat Detail">
                 👁️
               </button>
               <button v-if="canEdit && order.status === 'pending'" @click="editOrder(order)" class="btn-warning" title="Edit">
                 ✏️
               </button>
-              <button v-if="canConfirm && order.status === 'pending'" @click="confirmOrder(order)" class="btn-success" title="Confirm">
+              <button v-if="canConfirm && order.status === 'pending'" @click="confirmOrder(order)" class="btn-success" title="Konfirmasi">
                 ✅
               </button>
-              <button v-if="canShip && order.status === 'confirmed'" @click="shipOrder(order)" class="btn-primary" title="Ship Order">
+              <button v-if="canShip && order.status === 'confirmed'" @click="shipOrder(order)" class="btn-primary" title="Kirim Pesanan">
                 🚚
               </button>
-              <button v-if="canDeliver && order.status === 'shipped'" @click="deliverOrder(order)" class="btn-success" title="Mark as Delivered">
+              <button v-if="canDeliver && order.status === 'shipped'" @click="deliverOrder(order)" class="btn-success" title="Tandai Diterima">
                 📦
               </button>
-              <button v-if="canDelete && order.status === 'pending'" @click="deleteOrder(order)" class="btn-danger" title="Delete">
+              <button v-if="canDelete && order.status === 'pending'" @click="deleteOrder(order)" class="btn-danger" title="Hapus">
                 🗑️
               </button>
             </td>
@@ -103,31 +104,31 @@
         :disabled="currentPage === 1"
         class="pagination-btn"
       >
-        Previous
+        Sebelumnya
       </button>
       <span class="pagination-info">
-        Page {{ currentPage }} of {{ totalPages }}
+        Halaman {{ currentPage }} dari {{ totalPages }}
       </span>
       <button 
         @click="currentPage++" 
         :disabled="currentPage === totalPages"
         class="pagination-btn"
       >
-        Next
+        Selanjutnya
       </button>
     </div>
 
-    <!-- Create/Edit Modal -->
+    <!-- Modal Buat/Edit -->
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div class="modal" @click.stop>
         <div class="modal-header">
-          <h2>{{ editingOrder ? 'Edit' : 'Create' }} Sales Order</h2>
+          <h2>{{ editingOrder ? 'Edit' : 'Buat' }} Pesanan Penjualan</h2>
           <button @click="closeModal" class="close-btn">×</button>
         </div>
-        <div class="modal-body">
+          <div class="modal-body">
           <form @submit.prevent="submitOrder">
             <div class="form-group">
-              <label>SO Number</label>
+              <label>Nomor SO</label>
               <input 
                 v-model="form.so_number" 
                 type="text" 
@@ -136,7 +137,7 @@
               >
             </div>
             <div class="form-group">
-              <label>Customer Name</label>
+              <label>Nama Pelanggan</label>
               <input 
                 v-model="form.customer_name" 
                 type="text"
@@ -144,21 +145,21 @@
               >
             </div>
             <div class="form-group">
-              <label>Customer Email</label>
+              <label>Email Pelanggan</label>
               <input 
                 v-model="form.customer_email" 
                 type="email"
               >
             </div>
             <div class="form-group">
-              <label>Customer Phone</label>
+              <label>Telepon Pelanggan</label>
               <input 
                 v-model="form.customer_phone" 
                 type="tel"
               >
             </div>
             <div class="form-group">
-              <label>Order Date</label>
+              <label>Tanggal Pesanan</label>
               <input 
                 v-model="form.order_date" 
                 type="date" 
@@ -166,27 +167,25 @@
               >
             </div>
             <div class="form-group">
-              <label>Expected Delivery</label>
+              <label>Perkiraan Pengiriman</label>
               <input 
                 v-model="form.expected_delivery" 
                 type="date"
               >
-            </div>
-            
-            <!-- Order Items -->
+            </div>            <!-- Item Pesanan -->
             <div class="order-items">
-              <h3>Order Items</h3>
+              <h3>Item Pesanan</h3>
               <div v-for="(item, index) in form.items" :key="index" class="item-row">
                 <select v-model="item.product_id" class="item-select" required>
-                  <option value="">Select Product</option>
+                  <option value="">Pilih Produk</option>
                   <option v-for="product in products" :key="product.id" :value="product.id">
-                    {{ product.name }} (Stock: {{ product.stock }})
+                    {{ product.name }} (Stok: {{ product.stock }})
                   </option>
                 </select>
                 <input 
                   v-model.number="item.quantity" 
                   type="number" 
-                  placeholder="Quantity" 
+                  placeholder="Jumlah" 
                   min="1"
                   required
                 >
@@ -194,28 +193,28 @@
                   v-model.number="item.unit_price" 
                   type="number" 
                   step="0.01"
-                  placeholder="Unit Price"
+                  placeholder="Harga Satuan"
                   required
                 >
-                <button type="button" @click="removeItem(index)" class="btn-danger">Remove</button>
+                <button type="button" @click="removeItem(index)" class="btn-danger">Hapus</button>
               </div>
-              <button type="button" @click="addItem" class="btn-secondary">Add Item</button>
+              <button type="button" @click="addItem" class="btn-secondary">Tambah Item</button>
             </div>
 
             <div class="form-group">
-              <label>Shipping Address</label>
+              <label>Alamat Pengiriman</label>
               <textarea v-model="form.shipping_address" rows="3" required></textarea>
             </div>
 
             <div class="form-group">
-              <label>Notes</label>
+              <label>Catatan</label>
               <textarea v-model="form.notes" rows="3"></textarea>
             </div>
 
             <div class="modal-footer">
-              <button type="button" @click="closeModal" class="btn-secondary">Cancel</button>
+              <button type="button" @click="closeModal" class="btn-secondary">Batal</button>
               <button type="submit" class="btn-primary">
-                {{ editingOrder ? 'Update' : 'Create' }} Order
+                {{ editingOrder ? 'Perbarui' : 'Buat' }} Pesanan
               </button>
             </div>
           </form>
@@ -223,21 +222,21 @@
       </div>
     </div>
 
-    <!-- View Modal -->
+    <!-- Modal Lihat Detail -->
     <div v-if="showViewModal" class="modal-overlay" @click="closeViewModal">
       <div class="modal" @click.stop>
         <div class="modal-header">
-          <h2>Sales Order Details</h2>
+          <h2>Detail Pesanan Penjualan</h2>
           <button @click="closeViewModal" class="close-btn">×</button>
         </div>
         <div class="modal-body">
           <div v-if="selectedOrder" class="order-details">
             <div class="detail-row">
-              <label>SO Number:</label>
+              <label>Nomor SO:</label>
               <span>{{ selectedOrder.so_number }}</span>
             </div>
             <div class="detail-row">
-              <label>Customer:</label>
+              <label>Pelanggan:</label>
               <span>{{ selectedOrder.customer_name }}</span>
             </div>
             <div class="detail-row">
@@ -245,31 +244,31 @@
               <span>{{ selectedOrder.customer_email }}</span>
             </div>
             <div class="detail-row">
-              <label>Phone:</label>
+              <label>Telepon:</label>
               <span>{{ selectedOrder.customer_phone }}</span>
             </div>
             <div class="detail-row">
-              <label>Order Date:</label>
+              <label>Tanggal Pesanan:</label>
               <span>{{ formatDate(selectedOrder.order_date) }}</span>
             </div>
             <div class="detail-row">
               <label>Status:</label>
               <span :class="'status status-' + selectedOrder.status">
-                {{ selectedOrder.status }}
+                {{ translateStatus(selectedOrder.status) }}
               </span>
             </div>
             <div class="detail-row">
-              <label>Total Amount:</label>
+              <label>Total:</label>
               <span class="total-amount">{{ formatCurrency(selectedOrder.total_amount) }}</span>
             </div>
             
-            <h3>Order Items</h3>
+            <h3>Item Pesanan</h3>
             <table class="items-table">
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Unit Price</th>
+                  <th>Produk</th>
+                  <th>Jumlah</th>
+                  <th>Harga Satuan</th>
                   <th>Total</th>
                 </tr>
               </thead>
@@ -284,33 +283,38 @@
             </table>
 
             <div class="shipping-info">
-              <h3>Shipping Information</h3>
+              <h3>Informasi Pengiriman</h3>
               <div class="detail-row">
-                <label>Address:</label>
+                <label>Alamat:</label>
                 <span>{{ selectedOrder.shipping_address }}</span>
               </div>
               <div v-if="selectedOrder.expected_delivery" class="detail-row">
-                <label>Expected Delivery:</label>
+                <label>Perkiraan Pengiriman:</label>
                 <span>{{ formatDate(selectedOrder.expected_delivery) }}</span>
               </div>
             </div>
 
             <div v-if="selectedOrder.notes" class="notes">
-              <label>Notes:</label>
+              <label>Catatan:</label>
               <p>{{ selectedOrder.notes }}</p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+    </div>
+  </AppLayout>
 </template>
 
 <script>
 import axios from '../../services/axios';
+import AppLayout from '../../components/layout/AppLayout.vue';
 
 export default {
   name: 'SalesOrderView',
+  components: {
+    AppLayout
+  },
   data() {
     return {
       orders: [],
@@ -397,9 +401,19 @@ export default {
         this.user = JSON.parse(userData);
       }
     },
+    translateStatus(status) {
+      const statusMap = {
+        'pending': 'Menunggu',
+        'confirmed': 'Dikonfirmasi',
+        'shipped': 'Dikirim',
+        'delivered': 'Diterima',
+        'cancelled': 'Dibatalkan'
+      };
+      return statusMap[status] || status;
+    },
     async loadData() {
       try {
-        // Mock data - replace with actual API calls
+        // Mock data - diganti dengan panggilan API sebenarnya
         this.orders = [
           {
             id: 1,
@@ -485,53 +499,53 @@ export default {
       this.showViewModal = true;
     },
     async confirmOrder(order) {
-      if (confirm('Confirm this sales order?')) {
+      if (confirm('Konfirmasi pesanan penjualan ini?')) {
         try {
           // Mock API call
           order.status = 'confirmed';
-          alert('Sales order confirmed successfully!');
+          alert('Pesanan penjualan berhasil dikonfirmasi!');
         } catch (error) {
           console.error('Error confirming order:', error);
-          alert('Failed to confirm order');
+          alert('Gagal mengonfirmasi pesanan');
         }
       }
     },
     async shipOrder(order) {
-      if (confirm('Mark this order as shipped?')) {
+      if (confirm('Tandai pesanan ini sebagai dikirim?')) {
         try {
           // Mock API call
           order.status = 'shipped';
-          alert('Order marked as shipped successfully!');
+          alert('Pesanan berhasil ditandai sebagai dikirim!');
         } catch (error) {
           console.error('Error shipping order:', error);
-          alert('Failed to mark as shipped');
+          alert('Gagal menandai sebagai dikirim');
         }
       }
     },
     async deliverOrder(order) {
-      if (confirm('Mark this order as delivered?')) {
+      if (confirm('Tandai pesanan ini sebagai diterima?')) {
         try {
           // Mock API call
           order.status = 'delivered';
-          alert('Order marked as delivered successfully!');
+          alert('Pesanan berhasil ditandai sebagai diterima!');
         } catch (error) {
           console.error('Error delivering order:', error);
-          alert('Failed to mark as delivered');
+          alert('Gagal menandai sebagai diterima');
         }
       }
     },
     async deleteOrder(order) {
-      if (confirm('Are you sure you want to delete this sales order?')) {
+      if (confirm('Apakah Anda yakin ingin menghapus pesanan penjualan ini?')) {
         try {
           // Mock API call
           const index = this.orders.findIndex(o => o.id === order.id);
           if (index > -1) {
             this.orders.splice(index, 1);
           }
-          alert('Sales order deleted successfully!');
+          alert('Pesanan penjualan berhasil dihapus!');
         } catch (error) {
           console.error('Error deleting order:', error);
-          alert('Failed to delete order');
+          alert('Gagal menghapus pesanan');
         }
       }
     },
@@ -543,7 +557,7 @@ export default {
           if (index > -1) {
             this.orders[index] = { ...this.orders[index], ...this.form };
           }
-          alert('Sales order updated successfully!');
+          alert('Pesanan penjualan berhasil diperbarui!');
         } else {
           // Create new order
           const newOrder = {
@@ -553,12 +567,12 @@ export default {
             total_amount: this.calculateTotal()
           };
           this.orders.unshift(newOrder);
-          alert('Sales order created successfully!');
+          alert('Pesanan penjualan berhasil dibuat!');
         }
         this.closeModal();
       } catch (error) {
         console.error('Error submitting order:', error);
-        alert('Failed to save order');
+        alert('Gagal menyimpan pesanan');
       }
     },
     closeModal() {

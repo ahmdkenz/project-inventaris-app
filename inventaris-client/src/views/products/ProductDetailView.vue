@@ -1,21 +1,22 @@
 <template>
-  <div class="product-detail">
-    <!-- Header -->
-    <div class="page-header">
-      <h1>Detail Produk</h1>
-      <div class="actions">
-        <router-link to="/products" class="btn btn-secondary">
-          ← Kembali ke Daftar Produk
-        </router-link>
-        <router-link 
-          v-if="user.role === 'admin'" 
-          :to="`/products/${productId}/edit`" 
-          class="btn btn-primary"
-        >
-          Edit Produk
-        </router-link>
+  <AppLayout>
+    <div class="product-detail">
+      <!-- Header -->
+      <div class="page-header">
+        <h1>Detail Produk</h1>
+        <div class="actions">
+          <router-link to="/products" class="btn btn-secondary">
+            ← Kembali ke Daftar Produk
+          </router-link>
+          <router-link 
+            v-if="user.role === 'admin'" 
+            :to="`/products/${productId}/edit`" 
+            class="btn btn-primary"
+          >
+            Edit Produk
+          </router-link>
+        </div>
       </div>
-    </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="loading-container">
@@ -156,14 +157,19 @@
         </div>
       </div>
     </div>
-  </div>
+    </div>
+  </AppLayout>
 </template>
 
 <script>
-import axios from '../../services/axios';
-import '../../styles/product-detail.css';
+import axios from '@/services/axios';
+import AppLayout from '@/components/layout/AppLayout.vue';
+import '@/styles/product-detail.css';
 
 export default {
+  components: {
+    AppLayout
+  },
   name: "ProductDetailView",
   data() {
     return {
@@ -212,11 +218,11 @@ export default {
             this.transactions = response.data.product.transactions;
           }
         } else {
-          this.error = 'Product data not found';
+          this.error = 'Data produk tidak ditemukan';
         }
       } catch (error) {
         console.error('Error loading product:', error);
-        this.error = 'Failed to load product data. Please try again.';
+        this.error = 'Gagal memuat data produk. Silakan coba lagi.';
       } finally {
         this.loading = false;
       }
@@ -229,7 +235,7 @@ export default {
     },
     calculateMargin() {
       if (!this.product.purchase_price || this.product.purchase_price <= 0) {
-        return 'N/A';
+        return 'Tidak tersedia';
       }
       
       const purchase = parseFloat(this.product.purchase_price);
@@ -256,8 +262,8 @@ export default {
 
 <style scoped>
 /* Menghapus inline CSS yang sudah dipindahkan */
-@import "../../styles/layout-enhancements.css";
-@import "../../styles/responsive-fixes.css";
+@import "@/styles/layout-enhancements.css";
+@import "@/styles/responsive-fixes.css";
 
 /* Fix for transaction table */
 .transactions-table {

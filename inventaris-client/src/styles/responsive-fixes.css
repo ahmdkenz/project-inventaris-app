@@ -113,6 +113,24 @@ img, svg, video, canvas, audio, iframe, embed, object {
   }
 }
 
+/* Fix for form views */
+.content-wrapper {
+  width: 100%;
+  max-width: 100%;
+}
+
+.content-wrapper .card {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+/* Ensure forms use full width available */
+form {
+  width: 100%;
+  max-width: 100%;
+}
+
 /* Fix for container padding on very small screens */
 @media (max-width: 360px) {
   .main-content,

@@ -1,8 +1,7 @@
 <template>
-  <div class="app-layout">
-    <div class="auth-container">
-      <div class="auth-card">
-        <h1>Register</h1>
+  <div class="auth-container">
+    <div class="auth-card">
+      <h1>Register</h1>
         <form @submit.prevent="handleRegister" class="auth-form">
           <div class="grid-2">
             <div class="form-group">
@@ -81,11 +80,10 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
-import axios from "../../services/axios";
+import axios from "@/services/axios";
 
 export default {
   name: "RegisterView",
@@ -163,7 +161,7 @@ export default {
 </script>
 
 <style scoped>
-@import "../../styles/layout.css";
+@import "@/styles/layout.css";
 
 .auth-container {
   display: flex;

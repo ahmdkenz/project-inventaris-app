@@ -1,7 +1,6 @@
 <template>
-  <div class="settings-container">
-    <!-- Header -->
-    <div class="page-header">
+  <AppLayout>
+    <div class="settings-header">
       <div class="header-content">
         <h1>⚙️ System Settings</h1>
         <p class="subtitle">Configure your application preferences and system options</p>
@@ -455,14 +454,18 @@
     <div v-if="successMessage" class="success-banner">
       <p>✅ {{ successMessage }}</p>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script>
-import axios from '../../services/axios';
+import axios from '@/services/axios';
+import AppLayout from '@/components/layout/AppLayout.vue';
 
 export default {
   name: "SystemSettingsView",
+  components: {
+    AppLayout
+  },
   data() {
     return {
       loading: false,
@@ -655,11 +658,11 @@ export default {
 </script>
 
 <style scoped>
-@import "../../styles/layout.css";
-@import "../../styles/settings.css";
-@import "../../styles/settings-additional.css";
-@import "../../styles/layout-enhancements.css";
-@import "../../styles/responsive-fixes.css";
+@import "@/styles/layout.css";
+@import "@/styles/settings.css";
+@import "@/styles/settings-additional.css";
+@import "@/styles/layout-enhancements.css";
+@import "@/styles/responsive-fixes.css";
 
 /* Enhance card sizing in settings */
 .settings-section.card {

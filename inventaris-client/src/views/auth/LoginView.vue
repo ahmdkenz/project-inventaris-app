@@ -1,55 +1,64 @@
+<!-- File: src/views/auth/LoginView.vue -->
 <template>
-  <div class="app-layout">
-    <div class="auth-container">
-      <div class="auth-card">
-        <h1>Login</h1>
-        <form @submit.prevent="handleLogin" class="auth-form">
-          <div class="form-group">
-            <label for="email">Email:</label>
-            <input 
-              id="email" 
-              v-model="email" 
-              type="email" 
-              class="form-control"
-              placeholder="Enter your email" 
-              required 
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="password">Password:</label>
-            <input 
-              id="password" 
-              v-model="password" 
-              type="password" 
-              class="form-control"
-              placeholder="Enter your password" 
-              required 
-            />
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block" :disabled="isSubmitting">
-            {{ isSubmitting ? 'Logging in...' : 'Login' }}
-          </button>
-
-          <div v-if="errorMessage" class="error">
-            {{ errorMessage }}
-          </div>
-        </form>
-
-        <div class="auth-link">
-          <p>Don't have an account? <router-link to="/register">Register here</router-link></p>
+  <!-- Kita hapus div.app-layout dari sini -->
+  <div class="auth-container">
+    <div class="auth-card">
+      <h1>Login</h1>
+      <form @submit.prevent="handleLogin" class="auth-form">
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input 
+            id="email" 
+            v-model="email" 
+            type="email" 
+            class="form-control"
+            placeholder="Enter your email" 
+            required 
+          />
         </div>
+
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input 
+            id="password" 
+            v-model="password" 
+            type="password" 
+            class="form-control"
+            placeholder="Enter your password" 
+            required 
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" :disabled="isSubmitting">
+          {{ isSubmitting ? 'Logging in...' : 'Login' }}
+        </button>
+
+        <div v-if="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+      </form>
+
+      <div class="auth-link">
+        <p>Belum punya akun? <router-link to="/register">Daftar di sini</router-link></p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import axios from "../../services/axios";
+// [DIUBAH] Impor store dan router
+import { useAuthStore } from "@/stores/authStore";
+import { useRouter } from "vue-router";
+import axios from "@/services/axios";
 
 export default {
   name: "LoginView",
+  // [DIUBAH] Gunakan setup function untuk Composition API
+  setup() {
+    const authStore = useAuthStore();
+    const router = useRouter();
+    return { authStore, router };
+  },
   data() {
     return {
       email: "",
@@ -57,13 +66,6 @@ export default {
       errorMessage: "",
       isSubmitting: false,
     };
-  },
-  created() {
-    // Check if redirected with error=inactive
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('error') === 'inactive') {
-      this.errorMessage = "Your account is inactive. Please contact administrator.";
-    }
   },
   methods: {
     async handleLogin() {
@@ -78,22 +80,18 @@ export default {
         
         const { user, token } = response.data;
         
-        // Store token and user data
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("user", JSON.stringify(user));
-        
-        // Set axios default header
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        // [DIUBAH] Gunakan action dari authStore untuk login
+        this.authStore.login(user, token);
         
         // Redirect based on role
         if (user.role === 'admin') {
-          this.$router.push('/admin/dashboard');
+          this.router.push('/admin/dashboard'); // Sesuaikan dengan rute Anda
         } else {
-          this.$router.push('/dashboard');
+          this.router.push('/dashboard'); // Sesuaikan dengan rute Anda
         }
       } catch (error) {
         this.errorMessage =
-          error.response?.data?.message || "Login failed. Please try again.";
+          error.response?.data?.message || "Login gagal. Silakan coba lagi.";
       } finally {
         this.isSubmitting = false;
       }
@@ -103,7 +101,8 @@ export default {
 </script>
 
 <style scoped>
-@import "../../styles/layout.css";
+/* Path ke file CSS bisa jadi tidak diperlukan jika layout.css sudah global */
+/* @import "../../styles/layout.css"; */
 
 .auth-container {
   display: flex;
@@ -111,6 +110,7 @@ export default {
   align-items: center;
   min-height: 100vh;
   padding: 2rem;
+  background-color: #f0f2f5;
 }
 
 .auth-card {
@@ -125,12 +125,34 @@ export default {
 .auth-card h1 {
   text-align: center;
   margin-bottom: 2rem;
-  font-size: 2rem;
-  color: #333;
+}
+
+.error-message {
+  color: red;
+  text-align: center;
+  margin-top: 1rem;
 }
 
 .auth-form {
   width: 100%;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
 }
 
 .btn-block {
@@ -138,6 +160,15 @@ export default {
   padding: 0.75rem;
   font-size: 1rem;
   margin-top: 1rem;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.btn-block:disabled {
+    background-color: #aaa;
 }
 
 .auth-link {
@@ -145,35 +176,5 @@ export default {
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid #eee;
-}
-
-.auth-link p {
-  margin: 0;
-  color: #666;
-}
-
-.auth-link a {
-  color: var(--link-color, #007bff);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.auth-link a:hover {
-  text-decoration: underline;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .auth-container {
-    padding: 1rem;
-  }
-  
-  .auth-card {
-    padding: 2rem;
-  }
-  
-  .auth-card h1 {
-    font-size: 1.5rem;
-  }
 }
 </style>

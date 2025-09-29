@@ -1,0 +1,45 @@
+/\*
+
+- Perubahan yang dilakukan pada layout aplikasi:
+-
+- 1.  Refaktor Struktur Layout Global:
+- - App.vue dan AppLayout.vue menjadi pusat layout utama
+- - Semua halaman (views) menggunakan AppLayout sebagai wrapper
+- - Konsistensi struktur antara semua halaman
+-
+- 2.  Pemisahan CSS:
+- - Menghapus inline style dan memindahkannya ke file CSS terpisah
+- - Membuat file CSS baru di folder /styles untuk setiap komponen
+- - Memberikan penamaan konsisten pada class CSS
+-
+- 3.  Komponen yang Diperbarui:
+- - AppLayout.vue: Memastikan app layout menjadi sentral untuk semua halaman
+- - Header.vue: Penyesuaian untuk navigasi global dan info user
+- - Sidebar.vue: Penyesuaian menu navigasi sidebar yang responsif
+- - FormWrapper.vue: Pembuatan komponen reusable untuk form
+-
+- 4.  File CSS Global:
+- - reset.css: Reset dan style dasar untuk seluruh aplikasi
+- - global-components.css: Style untuk komponen umum (button, card, dll.)
+- - app-layout.css: Style khusus untuk layout utama
+- - header.css: Style untuk komponen header
+- - sidebar.css: Style untuk komponen sidebar
+- - form-wrapper.css: Style untuk wrapper form
+- - dashboard.css: Style untuk halaman dashboard
+- - product-form.css: Style untuk form produk
+- - products.css: Style untuk halaman daftar produk
+-
+- 5.  Keuntungan dari Perubahan:
+- - Kode lebih terstruktur dan mudah dipelihara
+- - Konsistensi tampilan di seluruh aplikasi
+- - Responsivitas yang lebih baik di berbagai ukuran layar
+- - Pemisahan yang jelas antara struktur, logika, dan tampilan
+- - Reusabilitas komponen yang meningkat
+- - Lebih mudah melakukan perubahan style di masa depan
+-
+- 6.  Rekomendasi Selanjutnya:
+- - Tambahkan preloader untuk transisi halaman
+- - Implementasi tema gelap/terang
+- - Optimasi gambar dan aset
+- - Optimalkan penggunaan CSS dengan variabel untuk warna dan ukuran
+    \*/
