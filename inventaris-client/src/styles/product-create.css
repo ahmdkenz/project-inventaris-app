@@ -1,7 +1,7 @@
 @import "./layout.css";
 
-.content-wrapper {
-  width: 100%;
+/* Special styling for product create page */
+.product-create-page .content-wrapper {
   padding: 0;
 }
 

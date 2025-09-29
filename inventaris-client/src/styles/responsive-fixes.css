@@ -113,15 +113,11 @@ img, svg, video, canvas, audio, iframe, embed, object {
   }
 }
 
-/* Fix for form views */
-.content-wrapper {
-  width: 100%;
-  max-width: 100%;
-}
+/* Fix for form views - respect max-width from app-layout.css */
+/* We are not overriding the max-width of content-wrapper here */
 
 .content-wrapper .card {
   width: 100%;
-  max-width: 100%;
   margin-bottom: 1.5rem;
 }
 

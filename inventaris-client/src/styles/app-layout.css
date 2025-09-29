@@ -13,18 +13,20 @@
   margin-left: 250px; /* Default sidebar width */
   width: calc(100% - 250px);
   transition: margin-left 0.3s ease, width 0.3s ease;
+  position: relative;
 }
 
 .main-content {
   flex-grow: 1;
   overflow-y: auto; /* Allows content to scroll */
   padding: 24px;
+  width: 100%; /* Ensure full width */
 }
 
 .content-wrapper {
-  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
 }
 
 /* Responsive adjustments */
