@@ -2,6 +2,9 @@
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
@@ -47,6 +50,23 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('users', UserController::class);
     Route::patch('/users/{user}/status', [UserController::class, 'updateStatus']);
     
+    // Orders
+    Route::get('/orders/stats', [OrderController::class, 'stats']);
+    Route::get('/orders/recent', [OrderController::class, 'recent']);
+    
+    // Purchase Orders
+    Route::apiResource('purchase-orders', PurchaseOrderController::class);
+    Route::post('/purchase-orders/{id}/approve', [PurchaseOrderController::class, 'approve']);
+    Route::post('/purchase-orders/{id}/receive', [PurchaseOrderController::class, 'receive']);
+    Route::post('/purchase-orders/{id}/cancel', [PurchaseOrderController::class, 'cancel']);
+    
+    // Sales Orders
+    Route::apiResource('sales-orders', SalesOrderController::class);
+    Route::post('/sales-orders/{id}/confirm', [SalesOrderController::class, 'confirm']);
+    Route::post('/sales-orders/{id}/ship', [SalesOrderController::class, 'ship']);
+    Route::post('/sales-orders/{id}/deliver', [SalesOrderController::class, 'deliver']);
+    Route::post('/sales-orders/{id}/cancel', [SalesOrderController::class, 'cancel']);
+
     // Settings and System
     Route::get('/settings', [App\Http\Controllers\SettingController::class, 'index']);
     Route::post('/settings', [App\Http\Controllers\SettingController::class, 'update']);
