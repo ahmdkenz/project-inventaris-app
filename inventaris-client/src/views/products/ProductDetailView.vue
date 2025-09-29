@@ -1,9 +1,10 @@
 <template>
   <AppLayout>
+    <template #header>
+    </template>
     <div class="product-detail">
       <!-- Header -->
       <div class="page-header">
-        <h1>Detail Produk</h1>
         <div class="actions">
           <router-link to="/products" class="btn btn-secondary">
             ← Kembali ke Daftar Produk

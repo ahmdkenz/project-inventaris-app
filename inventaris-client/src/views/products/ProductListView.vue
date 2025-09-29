@@ -1,8 +1,7 @@
 <template>
   <AppLayout>
-    <div class="header">
-      <h1>Product Management</h1>
-    </div>
+    <template #header>
+     </template>
     
     <div class="card">
       <div class="card-header">

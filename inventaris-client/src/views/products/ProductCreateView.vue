@@ -1,7 +1,8 @@
 <template>
   <AppLayout>
+    <template #header>
+    </template>
     <FormWrapper
-      title="Buat Produk Baru"
       backLink="/products"
       backText="Kembali ke Daftar Produk"
       :error="error"

@@ -1,9 +1,10 @@
 <template>
   <AppLayout>
+    <template #header>
+    </template>
     <div class="product-edit-container">
       <div class="card">
         <div class="card-header">
-          <h1 class="card-title">Edit Produk</h1>
           <div>
             <router-link :to="`/products/${$route.params.id}`" class="btn btn-secondary">Batal</router-link>
             <router-link to="/products" class="btn btn-secondary ml-2">← Kembali ke Daftar Produk</router-link>
