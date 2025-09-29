@@ -142,4 +142,5 @@ export default {
 
 <style>
 @import '@/styles/dashboard.css';
+@import '@/styles/minimal-dashboard.css';
 </style>

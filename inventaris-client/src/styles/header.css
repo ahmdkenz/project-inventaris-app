@@ -8,7 +8,7 @@
   align-items: center;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   width: 100%;
-  height: 64px;
+  height: 50px; /* Reduced from 64px */
   position: sticky;
   top: 0;
   z-index: 990;
@@ -32,7 +32,7 @@
 
 .page-title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1rem; /* Reduced from 1.25rem */
   font-weight: 600;
   color: #333;
   white-space: nowrap;
@@ -59,7 +59,7 @@
   border: none;
   cursor: pointer;
   color: #666;
-  padding: 8px;
+  padding: 6px; /* Reduced from 8px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,8 +100,8 @@
 .dropdown-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px; /* Reduced from 8px */
+  padding: 8px 12px; /* Reduced from 10px 16px */
   text-decoration: none;
   color: #333;
   width: 100%;
@@ -110,6 +110,7 @@
   border: none;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 0.9rem; /* Added smaller font size */
 }
 
 .dropdown-item:hover {
@@ -128,7 +129,7 @@
 
 @media (max-width: 576px) {
   .page-title {
-    font-size: 1.1rem;
+    font-size: 0.95rem; /* Reduced from 1.1rem */
     max-width: 180px;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -130,4 +130,5 @@ export default {
 @import "../../styles/dashboard.css";
 @import "../../styles/orders.css";
 @import "../../styles/responsive-fixes.css";
+@import "../../styles/minimal-dashboard.css";
 </style>

@@ -166,6 +166,7 @@ export default {
 @import "../../styles/layout.css";
 @import "../../styles/dashboard.css";
 @import "../../styles/responsive-fixes.css";
+@import "../../styles/minimal-dashboard.css";
 
 .dashboard {
   display: flex;

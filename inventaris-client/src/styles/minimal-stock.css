@@ -17,7 +17,17 @@
 .adjustment-form input,
 .adjustment-form select,
 .adjustment-form textarea,
-.action-buttons .btn {
+.action-buttons .btn,
+.card p,
+.card span,
+.card-header span,
+.card-header button,
+.card-header a,
+.stock-list-container button,
+.stock-list-container a,
+.table-responsive button,
+.table-responsive a,
+.page-info {
   font-size: 0.9rem !important; /* Reduce font size across all stock views */
 }
 

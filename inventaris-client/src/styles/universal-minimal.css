@@ -1,0 +1,124 @@
+/* Universal Minimal UI Style - Common styles for all minimalist views */
+
+/* Universal Button Size Reduction */
+.btn, button, a.btn {
+  padding: 0.35rem 0.7rem !important;
+  font-size: 0.85rem !important;
+  line-height: 1.2 !important;
+}
+
+.btn-sm, button.btn-sm {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.8rem !important;
+}
+
+.btn-lg, button.btn-lg {
+  padding: 0.5rem 1rem !important;
+  font-size: 0.9rem !important;
+}
+
+/* Universal Font Size Reduction */
+p, span, div, label, th, td, input, select, textarea, button, a {
+  font-size: 0.9rem !important;
+}
+
+h1, .h1 {
+  font-size: 1.4rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+h2, .h2 {
+  font-size: 1.2rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+h3, .h3 {
+  font-size: 1.1rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+h4, .h4 {
+  font-size: 1rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Universal Form Size Reduction */
+.form-control, 
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+select,
+textarea {
+  padding: 0.4rem 0.6rem !important;
+  font-size: 0.9rem !important;
+  height: auto !important;
+  line-height: 1.4 !important;
+}
+
+.form-group {
+  margin-bottom: 0.75rem !important;
+}
+
+/* Universal Card Padding Reduction */
+.card,
+.card-body {
+  padding: 1rem !important;
+}
+
+.card-header {
+  padding: 0.75rem 1rem !important;
+}
+
+/* Universal Table Compact */
+table {
+  font-size: 0.9rem !important;
+}
+
+th, td {
+  padding: 0.5rem !important;
+}
+
+/* Universal Icon Size Reduction */
+.icon {
+  font-size: 1.2rem !important;
+}
+
+/* Universal Spacing Reduction */
+.container, .container-fluid {
+  padding: 0.75rem !important;
+}
+
+.row {
+  margin-left: -0.5rem !important;
+  margin-right: -0.5rem !important;
+}
+
+.col, [class*="col-"] {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .card,
+  .card-body {
+    padding: 0.75rem !important;
+  }
+  
+  .card-header {
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  .form-control, 
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  select,
+  textarea {
+    padding: 0.35rem 0.5rem !important;
+  }
+}
