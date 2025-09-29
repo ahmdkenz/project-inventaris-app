@@ -17,7 +17,8 @@
 .main-content {
   flex-grow: 1;
   padding: 24px;
-  min-height: calc(100vh - 64px); /* Adjust based on header height */
+  min-height: calc(100vh - 124px); /* Adjusted to account for header and footer */
+  padding-bottom: 20px; /* Add padding at the bottom for footer separation */
 }
 
 .content-container {

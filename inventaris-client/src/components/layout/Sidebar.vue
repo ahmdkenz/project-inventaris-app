@@ -83,4 +83,5 @@ export default {
 
 <style>
 @import '@/styles/sidebar.css';
+@import '@/styles/sidebar-animations.css';
 </style>

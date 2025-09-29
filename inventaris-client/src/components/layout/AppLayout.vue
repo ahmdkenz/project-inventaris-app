@@ -9,6 +9,7 @@
           <slot></slot>
         </div>
       </main>
+      <Footer />
     </div>
   </div>
 </template>
@@ -16,12 +17,14 @@
 <script>
 import Header from './Header.vue';
 import Sidebar from './Sidebar.vue';
+import Footer from './Footer.vue';
 
 export default {
   name: "AppLayout",
   components: {
     Header,
-    Sidebar
+    Sidebar,
+    Footer
   }
 };
 </script>
