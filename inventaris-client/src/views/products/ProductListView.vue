@@ -74,17 +74,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="product in paginatedProducts" :key="product.id">
+          <tr v-for="product in paginatedProducts" :key="product.id" :class="{ 'inactive-row': product.status === 'inactive' }">
             <td>{{ product.id }}</td>
             <td>{{ product.name }}</td>
             <td>{{ product.description }}</td>
             <td>{{ product.sku }}</td>
             <td>{{ product.category }}</td>
-            <td>${{ product.purchase_price }}</td>
-            <td>${{ product.selling_price }}</td>
+            <td>Rp {{ formatNumber(product.purchase_price) }}</td>
+            <td>Rp {{ formatNumber(product.selling_price) }}</td>
             <td :class="{ 'low-stock': product.stock < 10 }">{{ product.stock }}</td>
             <td>
-              <span :class="`status ${product.status}`">{{ product.status }}</span>
+              <span :class="`status ${product.status}`">{{ product.status === 'active' ? 'Aktif' : 'Tidak Aktif' }}</span>
             </td>
             <td>
               <div class="action-buttons">
@@ -291,22 +291,83 @@ export default {
       }
     },
     async deleteProduct(id) {
-      console.log('Deleting product with ID:', id); // Log ID produk yang akan dihapus
-      if (confirm('Are you sure you want to delete this product?')) {
+      console.log('Deleting product with ID:', id);
+      
+      // Dapatkan produk untuk mendapatkan nama
+      let productName = "produk ini";
+      try {
+        const checkResponse = await axios.get(`/products/${id}`);
+        if (checkResponse.data && checkResponse.data.product) {
+          productName = checkResponse.data.product.name;
+        }
+      } catch (error) {
+        console.log('Could not get product details:', error);
+      }
+      
+      // Tampilkan dialog konfirmasi sederhana
+      if (confirm(`Apakah Anda yakin ingin menghapus "${productName}"?`)) {
         try {
-          const response = await axios.delete(`/products/${id}`);
-          console.log('Delete response:', response.data); // Log respons dari API
+          // Coba hapus produk
+          await axios.delete(`/products/${id}`);
+          
+          // Jika berhasil, refresh daftar dan tunjukkan pesan sukses
           await this.loadProducts();
         } catch (error) {
           console.error('Error deleting product:', error.response || error.message);
-          alert('Failed to delete product. Please try again.');
+          
+          // Tampilkan pesan error yang jelas
+          let errorMessage = 'Gagal menghapus produk.';
+          
+          if (error.response && error.response.data && error.response.data.message) {
+            errorMessage = `${errorMessage} ${error.response.data.message}`;
+          } else if (error.response && error.response.status === 400) {
+            errorMessage = 'Produk ini tidak dapat dihapus karena memiliki riwayat transaksi. Coba nonaktifkan produk sebagai gantinya.';
+          }
+          
+          if (errorMessage.includes('transaksi') || errorMessage.includes('transaction')) {
+            // Tawarkan opsi untuk menonaktifkan sebagai gantinya
+            if (confirm(`${errorMessage}\n\nApakah Anda ingin menonaktifkan produk ini sebagai gantinya?`)) {
+              await this.deactivateProduct(id, productName);
+            }
+          } else {
+            alert(errorMessage);
+          }
         }
       }
     },
     
+    // Fungsi terpisah untuk menonaktifkan produk
+    async deactivateProduct(id, productName) {
+      try {
+        const response = await axios.put(`/products/${id}`, {
+          status: 'inactive'
+        });
+        
+        console.log('Deactivate response:', response.data);
+        alert(`Produk "${productName}" berhasil dinonaktifkan.`);
+        
+        // Refresh daftar produk
+        await this.loadProducts();
+      } catch (error) {
+        console.error('Error deactivating product:', error.response || error.message);
+        alert('Gagal menonaktifkan produk. Silakan coba lagi.');
+      }
+    },
+    
+
+    
     formatUpdateTime() {
       if (!this.lastUpdate) return '';
       return this.lastUpdate.toLocaleTimeString();
+    },
+    
+    formatNumber(value) {
+      if (!value) return '0';
+      // Format angka ke format Indonesia (misalnya 1.000.000,00)
+      return parseFloat(value).toLocaleString('id-ID', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
     }
   }
 };
@@ -315,4 +376,15 @@ export default {
 <style>
 @import "@/styles/products.css";
 @import '@/styles/minimal-product.css';
+
+/* Custom styles for product list */
+.inactive-row {
+  opacity: 0.7;
+  background-color: #f8f9fa !important;
+}
+
+.inactive-row td {
+  color: #6c757d !important;
+  font-style: italic;
+}
 </style>

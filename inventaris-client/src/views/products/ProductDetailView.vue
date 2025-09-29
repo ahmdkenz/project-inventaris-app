@@ -34,6 +34,12 @@
 
     <!-- Product Details -->
     <div v-else class="product-info-container">
+      <!-- Status Banner untuk produk tidak aktif -->
+      <div v-if="product.status === 'inactive'" class="status-banner inactive-banner">
+        <span class="icon">⚠️</span>
+        <span class="message">Produk ini sudah dinonaktifkan dan tidak akan muncul dalam transaksi baru.</span>
+      </div>
+      
       <div class="detail-sections-grid">
         <div class="product-info-card">
           <h2>Informasi Umum</h2>
@@ -247,15 +253,56 @@ export default {
       return margin.toFixed(2);
     },
     async deleteProduct() {
+      // Konfirmasi penghapusan dengan satu dialog
       if (confirm(`Apakah Anda yakin ingin menghapus "${this.product.name}"?`)) {
         try {
+          // Coba hapus produk
           await axios.delete(`/products/${this.productId}`);
-          // Redirect to products list
+          
+          // Jika berhasil, redirect ke daftar produk
           this.$router.push('/products');
         } catch (error) {
           console.error('Error deleting product:', error);
-          alert('Gagal menghapus produk. Produk mungkin masih digunakan dalam transaksi atau pesanan.');
+          
+          // Tampilkan pesan error yang jelas
+          let errorMessage = 'Gagal menghapus produk.';
+          
+          if (error.response && error.response.data && error.response.data.message) {
+            errorMessage = `${errorMessage} ${error.response.data.message}`;
+          } else if (error.response && error.response.status === 400) {
+            errorMessage = 'Produk ini tidak dapat dihapus karena memiliki riwayat transaksi. Coba nonaktifkan produk sebagai gantinya.';
+          }
+          
+          if (errorMessage.includes('transaksi') || errorMessage.includes('transaction')) {
+            // Tawarkan opsi untuk menonaktifkan sebagai gantinya
+            if (confirm(`${errorMessage}\n\nApakah Anda ingin menonaktifkan produk ini sebagai gantinya?`)) {
+              await this.deactivateProduct();
+            }
+          } else {
+            alert(errorMessage);
+          }
         }
+      }
+    },
+    
+    // Fungsi untuk menonaktifkan produk
+    async deactivateProduct() {
+      try {
+        const response = await axios.put(`/products/${this.productId}`, {
+          status: 'inactive'
+        });
+        
+        console.log('Deactivate response:', response.data);
+        alert(`Produk "${this.product.name}" berhasil dinonaktifkan.`);
+        
+        // Update status produk di tampilan detail
+        this.product.status = 'inactive';
+        
+        // Opsional: reload data produk untuk mendapatkan status terbaru
+        await this.loadProductData();
+      } catch (error) {
+        console.error('Error deactivating product:', error);
+        alert('Gagal menonaktifkan produk. Silakan coba lagi.');
       }
     }
   }
@@ -279,6 +326,30 @@ export default {
   padding: 0.5rem 0.75rem;
   text-align: left;
   white-space: nowrap;
+}
+
+/* Status Banner for inactive products */
+.status-banner {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inactive-banner {
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+  color: #856404;
+}
+
+.status-banner .icon {
+  font-size: 1.2rem;
+}
+
+.status-banner .message {
+  font-weight: 500;
 }
 
 @media (max-width: 992px) {
