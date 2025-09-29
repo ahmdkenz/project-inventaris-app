@@ -93,8 +93,12 @@ class ProductController extends Controller
             if (!$request->sku) {
                 $request->merge(['sku' => $this->generateSku($request->name, $request->category)]);
             }
-
+            
+            // Generate unique ID for product
+            $productId = $this->generateProductId();
+            
             $product = Product::create([
+                'id' => $productId,
                 'name' => $request->name,
                 'sku' => $request->sku,
                 'description' => $request->description,
@@ -265,6 +269,27 @@ class ProductController extends Controller
         $random = str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
         
         return $prefix . $namePrefix . $timestamp . $random;
+    }
+    
+    /**
+     * Generate unique product ID
+     */
+    private function generateProductId()
+    {
+        $prefix = 'PRD'; // Prefix untuk produk
+        $timestamp = substr(time(), -6); // 6 digit terakhir dari timestamp
+        $random = str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT); // 4 digit random
+        
+        // Format: PRD-[timestamp]-[random]
+        $productId = $prefix . '-' . $timestamp . '-' . $random;
+        
+        // Cek apakah ID sudah ada, jika ya, generate ulang
+        while (Product::where('id', $productId)->exists()) {
+            $random = str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            $productId = $prefix . '-' . $timestamp . '-' . $random;
+        }
+        
+        return $productId;
     }
 
     /**

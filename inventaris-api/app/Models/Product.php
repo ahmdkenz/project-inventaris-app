@@ -5,7 +5,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
+    // Konfigurasi untuk ID string
+    public $incrementing = false;
+    protected $keyType = 'string';
+    
     protected $fillable = [
+        'id',
         'name',
         'sku',
         'description',
