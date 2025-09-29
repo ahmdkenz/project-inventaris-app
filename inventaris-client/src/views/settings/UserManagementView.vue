@@ -370,7 +370,13 @@ export default {
           // Add new user logic
           const response = await axios.post('/users', this.userForm);
           this.users.push(response.data);
-          alert('Pengguna baru berhasil dibuat.');
+          
+          // Tampilkan ID pengguna baru
+          const idMessage = response.data.id 
+            ? `ID Pengguna: ${response.data.id}` 
+            : '';
+            
+          alert(`Pengguna baru berhasil dibuat. ${idMessage}`);
         } else {
           // Update existing user logic - exclude password if empty
           const updateData = { ...this.userForm };
