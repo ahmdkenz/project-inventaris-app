@@ -10,6 +10,9 @@ return [
     'guard' => ['web'],
 
     'expiration' => null,
+    
+    // Use the custom PersonalAccessToken model
+    'model' => App\Models\PersonalAccessToken::class,
 
     'middleware' => [
         // Middleware yang tidak tersedia di Laravel 11 telah dihapus
