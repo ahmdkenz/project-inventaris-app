@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <div>
-      <h1>Stock Transaction</h1>
+      <h1 class="page-title">Transaksi Stok</h1>
     </div>
   </AppLayout>
 </template>
@@ -17,4 +17,6 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+@import "../../styles/minimal-stock.css";
+</style>

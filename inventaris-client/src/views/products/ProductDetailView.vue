@@ -1,6 +1,7 @@
 <template>
   <AppLayout>
     <template #header>
+      <h1 class="page-title">Detail Produk</h1>
     </template>
     <div class="product-detail">
       <!-- Header -->
@@ -265,6 +266,7 @@ export default {
 /* Menghapus inline CSS yang sudah dipindahkan */
 @import "@/styles/layout-enhancements.css";
 @import "@/styles/responsive-fixes.css";
+@import "@/styles/minimal-product.css";
 
 /* Fix for transaction table */
 .transactions-table {

@@ -1,13 +1,14 @@
 <template>
   <AppLayout>
     <template #header>
+      <h1 class="page-title">Edit Produk</h1>
     </template>
     <div class="product-edit-container">
       <div class="card">
         <div class="card-header">
-          <div>
-            <router-link :to="`/products/${$route.params.id}`" class="btn btn-secondary">Batal</router-link>
-            <router-link to="/products" class="btn btn-secondary ml-2">← Kembali ke Daftar Produk</router-link>
+          <div class="btn-group">
+            <router-link :to="`/products/${$route.params.id}`" class="btn btn-sm btn-secondary">Batal</router-link>
+            <router-link to="/products" class="btn btn-sm btn-secondary ml-2">← Kembali</router-link>
           </div>
         </div>
         
@@ -396,4 +397,5 @@ export default {
 
 <style scoped>
 /* Menghapus aturan inline CSS yang sudah dipindahkan */
+@import '@/styles/minimal-product.css';
 </style>

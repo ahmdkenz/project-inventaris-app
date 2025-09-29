@@ -1,8 +1,10 @@
 <template>
   <AppLayout>
     <template #header>
+      <h1 class="page-title">Tambah Produk Baru</h1>
     </template>
     <FormWrapper
+      title="Form Tambah Produk"
       backLink="/products"
       backText="Kembali ke Daftar Produk"
       :error="error"
@@ -183,4 +185,5 @@ export default {
 
 <style>
 @import '@/styles/product-form.css';
+@import '@/styles/minimal-product.css';
 </style>

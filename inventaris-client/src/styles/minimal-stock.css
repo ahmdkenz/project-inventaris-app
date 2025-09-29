@@ -1,0 +1,173 @@
+/* Minimal Stock UI Style - Compact & Space-saving design */
+
+/* General Font Size Reduction */
+.stock-list-container label,
+.stock-table th,
+.stock-table td,
+.table th, 
+.table td,
+.filters-section input,
+.filters-section select,
+.pagination,
+.info-item span,
+.info-item p,
+.adjustments-table th,
+.adjustments-table td,
+.adjustment-form label,
+.adjustment-form input,
+.adjustment-form select,
+.adjustment-form textarea,
+.action-buttons .btn {
+  font-size: 0.9rem !important; /* Reduce font size across all stock views */
+}
+
+/* Heading Size Reduction */
+.card-title,
+.page-header h1,
+.adjustment-form h2,
+.recent-adjustments h2 {
+  font-size: 1.4rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Button Size Reduction */
+.btn {
+  padding: 0.35rem 0.7rem !important;
+  font-size: 0.85rem !important;
+}
+
+.btn-lg {
+  padding: 0.5rem 1rem !important;
+  font-size: 0.9rem !important;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.8rem !important;
+}
+
+/* Form Elements Size Reduction */
+.form-control, 
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  padding: 0.4rem 0.6rem !important;
+  font-size: 0.9rem !important;
+  height: auto !important;
+  line-height: 1.4 !important;
+}
+
+textarea {
+  min-height: 80px !important; /* Reduced from 120px */
+}
+
+.form-group {
+  margin-bottom: 0.75rem !important;
+}
+
+/* Card & Container Padding Reduction */
+.card,
+.card-body,
+.adjustment-form,
+.recent-adjustments {
+  padding: 1rem !important;
+}
+
+.card-header {
+  padding: 0.75rem 1rem !important;
+}
+
+/* Table Compact Design */
+.stock-table th,
+.stock-table td,
+.table th,
+.table td,
+.adjustments-table th,
+.adjustments-table td {
+  padding: 0.5rem !important;
+}
+
+.stock-table th,
+.table th,
+.adjustments-table th {
+  font-weight: 500 !important;
+}
+
+/* Grid Gaps Reduction */
+.form-row {
+  gap: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Action Buttons Compact Design */
+.action-buttons {
+  gap: 0.3rem !important;
+  display: flex;
+}
+
+/* Filter Section Compact Design */
+.filters-section {
+  padding: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Pagination Compact Design */
+.pagination-wrapper {
+  padding: 0.75rem !important;
+}
+
+/* Status Tags More Compact */
+.status {
+  padding: 0.15rem 0.35rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Adjust Spacing for Stock Adjustment Form */
+.adjustment-form .form-group > label {
+  margin-bottom: 0.25rem !important;
+  display: block;
+}
+
+/* Reduce margin for action buttons at the end of forms */
+.form-group:last-child {
+  margin-bottom: 0.5rem !important;
+}
+
+/* More compact table-container */
+.table-responsive,
+.table-container {
+  margin-bottom: 1rem !important;
+}
+
+/* Adjust Recent Adjustment Section */
+.recent-adjustments {
+  margin-top: 1rem !important;
+}
+
+.recent-adjustments h2 {
+  margin-top: 0 !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .card,
+  .card-body,
+  .adjustment-form,
+  .recent-adjustments {
+    padding: 0.75rem !important;
+  }
+  
+  .form-control, 
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    padding: 0.35rem 0.5rem !important;
+  }
+  
+  .form-row {
+    gap: 0.5rem !important;
+  }
+}

@@ -3,17 +3,17 @@
     <div class="stock-list-container">
       <div class="card">
         <div class="card-header">
-          <h1 class="card-title">Stock Management</h1>
+          <h1 class="card-title">Manajemen Stok</h1>
           <div class="flex-center">
             <router-link 
               v-if="user.role === 'admin'" 
               to="/stocks/adjustment" 
               class="btn btn-primary"
             >
-              Stock Adjustment
+              Penyesuaian Stok
             </router-link>
             <button @click="refreshStocks" class="btn btn-secondary">
-              Refresh
+              Segarkan
             </button>
           </div>
         </div>
@@ -26,16 +26,16 @@
                 v-model="searchQuery" 
                 type="text" 
                 class="form-control"
-                placeholder="Search products..." 
+                placeholder="Cari produk..." 
                 @input="handleSearch"
               >
             </div>
             <div class="filter-group">
               <select v-model="statusFilter" @change="handleFilter" class="form-control">
-                <option value="">All Status</option>
-                <option value="in_stock">In Stock</option>
-                <option value="low_stock">Low Stock</option>
-                <option value="out_of_stock">Out of Stock</option>
+                <option value="">Semua Status</option>
+                <option value="in_stock">Tersedia</option>
+                <option value="low_stock">Stok Rendah</option>
+                <option value="out_of_stock">Habis</option>
               </select>
             </div>
           </div>
@@ -43,7 +43,7 @@
 
         <!-- Loading State -->
         <div v-if="loading" class="loading">
-          Loading stocks...
+          Memuat data stok...
         </div>
 
         <!-- Stock Table -->
@@ -51,14 +51,14 @@
           <table class="table">
             <thead>
               <tr>
-                <th>Product ID</th>
-                <th>Product Name</th>
-                <th>Category</th>
-                <th>Current Stock</th>
-                <th>Min Stock</th>
+                <th>ID Produk</th>
+                <th>Nama Produk</th>
+                <th>Kategori</th>
+                <th>Stok Saat Ini</th>
+                <th>Min. Stok</th>
                 <th>Status</th>
-                <th>Last Updated</th>
-                <th v-if="user.role === 'admin'">Actions</th>
+                <th>Terakhir Diperbarui</th>
+                <th v-if="user.role === 'admin'">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -80,13 +80,13 @@
                       :to="`/stocks/adjustment?product=${stock.product_id}`" 
                       class="btn btn-sm btn-warning"
                     >
-                      Adjust
+                      Sesuaikan
                     </router-link>
                     <button 
                       @click="viewHistory(stock.product_id)"
                       class="btn btn-sm btn-info"
                     >
-                      History
+                      Riwayat
                     </button>
                   </div>
                 </td>
@@ -97,7 +97,7 @@
 
         <!-- Empty State -->
         <div v-if="!loading && filteredStocks.length === 0" class="text-center py-4">
-          <p class="text-muted">No stocks found.</p>
+          <p class="text-muted">Tidak ada stok ditemukan.</p>
         </div>
 
         <!-- Pagination -->
@@ -108,17 +108,17 @@
               :disabled="currentPage <= 1"
               class="btn btn-secondary"
             >
-              Previous
+              Sebelumnya
             </button>
             <span class="page-info">
-              Page {{ currentPage }} of {{ totalPages }}
+              Halaman {{ currentPage }} dari {{ totalPages }}
             </span>
             <button 
               @click="nextPage" 
               :disabled="currentPage >= totalPages"
               class="btn btn-secondary"
             >
-              Next
+              Selanjutnya
             </button>
           </div>
         </div>
@@ -253,10 +253,10 @@ export default {
     getStockStatusText(stock) {
       const status = this.getStockStatus(stock);
       switch (status) {
-        case 'out_of_stock': return 'Out of Stock';
-        case 'low_stock': return 'Low Stock';
-        case 'in_stock': return 'In Stock';
-        default: return 'Unknown';
+        case 'out_of_stock': return 'Habis';
+        case 'low_stock': return 'Stok Rendah';
+        case 'in_stock': return 'Tersedia';
+        default: return 'Tidak Diketahui';
       }
     },
     getStockClass(stock) {
@@ -292,4 +292,5 @@ export default {
 
 <style scoped>
 @import "../../styles/stock-adjustment.css";
+@import "../../styles/minimal-stock.css";
 </style>

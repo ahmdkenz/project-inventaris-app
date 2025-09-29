@@ -1,0 +1,179 @@
+/* Minimal Product UI Style - Compact & Space-saving design */
+
+/* General Font Size Reduction */
+.product-form label,
+.product-table th,
+.product-table td,
+.filters label,
+.filters input,
+.filters select,
+.pagination,
+.product-info-container,
+.info-item span,
+.info-item p {
+  font-size: 0.9rem !important; /* Reduce font size across all product views */
+}
+
+/* Heading Size Reduction */
+.card-title,
+.page-header h1,
+.product-info-card h2 {
+  font-size: 1.4rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Button Size Reduction */
+.btn {
+  padding: 0.35rem 0.7rem !important;
+  font-size: 0.85rem !important;
+}
+
+.btn-lg {
+  padding: 0.5rem 1rem !important;
+  font-size: 0.9rem !important;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.8rem !important;
+}
+
+/* Form Elements Size Reduction */
+.form-control, 
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  padding: 0.4rem 0.6rem !important;
+  font-size: 0.9rem !important;
+  height: auto !important;
+  line-height: 1.4 !important;
+}
+
+textarea {
+  min-height: 80px !important; /* Reduced from 120px */
+}
+
+.form-group {
+  margin-bottom: 0.75rem !important;
+}
+
+/* Card & Container Padding Reduction */
+.card,
+.card-body,
+.product-info-card {
+  padding: 1rem !important;
+}
+
+.card-header {
+  padding: 0.75rem 1rem !important;
+}
+
+/* Table Compact Design */
+.product-table th,
+.product-table td {
+  padding: 0.5rem !important;
+}
+
+.product-table th {
+  font-weight: 500 !important;
+}
+
+/* Grid Gaps Reduction */
+.grid {
+  gap: 0.75rem !important;
+}
+
+/* Action Buttons Compact Design */
+.action-buttons, .btn-group {
+  gap: 0.3rem !important;
+  display: flex;
+}
+
+/* Memberi space untuk multi-button */
+.ml-2 {
+  margin-left: 0.5rem !important;
+}
+
+/* Filter Section Compact Design */
+.filters {
+  padding: 1rem !important;
+  margin-bottom: 1rem !important;
+  gap: 0.75rem !important;
+}
+
+/* Pagination Compact Design */
+.pagination {
+  padding: 0.75rem !important;
+  gap: 0.75rem !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .card,
+  .card-body,
+  .product-info-card {
+    padding: 0.75rem !important;
+  }
+  
+  .form-control, 
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    padding: 0.35rem 0.5rem !important;
+  }
+}
+
+/* Detail View Compact Info Items */
+.info-item {
+  margin-bottom: 0.5rem !important;
+}
+
+.info-item label {
+  margin-bottom: 0.2rem !important;
+  font-size: 0.8rem !important;
+  color: #6c757d !important;
+}
+
+/* Quick Action Cards More Compact */
+.action-card {
+  padding: 0.75rem !important;
+}
+
+.action-card h3 {
+  font-size: 1rem !important;
+  margin: 0.5rem 0 0.25rem !important;
+}
+
+.action-card p {
+  font-size: 0.8rem !important;
+  margin: 0 !important;
+}
+
+/* Transaction Table More Compact */
+.transactions-table {
+  font-size: 0.8rem !important;
+}
+
+.transactions-table th,
+.transactions-table td {
+  padding: 0.4rem 0.5rem !important;
+}
+
+/* Status Tags More Compact */
+.status {
+  padding: 0.15rem 0.35rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Adjust Grid Layout */
+.detail-sections-grid {
+  gap: 1rem !important;
+}
+
+/* Form Layout Adjustments */
+.form-group > label {
+  margin-bottom: 0.25rem !important;
+  display: block;
+}

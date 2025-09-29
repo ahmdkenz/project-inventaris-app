@@ -1,6 +1,7 @@
 <template>
   <AppLayout>
     <template #header>
+      <h1 class="page-title">Daftar Produk</h1>
      </template>
     
     <div class="card">
@@ -11,14 +12,14 @@
             to="/products/create" 
             class="btn btn-primary"
           >
-            Add New Product
+            Tambah Produk Baru
           </router-link>
           <button 
             @click="refreshProducts" 
             class="btn btn-secondary" 
             :disabled="isRefreshing"
           >
-            <span v-if="isRefreshing">Refreshing...</span>
+            <span v-if="isRefreshing">Memperbarui...</span>
             <span v-else>Refresh</span>
           </button>
         </div>
@@ -26,8 +27,8 @@
     
     <!-- Refresh Notification -->
     <div v-if="showRefreshMessage" class="refresh-message">
-      <span>✅ Product list has been updated</span>
-      <span v-if="lastUpdate" class="update-time">Last updated: {{ formatUpdateTime() }}</span>
+      <span>✅ Daftar produk telah diperbarui</span>
+      <span v-if="lastUpdate" class="update-time">Pembaruan terakhir: {{ formatUpdateTime() }}</span>
     </div>
 
     <!-- Search and Filter -->
@@ -36,21 +37,21 @@
         <input 
           v-model="searchQuery" 
           type="text" 
-          placeholder="Search products..." 
+          placeholder="Cari produk..." 
           @input="handleSearch"
         >
       </div>
       <div class="filter-group">
         <select v-model="categoryFilter" @change="handleFilter">
-          <option value="">All Categories</option>
+          <option value="">Semua Kategori</option>
           <option v-for="category in categories" :key="category" :value="category">
             {{ category }}
           </option>
         </select>
         <select v-model="statusFilter" @change="handleFilter">
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="">Semua Status</option>
+          <option value="active">Aktif</option>
+          <option value="inactive">Tidak Aktif</option>
         </select>
       </div>
     </div>
@@ -61,15 +62,15 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Name</th>
-            <th>Description</th>
+            <th>Nama</th>
+            <th>Deskripsi</th>
             <th>SKU</th>
-            <th>Category</th>
-            <th>Purchase Price</th>
-            <th>Selling Price</th>
-            <th>Stock</th>
+            <th>Kategori</th>
+            <th>Harga Beli</th>
+            <th>Harga Jual</th>
+            <th>Stok</th>
             <th>Status</th>
-            <th>Actions</th>
+            <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -91,7 +92,7 @@
                   :to="`/products/${product.id}`" 
                   class="btn btn-sm btn-info"
                 >
-                  View
+                  Lihat
                 </router-link>
                 <router-link 
                   v-if="user.role === 'admin'"
@@ -106,7 +107,7 @@
                   @click="deleteProduct(product.id)"
                   class="btn btn-sm btn-danger"
                 >
-                  Delete
+                  Hapus
                 </button>
               </div>
             </td>
@@ -122,17 +123,17 @@
         :disabled="currentPage <= 1"
         class="btn btn-secondary"
       >
-        Previous
+        Sebelumnya
       </button>
       <span class="page-info">
-        Page {{ currentPage }} of {{ totalPages }}
+        Halaman {{ currentPage }} dari {{ totalPages }}
       </span>
       <button 
         @click="nextPage" 
         :disabled="currentPage >= totalPages"
         class="btn btn-secondary"
       >
-        Next
+        Selanjutnya
       </button>
     </div>
     </div>
@@ -155,7 +156,7 @@ export default {
       searchQuery: '',
       categoryFilter: '',
       statusFilter: '',
-      categories: ['Electronics', 'Clothing', 'Books', 'Home & Garden'],
+      categories: ['Elektronik', 'Pakaian', 'Buku', 'Rumah & Taman'],
       currentPage: 1,
       itemsPerPage: 10,
       user: {},
@@ -313,4 +314,5 @@ export default {
 
 <style>
 @import "@/styles/products.css";
+@import '@/styles/minimal-product.css';
 </style>

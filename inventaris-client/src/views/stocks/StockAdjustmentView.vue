@@ -373,4 +373,5 @@ export default {
 <style scoped>
 @import "../../styles/stock-adjustment.css";
 @import "../../styles/stocks.css";
+@import "../../styles/minimal-stock.css";
 </style>
