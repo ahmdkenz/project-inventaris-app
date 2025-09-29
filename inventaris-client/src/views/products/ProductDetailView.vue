@@ -1,170 +1,156 @@
 <template>
   <AppLayout>
-    <template #header>
-      <h1 class="page-title">Detail Produk</h1>
-    </template>
     <div class="product-detail">
-      <!-- Header -->
-      <div class="page-header">
-        <div class="actions">
-          <router-link to="/products" class="btn btn-secondary">
-            ← Kembali ke Daftar Produk
-          </router-link>
-          <router-link 
-            v-if="user.role === 'admin'" 
-            :to="`/products/${productId}/edit`" 
-            class="btn btn-primary"
-          >
-            Edit Produk
-          </router-link>
-        </div>
-      </div>
-
-    <!-- Loading State -->
-    <div v-if="loading" class="loading-container">
-      <div class="loader"></div>
-      <p>Memuat data produk...</p>
-    </div>
-
-    <!-- Error State -->
-    <div v-else-if="error" class="error-container">
-      <p>{{ error }}</p>
-      <button @click="loadProductData" class="btn btn-primary">Coba Lagi</button>
-    </div>
-
-    <!-- Product Details -->
-    <div v-else class="product-info-container">
-      <!-- Status Banner untuk produk tidak aktif -->
-      <div v-if="product.status === 'inactive'" class="status-banner inactive-banner">
-        <span class="icon">⚠️</span>
-        <span class="message">Produk ini sudah dinonaktifkan dan tidak akan muncul dalam transaksi baru.</span>
-      </div>
-      
-      <div class="detail-sections-grid">
-        <div class="product-info-card">
-          <h2>Informasi Umum</h2>
-          <div class="info-grid two-column-fields">
-            <div class="info-item">
-              <label>Nama:</label>
-              <span>{{ product.name }}</span>
-            </div>
-            <div class="info-item">
-              <label>SKU:</label>
-              <span>{{ product.sku }}</span>
-            </div>
-            <div class="info-item">
-              <label>Kategori:</label>
-              <span>{{ product.category }}</span>
-            </div>
-            <div class="info-item">
-              <label>Status:</label>
-              <span :class="`status ${product.status}`">{{ product.status === 'active' ? 'Aktif' : 'Tidak Aktif' }}</span>
-            </div>
-            <div class="info-item full-width">
-              <label>Deskripsi:</label>
-              <p>{{ product.description || 'Tidak ada deskripsi tersedia' }}</p>
-            </div>
+      <div class="card">
+        <div class="card-header">
+          <h1 class="card-title">Detail Produk</h1>
+          <div class="flex-center">
+            <router-link to="/products" class="btn btn-secondary">
+              ← Kembali
+            </router-link>
           </div>
         </div>
 
-        <div class="product-info-card">
-          <h2>Informasi Stok & Harga</h2>
-          <div class="info-grid two-column-fields">
-            <div class="info-item">
-              <label>Stok Saat Ini:</label>
-              <span :class="{ 'low-stock': product.stock <= product.min_stock }">
-                {{ product.stock }} unit
-              </span>
-            </div>
-            <div class="info-item">
-              <label>Stok Minimum:</label>
-              <span>{{ product.min_stock }} unit</span>
-            </div>
-            <div class="info-item">
-              <label>Harga Beli:</label>
-              <span>Rp {{ formatPrice(product.purchase_price) }}</span>
-            </div>
-            <div class="info-item">
-              <label>Harga Jual:</label>
-              <span>Rp {{ formatPrice(product.selling_price) }}</span>
-            </div>
-            <div class="info-item">
-              <label>Margin Keuntungan:</label>
-              <span>{{ calculateMargin() }}%</span>
-            </div>
-          </div>
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-container">
+          <div class="loader"></div>
+          <p>Memuat data produk...</p>
         </div>
 
-        <div class="product-info-card">
-          <h2>Transaksi Terbaru</h2>
-          <div v-if="transactions.length === 0" class="no-data">
-            Tidak ada transaksi terbaru untuk produk ini.
+        <!-- Error State -->
+        <div v-else-if="error" class="error-container">
+          <p>{{ error }}</p>
+          <button @click="loadProductData" class="btn btn-primary">Coba Lagi</button>
+        </div>
+
+        <!-- Product Details -->
+        <div v-else>
+          <!-- Status Banner untuk produk tidak aktif -->
+          <div v-if="product.status === 'inactive'" class="status-banner inactive-banner">
+            <span class="icon">⚠️</span>
+            <span class="message">Produk ini sudah dinonaktifkan dan tidak akan muncul dalam transaksi baru.</span>
           </div>
-          <table v-else class="transactions-table">
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th>Tipe</th>
-                <th>Jumlah</th>
-                <th>Stok Lama</th>
-                <th>Stok Baru</th>
-                <th>Alasan</th>
-                <th>Pengguna</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="transaction in transactions" :key="transaction.id">
-                <td>{{ formatDate(transaction.created_at) }}</td>
-                <td>
-                  <span :class="{'in': transaction.type === 'in', 'out': transaction.type === 'out'}">
-                    {{ transaction.type === 'in' ? 'Stok Masuk' : 'Stok Keluar' }}
+          
+          <div class="detail-sections-grid">
+            <div class="product-info-card">
+              <h2>Informasi Umum</h2>
+              <div class="info-grid two-column-fields">
+                <div class="info-item">
+                  <label>Nama:</label>
+                  <span>{{ product.name }}</span>
+                </div>
+                <div class="info-item">
+                  <label>SKU:</label>
+                  <span>{{ product.sku }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Kategori:</label>
+                  <span>{{ product.category }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Status:</label>
+                  <span :class="`status ${product.status}`">{{ product.status === 'active' ? 'Aktif' : 'Tidak Aktif' }}</span>
+                </div>
+                <div class="info-item full-width">
+                  <label>Deskripsi:</label>
+                  <p>{{ product.description || 'Tidak ada deskripsi tersedia' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="product-info-card">
+              <h2>Informasi Stok & Harga</h2>
+              <div class="info-grid two-column-fields">
+                <div class="info-item">
+                  <label>Stok Saat Ini:</label>
+                  <span :class="{ 'low-stock': product.stock <= product.min_stock }">
+                    {{ product.stock }} unit
                   </span>
-                </td>
-                <td>{{ transaction.quantity }}</td>
-                <td>{{ transaction.old_stock }}</td>
-                <td>{{ transaction.new_stock }}</td>
-                <td>{{ transaction.reason || 'N/A' }}</td>
-                <td>{{ transaction.user ? transaction.user.name : 'Sistem' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+                <div class="info-item">
+                  <label>Stok Minimum:</label>
+                  <span>{{ product.min_stock }} unit</span>
+                </div>
+                <div class="info-item">
+                  <label>Harga Beli:</label>
+                  <span>Rp {{ formatPrice(product.purchase_price) }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Harga Jual:</label>
+                  <span>Rp {{ formatPrice(product.selling_price) }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Margin Keuntungan:</label>
+                  <span>{{ calculateMargin() }}%</span>
+                </div>
+              </div>
+            </div>
 
-        <div class="product-info-card quick-actions">
-          <h2>Aksi Cepat</h2>
-          <div class="actions-grid">
-            <router-link to="/stocks/adjustment" class="action-card">
-              <span class="icon">📦</span>
-              <h3>Atur Stok</h3>
-              <p>Tambah atau kurangi stok</p>
-            </router-link>
-            <router-link 
-              v-if="user.role === 'admin'" 
-              :to="`/products/${productId}/edit`" 
-              class="action-card"
-            >
-              <span class="icon">✏️</span>
-              <h3>Edit Produk</h3>
-              <p>Perbarui informasi produk</p>
-            </router-link>
-            <button 
-              v-if="user.role === 'admin'"
-              @click="deleteProduct"
-              class="action-card delete"
-            >
-              <span class="icon">🗑️</span>
-              <h3>Hapus Produk</h3>
-              <p>Hapus produk ini</p>
-            </button>
-            <router-link to="/reports" class="action-card">
-              <span class="icon">📊</span>
-              <h3>Lihat Laporan</h3>
-              <p>Lihat kinerja produk</p>
-            </router-link>
+            <div class="product-info-card">
+              <h2>Aksi Cepat</h2>
+              <div class="action-buttons">
+                <router-link to="/stocks/adjustment" class="btn btn-sm btn-info">
+                  📦 Atur Stok
+                </router-link>
+                <router-link 
+                  v-if="user.role === 'admin'" 
+                  :to="`/products/${productId}/edit`" 
+                  class="btn btn-sm btn-primary"
+                >
+                  ✏️ Edit
+                </router-link>
+                <button 
+                  v-if="user.role === 'admin'"
+                  @click="deleteProduct"
+                  class="btn btn-sm btn-danger"
+                >
+                  🗑️ Hapus
+                </button>
+                <router-link to="/reports" class="btn btn-sm btn-secondary">
+                  📊 Laporan
+                </router-link>
+              </div>
+            </div>
+
+            <div class="product-info-card">
+              <h2>Transaksi Terbaru</h2>
+              <div v-if="transactions.length === 0" class="no-data">
+                Tidak ada transaksi terbaru untuk produk ini.
+              </div>
+              <div v-else class="table-responsive">
+                <table class="transactions-table">
+                  <thead>
+                    <tr>
+                      <th>Tanggal</th>
+                      <th>Tipe</th>
+                      <th>Jumlah</th>
+                      <th>Stok Lama</th>
+                      <th>Stok Baru</th>
+                      <th>Alasan</th>
+                      <th>Pengguna</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="transaction in transactions" :key="transaction.id">
+                      <td>{{ formatDate(transaction.created_at) }}</td>
+                      <td>
+                        <span :class="{'in': transaction.type === 'in', 'out': transaction.type === 'out'}">
+                          {{ transaction.type === 'in' ? 'Stok Masuk' : 'Stok Keluar' }}
+                        </span>
+                      </td>
+                      <td>{{ transaction.quantity }}</td>
+                      <td>{{ transaction.old_stock }}</td>
+                      <td>{{ transaction.new_stock }}</td>
+                      <td>{{ transaction.reason || 'N/A' }}</td>
+                      <td>{{ transaction.user ? transaction.user.name : 'Sistem' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
   </AppLayout>
 </template>
@@ -172,7 +158,6 @@
 <script>
 import axios from '@/services/axios';
 import AppLayout from '@/components/layout/AppLayout.vue';
-import '@/styles/product-detail.css';
 
 export default {
   components: {
@@ -310,52 +295,48 @@ export default {
 </script>
 
 <style scoped>
-/* Menghapus inline CSS yang sudah dipindahkan */
-@import "@/styles/layout-enhancements.css";
-@import "@/styles/responsive-fixes.css";
-@import "@/styles/minimal-product.css";
+@import "@/styles/minimal-product-detail.css";
 
-/* Fix for transaction table */
-.transactions-table {
-  width: 100%;
-  overflow-x: auto;
-  font-size: 0.9rem;
+/* Additional styles */
+.card {
+  margin: 0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
 
-.transactions-table th, .transactions-table td {
-  padding: 0.5rem 0.75rem;
-  text-align: left;
-  white-space: nowrap;
-}
-
-/* Status Banner for inactive products */
-.status-banner {
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-  border-radius: 4px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.flex-center {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.inactive-banner {
-  background-color: #fff3cd;
-  border-left: 4px solid #ffc107;
-  color: #856404;
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.status-banner .icon {
-  font-size: 1.2rem;
+.table-responsive {
+  overflow-x: auto;
+  margin-bottom: 1rem;
 }
 
-.status-banner .message {
+.in {
+  color: #28a745;
   font-weight: 500;
 }
 
-@media (max-width: 992px) {
-  .product-info-card:has(.transactions-table) {
-    padding: 0.5rem;
-    overflow-x: auto;
-  }
+.out {
+  color: #dc3545;
+  font-weight: 500;
 }
 </style>
