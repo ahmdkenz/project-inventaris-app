@@ -1,29 +1,29 @@
 /* App Layout Styles */
 .app-layout {
   display: flex;
-  min-height: 100vh;
-  background-color: #f0f2f5; /* Latar belakang abu-abu untuk seluruh halaman */
+  height: 100vh;
+  background-color: #f0f2f5;
+  overflow: hidden;
 }
 
 .main-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Membuat kontainer ini mengisi sisa ruang */
-  margin-left: 250px; /* Sesuaikan dengan lebar sidebar */
+  flex-grow: 1;
+  margin-left: 250px; /* Default sidebar width */
   width: calc(100% - 250px);
-  transition: all 0.3s ease;
+  transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
 .main-content {
   flex-grow: 1;
+  overflow-y: auto; /* Allows content to scroll */
   padding: 24px;
-  min-height: calc(100vh - 124px); /* Adjusted to account for header and footer */
-  padding-bottom: 20px; /* Add padding at the bottom for footer separation */
 }
 
-.content-container {
+.content-wrapper {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -47,7 +47,7 @@
 }
 
 @media (max-width: 576px) {
-  .content-container {
+  .content-wrapper {
     padding: 0 8px;
   }
 }

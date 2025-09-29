@@ -4,9 +4,18 @@
   padding: 16px 24px;
   border-bottom: 1px solid #e8e8e8;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+.header-content {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .header-left, .header-right {

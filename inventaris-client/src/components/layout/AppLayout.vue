@@ -4,7 +4,7 @@
     <div class="main-container">
       <Header />
       <main class="main-content">
-        <div class="content-container">
+        <div class="content-wrapper">
           <slot name="header"></slot>
           <slot></slot>
         </div>

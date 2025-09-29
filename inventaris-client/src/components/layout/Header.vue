@@ -1,18 +1,20 @@
 <template>
   <header class="header">
-    <div class="header-left">
-      <h1 class="page-title">{{ pageTitle || 'Inventaris App' }}</h1>
-    </div>
-    <div class="header-right">
-      <div v-if="user" class="user-info">
-        <span>{{ user.name }}</span>
-        <div class="user-dropdown">
-          <button @click="toggleDropdown" class="dropdown-toggle">
-            <i class="fas fa-user-circle"></i>
-          </button>
-          <div v-if="showDropdown" class="dropdown-menu">
-            <router-link to="/profile" class="dropdown-item">Profile</router-link>
-            <button @click="logout" class="dropdown-item">Logout</button>
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">{{ pageTitle || 'Inventaris App' }}</h1>
+      </div>
+      <div class="header-right">
+        <div v-if="user" class="user-info">
+          <span>{{ user.name }}</span>
+          <div class="user-dropdown">
+            <button @click="toggleDropdown" class="dropdown-toggle">
+              <i class="fas fa-user-circle"></i>
+            </button>
+            <div v-if="showDropdown" class="dropdown-menu">
+              <router-link to="/profile" class="dropdown-item">Profile</router-link>
+              <button @click="logout" class="dropdown-item">Logout</button>
+            </div>
           </div>
         </div>
       </div>

@@ -1,6 +1,8 @@
 <template>
   <aside class="sidebar">
-    <div class="logo">Inventaris App</div>
+    <div class="logo">
+      <span>Inventaris App</span>
+    </div>
     <nav class="nav-menu">
       <!-- Dashboard link berbeda untuk admin dan staff -->
       <router-link 
@@ -8,55 +10,76 @@
         class="nav-item" 
         exact
       >
-        <i class="fas fa-home"></i>
+        <Home :size="20" />
         <span>Dashboard</span>
       </router-link>
       
       <router-link to="/products" class="nav-item">
-        <i class="fas fa-box"></i>
+        <Box :size="20" />
         <span>Products</span>
       </router-link>
       
       <router-link to="/stocks/adjustment" class="nav-item">
-        <i class="fas fa-warehouse"></i>
+        <Warehouse :size="20" />
         <span>Stock Management</span>
       </router-link>
       
       <!-- Menu Orders hanya tampil untuk staff, tidak untuk admin -->
       <router-link to="/orders" class="nav-item" v-if="!isAdmin">
-        <i class="fas fa-shopping-cart"></i>
+        <ShoppingCart :size="20" />
         <span>Orders</span>
       </router-link>
       
       <router-link to="/reports" class="nav-item">
-        <i class="fas fa-chart-bar"></i>
+        <BarChart :size="20" />
         <span>Reports</span>
       </router-link>
       
       <!-- Menu khusus admin -->
       <template v-if="isAdmin">
         <router-link to="/products/create" class="nav-item admin-menu">
-          <i class="fas fa-plus"></i>
+          <Plus :size="20" />
           <span>Add Product</span>
         </router-link>
         
         <router-link to="/settings/users" class="nav-item admin-menu">
-          <i class="fas fa-users-cog"></i>
+          <Users :size="20" />
           <span>User Management</span>
         </router-link>
         
         <router-link to="/settings/system" class="nav-item admin-menu">
-          <i class="fas fa-cog"></i>
+          <Cog :size="20" />
           <span>System Settings</span>
         </router-link>
       </template>
     </nav>
   </aside>
-</template>
+</template><script>
+import {
+  Home,
+  Box,
+  Warehouse,
+  ShoppingCart,
+  BarChart,
+  Plus,
+  Users,
+  Cog
+} from 'lucide-vue-next';
+import { RouterLink } from 'vue-router';
 
-<script>
 export default {
   name: 'Sidebar',
+  components: {
+    Home,
+    Box,
+    Warehouse,
+    ShoppingCart,
+    BarChart,
+    Plus,
+    Users,
+    Cog,
+    RouterLink
+  },
   data() {
     return {
       user: null
