@@ -1,7 +1,13 @@
 <template>
   <div class="app-layout app-main-layout">
-    <Sidebar ref="sidebar" />
-    <div class="main-container" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
+    <Sidebar 
+      ref="sidebar" 
+      @sidebar-hover="handleSidebarHover" 
+    />
+    <div class="main-container" :class="{ 
+      'sidebar-collapsed': sidebarCollapsed, 
+      'sidebar-hovered': sidebarHovered && sidebarCollapsed 
+    }">
       <Header />
       <main class="main-content">
         <slot name="header"></slot>
@@ -26,13 +32,14 @@ export default {
   },
   data() {
     return {
-      sidebarCollapsed: false
+      sidebarCollapsed: false,
+      sidebarHovered: false
     };
   },
   mounted() {
-    // Check if sidebar is collapsed from localStorage
-    const savedState = localStorage.getItem('sidebarCollapsed');
-    this.sidebarCollapsed = savedState === 'true';
+    // Always start with collapsed sidebar
+    this.sidebarCollapsed = true;
+    localStorage.setItem('sidebarCollapsed', 'true');
     
     // Watch for changes in the sidebar component
     if (this.$refs.sidebar) {
@@ -57,6 +64,9 @@ export default {
           this.$refs.sidebar.isCollapsed = true;
         }
       }
+    },
+    handleSidebarHover(isHovered) {
+      this.sidebarHovered = isHovered;
     }
   }
 };

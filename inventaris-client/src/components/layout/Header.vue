@@ -1,12 +1,7 @@
 <template>
   <header class="header">
     <div class="header-content">
-      <div class="header-left">
-        <button @click="toggleSidebar" class="menu-toggle">
-          <Menu :size="20" />
-        </button>
-        <h1 class="page-title">{{ pageTitle || 'Inventaris App' }}</h1>
-      </div>
+      <h1 class="page-title">{{ pageTitle || 'Inventaris App' }}</h1>
       <div class="header-right">
         <div v-if="user" class="user-info">
           <span class="user-name">{{ user.name }}</span>
@@ -32,12 +27,11 @@
 </template>
 
 <script>
-import { Menu, UserCircle, User, LogOut } from 'lucide-vue-next';
+import { UserCircle, User, LogOut } from 'lucide-vue-next';
 
 export default {
   name: 'Header',
   components: {
-    Menu,
     UserCircle,
     User,
     LogOut
@@ -77,17 +71,6 @@ export default {
       const dropdown = this.$el.querySelector('.user-dropdown');
       if (dropdown && !dropdown.contains(event.target)) {
         this.showDropdown = false;
-      }
-    },
-    toggleSidebar() {
-      // Find the parent AppLayout component
-      let parent = this.$parent;
-      while (parent && parent.$options.name !== 'AppLayout') {
-        parent = parent.$parent;
-      }
-      
-      if (parent && parent.$refs.sidebar) {
-        parent.$refs.sidebar.toggleCollapse();
       }
     },
     updateTitle() {

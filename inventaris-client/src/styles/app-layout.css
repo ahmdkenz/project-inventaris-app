@@ -6,6 +6,7 @@
   overflow: hidden;
   flex-direction: row;
   width: 100%;
+  position: relative; /* Ensure position context for absolute elements */
 }
 
 .main-container {
@@ -14,13 +15,27 @@
   flex-grow: 1;
   margin-left: 250px; /* Default sidebar width */
   width: calc(100% - 250px);
-  transition: margin-left 0.3s ease, width 0.3s ease;
+  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  will-change: margin-left, width; /* Optimize for animation */
 }
 
+/* Collapsed sidebar - main content adjustment */
 .main-container.sidebar-collapsed {
   margin-left: 64px; /* Width of collapsed sidebar */
   width: calc(100% - 64px);
+}
+
+/* When sidebar is collapsed but hovered */
+.main-container.sidebar-collapsed.sidebar-hovered {
+  margin-left: 250px; /* Width of expanded sidebar */
+  width: calc(100% - 250px);
+}
+
+/* Hover state - adjust main content when sidebar is hovered */
+.app-layout:has(.sidebar.collapsed:hover) .main-container {
+  margin-left: 250px;
+  width: calc(100% - 250px);
 }
 
 .main-content {
@@ -47,6 +62,11 @@
     width: calc(100% - 64px);
   }
   
+  .main-container.sidebar-collapsed.sidebar-hovered {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+  }
+  
   .main-content {
     padding: 1.25rem;
   }
@@ -61,6 +81,11 @@
   .main-container.sidebar-collapsed {
     margin-left: 0;
     width: 100%;
+  }
+  
+  .main-container.sidebar-collapsed.sidebar-hovered {
+    margin-left: 200px;
+    width: calc(100% - 200px);
   }
   
   .main-content {

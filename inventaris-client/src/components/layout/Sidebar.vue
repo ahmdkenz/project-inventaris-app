@@ -1,7 +1,6 @@
 <template>
   <aside class="sidebar" :class="{ 'collapsed': isCollapsed && !isHovered }">
-    <div class="logo" @click="toggleCollapse">
-      <MenuIcon :size="20" class="toggle-icon" />
+    <div class="logo">
       <span>Inventaris App</span>
     </div>
     <nav class="nav-menu">
@@ -65,8 +64,7 @@ import {
   BarChart,
   Plus,
   Users,
-  Cog,
-  Menu as MenuIcon
+  Cog
 } from 'lucide-vue-next';
 import { RouterLink } from 'vue-router';
 
@@ -81,7 +79,6 @@ export default {
     Plus,
     Users,
     Cog,
-    MenuIcon,
     RouterLink
   },
   data() {
@@ -101,12 +98,14 @@ export default {
     this.loadUserData();
     this.checkScreenSize();
     window.addEventListener('resize', this.checkScreenSize);
+    
+    // Default sidebar to collapsed state
+    this.isCollapsed = true;
+    localStorage.setItem('sidebarCollapsed', 'true');
   },
   mounted() {
-    // Auto-collapse on mobile
-    if (this.screenWidth <= 768) {
-      this.isCollapsed = true;
-    }
+    // Auto-collapse by default on all screens
+    this.isCollapsed = true;
 
     // Add hover event listeners
     const sidebar = this.$el;
@@ -132,9 +131,13 @@ export default {
     },
     handleMouseEnter() {
       this.isHovered = true;
+      // Emit event when sidebar is hovered
+      this.$emit('sidebar-hover', true);
     },
     handleMouseLeave() {
       this.isHovered = false;
+      // Emit event when sidebar hover ends
+      this.$emit('sidebar-hover', false);
     },
     checkScreenSize() {
       this.screenWidth = window.innerWidth;
