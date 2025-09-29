@@ -1,11 +1,6 @@
 <template>
   <AppLayout>
     <template #header>
-      <h1>Staff Dashboard</h1>
-      <div class="user-info">
-        <span>Welcome, {{ user.name }}</span>
-        <button @click="logout" class="logout-btn">Logout</button>
-      </div>
     </template>
 
     <main class="dashboard-content">
