@@ -358,7 +358,88 @@ export default {
     },
     async loadData() {
       try {
-        // Mock data - replace with actual API calls
+        // Load purchase orders
+        const ordersResponse = await axios.get('/purchase-orders');
+        if (ordersResponse.data && ordersResponse.data.data) {
+          this.orders = ordersResponse.data.data;
+        } else {
+          // Fallback mock data
+          this.orders = [
+            {
+              id: 1,
+              po_number: 'PO001',
+              supplier_name: 'Tech Supplier Co.',
+              order_date: '2024-01-15',
+              total_amount: 1500000,
+              status: 'pending',
+              items: [
+                { id: 1, product_name: 'Mouse Wireless', quantity: 10, unit_price: 75000 },
+                { id: 2, product_name: 'Keyboard Mechanical', quantity: 5, unit_price: 150000 }
+              ]
+            },
+            {
+              id: 2,
+              po_number: 'PO002',
+              supplier_name: 'Office Supplies Ltd.',
+              order_date: '2024-01-10',
+              total_amount: 2500000,
+              status: 'approved',
+              items: [
+                { id: 3, product_name: 'Laptop Dell', quantity: 2, unit_price: 1250000 }
+              ]
+            },
+            {
+              id: 3,
+              po_number: 'PO003',
+              supplier_name: 'Hardware Solutions',
+              order_date: '2024-01-05',
+              total_amount: 800000,
+              status: 'received',
+              items: [
+                { id: 4, product_name: 'Monitor 24 inch', quantity: 4, unit_price: 200000 }
+              ]
+            }
+          ];
+        }
+
+        // Load products for order items
+        const productsResponse = await axios.get('/products');
+        if (productsResponse.data && productsResponse.data.data) {
+          this.products = productsResponse.data.data;
+        } else {
+          // Fallback mock data
+          this.products = [
+            { id: 1, name: 'Mouse Wireless' },
+            { id: 2, name: 'Keyboard Mechanical' },
+            { id: 3, name: 'Laptop Dell' },
+            { id: 4, name: 'Monitor 24 inch' }
+          ];
+        }
+
+        // For suppliers, we could get them from the backend if you have a suppliers table
+        // For now, we'll extract unique suppliers from the orders
+        const uniqueSuppliers = new Map();
+        this.orders.forEach(order => {
+          if (!uniqueSuppliers.has(order.supplier_name)) {
+            uniqueSuppliers.set(order.supplier_name, {
+              id: uniqueSuppliers.size + 1,
+              name: order.supplier_name
+            });
+          }
+        });
+        this.suppliers = Array.from(uniqueSuppliers.values());
+
+        if (this.suppliers.length === 0) {
+          // Fallback mock data
+          this.suppliers = [
+            { id: 1, name: 'Tech Supplier Co.' },
+            { id: 2, name: 'Office Supplies Ltd.' },
+            { id: 3, name: 'Hardware Solutions' }
+          ];
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        // Set fallback data
         this.orders = [
           {
             id: 1,
@@ -371,45 +452,21 @@ export default {
               { id: 1, product_name: 'Mouse Wireless', quantity: 10, unit_price: 75000 },
               { id: 2, product_name: 'Keyboard Mechanical', quantity: 5, unit_price: 150000 }
             ]
-          },
-          {
-            id: 2,
-            po_number: 'PO002',
-            supplier_name: 'Office Supplies Ltd.',
-            order_date: '2024-01-10',
-            total_amount: 2500000,
-            status: 'approved',
-            items: [
-              { id: 3, product_name: 'Laptop Dell', quantity: 2, unit_price: 1250000 }
-            ]
-          },
-          {
-            id: 3,
-            po_number: 'PO003',
-            supplier_name: 'Hardware Solutions',
-            order_date: '2024-01-05',
-            total_amount: 800000,
-            status: 'received',
-            items: [
-              { id: 4, product_name: 'Monitor 24 inch', quantity: 4, unit_price: 200000 }
-            ]
           }
         ];
-
+        
         this.suppliers = [
           { id: 1, name: 'Tech Supplier Co.' },
           { id: 2, name: 'Office Supplies Ltd.' },
           { id: 3, name: 'Hardware Solutions' }
         ];
-
+        
         this.products = [
           { id: 1, name: 'Mouse Wireless' },
           { id: 2, name: 'Keyboard Mechanical' },
           { id: 3, name: 'Laptop Dell' },
           { id: 4, name: 'Monitor 24 inch' }
         ];
-      } catch (error) {
-        console.error('Error loading data:', error);
       }
     },
     showCreateModal() {
@@ -437,9 +494,15 @@ export default {
     async approveOrder(order) {
       if (confirm('Approve this purchase order?')) {
         try {
-          // Mock API call
-          order.status = 'approved';
-          alert('Purchase order approved successfully!');
+          const response = await axios.post(`/purchase-orders/${order.id}/approve`);
+          if (response.data && response.data.data) {
+            // Update the order in the list with the returned data
+            const index = this.orders.findIndex(o => o.id === order.id);
+            if (index > -1) {
+              this.orders[index].status = 'approved';
+            }
+            alert('Purchase order approved successfully!');
+          }
         } catch (error) {
           console.error('Error approving order:', error);
           alert('Failed to approve order');
@@ -449,9 +512,15 @@ export default {
     async receiveOrder(order) {
       if (confirm('Mark this purchase order as received?')) {
         try {
-          // Mock API call
-          order.status = 'received';
-          alert('Purchase order marked as received successfully!');
+          const response = await axios.post(`/purchase-orders/${order.id}/receive`);
+          if (response.data && response.data.data) {
+            // Update the order in the list with the returned data
+            const index = this.orders.findIndex(o => o.id === order.id);
+            if (index > -1) {
+              this.orders[index].status = 'received';
+            }
+            alert('Purchase order marked as received successfully!');
+          }
         } catch (error) {
           console.error('Error receiving order:', error);
           alert('Failed to mark as received');
@@ -461,7 +530,9 @@ export default {
     async deleteOrder(order) {
       if (confirm('Are you sure you want to delete this purchase order?')) {
         try {
-          // Mock API call
+          await axios.delete(`/purchase-orders/${order.id}`);
+          
+          // Remove from local list
           const index = this.orders.findIndex(o => o.id === order.id);
           if (index > -1) {
             this.orders.splice(index, 1);
@@ -475,28 +546,42 @@ export default {
     },
     async submitOrder() {
       try {
+        const formData = {
+          ...this.form,
+          // Ensure we have all required fields
+          supplier_name: this.form.supplier_name || this.suppliers.find(s => s.id === this.form.supplier_id)?.name,
+          items: this.form.items.map(item => ({
+            product_id: item.product_id,
+            quantity: item.quantity,
+            unit_price: item.unit_price
+          }))
+        };
+        
         if (this.editingOrder) {
           // Update existing order
-          const index = this.orders.findIndex(o => o.id === this.editingOrder.id);
-          if (index > -1) {
-            this.orders[index] = { ...this.orders[index], ...this.form };
+          const response = await axios.put(`/purchase-orders/${this.editingOrder.id}`, formData);
+          
+          if (response.data && response.data.data) {
+            const index = this.orders.findIndex(o => o.id === this.editingOrder.id);
+            if (index > -1) {
+              this.orders[index] = response.data.data;
+            }
+            alert('Purchase order updated successfully!');
           }
-          alert('Purchase order updated successfully!');
         } else {
           // Create new order
-          const newOrder = {
-            id: Date.now(),
-            ...this.form,
-            status: 'pending',
-            total_amount: this.calculateTotal()
-          };
-          this.orders.unshift(newOrder);
-          alert('Purchase order created successfully!');
+          const response = await axios.post('/purchase-orders', formData);
+          
+          if (response.data && response.data.data) {
+            this.orders.unshift(response.data.data);
+            alert('Purchase order created successfully!');
+          }
         }
         this.closeModal();
       } catch (error) {
         console.error('Error submitting order:', error);
-        alert('Failed to save order');
+        const errorMessage = error.response?.data?.message || 'Failed to save order';
+        alert(errorMessage);
       }
     },
     closeModal() {

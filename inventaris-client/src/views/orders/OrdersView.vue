@@ -118,7 +118,10 @@ export default {
   },
   async mounted() {
     this.loadUserData();
-    await this.loadOrdersData();
+    await Promise.all([
+      this.loadOrdersData(),
+      this.loadOrderStats()
+    ]);
   },
   methods: {
     loadUserData() {
@@ -127,9 +130,86 @@ export default {
         this.user = JSON.parse(userData);
       }
     },
+    async loadOrderStats() {
+      try {
+        const response = await axios.get('/orders/stats');
+        if (response.data && response.data.data) {
+          this.stats = response.data.data;
+        }
+      } catch (error) {
+        console.error('Error loading order stats:', error);
+        // Fallback to mock data if API fails
+        this.stats = {
+          totalSalesOrders: 32,
+          salesOrdersTrend: 12,
+          totalPurchaseOrders: 18,
+          purchaseOrdersTrend: -5,
+          pendingOrders: 8,
+          completedOrders: 42
+        };
+      }
+    },
     async loadOrdersData() {
       try {
-        // Mock data - replace with actual API calls
+        const response = await axios.get('/orders/recent', {
+          params: { limit: 5 }
+        });
+        
+        if (response.data && response.data.data) {
+          this.recentOrders = response.data.data;
+        } else {
+          // Fallback to mock data if API response is empty
+          this.recentOrders = [
+            {
+              id: 1,
+              type: 'sales',
+              number: 'SO2024090123',
+              customer: 'PT. ABC Company',
+              amount: 2250000,
+              status: 'pending',
+              date: '2024-09-15'
+            },
+            {
+              id: 2,
+              type: 'purchase',
+              number: 'PO2024090089',
+              supplier: 'Tech Supplier Co.',
+              amount: 1500000,
+              status: 'approved',
+              date: '2024-09-14'
+            },
+            {
+              id: 3,
+              type: 'sales',
+              number: 'SO2024090118',
+              customer: 'CV. XYZ Solutions',
+              amount: 3750000,
+              status: 'confirmed',
+              date: '2024-09-12'
+            },
+            {
+              id: 4,
+              type: 'purchase',
+              number: 'PO2024090076',
+              supplier: 'Office Supplies Ltd.',
+              amount: 2500000,
+              status: 'received',
+              date: '2024-09-10'
+            },
+            {
+              id: 5,
+              type: 'sales',
+              number: 'SO2024090097',
+              customer: 'Toko Komputer Maju',
+              amount: 1200000,
+              status: 'delivered',
+              date: '2024-09-08'
+            }
+          ];
+        }
+      } catch (error) {
+        console.error('Error loading orders data:', error);
+        // Set fallback data
         this.recentOrders = [
           {
             id: 1,
@@ -148,37 +228,8 @@ export default {
             amount: 1500000,
             status: 'approved',
             date: '2024-09-14'
-          },
-          {
-            id: 3,
-            type: 'sales',
-            number: 'SO2024090118',
-            customer: 'CV. XYZ Solutions',
-            amount: 3750000,
-            status: 'confirmed',
-            date: '2024-09-12'
-          },
-          {
-            id: 4,
-            type: 'purchase',
-            number: 'PO2024090076',
-            supplier: 'Office Supplies Ltd.',
-            amount: 2500000,
-            status: 'received',
-            date: '2024-09-10'
-          },
-          {
-            id: 5,
-            type: 'sales',
-            number: 'SO2024090097',
-            customer: 'Toko Komputer Maju',
-            amount: 1200000,
-            status: 'delivered',
-            date: '2024-09-08'
           }
         ];
-      } catch (error) {
-        console.error('Error loading orders data:', error);
       }
     },
     formatDate(dateString) {

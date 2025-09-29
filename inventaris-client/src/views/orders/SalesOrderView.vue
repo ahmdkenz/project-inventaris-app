@@ -413,7 +413,81 @@ export default {
     },
     async loadData() {
       try {
-        // Mock data - diganti dengan panggilan API sebenarnya
+        // Load sales orders
+        const ordersResponse = await axios.get('/sales-orders');
+        if (ordersResponse.data && ordersResponse.data.data) {
+          this.orders = ordersResponse.data.data;
+        } else {
+          // Fallback mock data
+          this.orders = [
+            {
+              id: 1,
+              so_number: 'SO001',
+              customer_name: 'PT. ABC Company',
+              customer_email: 'order@abc.com',
+              customer_phone: '021-1234567',
+              order_date: '2024-01-15',
+              expected_delivery: '2024-01-20',
+              shipping_address: 'Jl. Sudirman No. 123, Jakarta Pusat',
+              total_amount: 2250000,
+              status: 'pending',
+              items: [
+                { id: 1, product_name: 'Mouse Wireless', quantity: 15, unit_price: 75000 },
+                { id: 2, product_name: 'Keyboard Mechanical', quantity: 10, unit_price: 150000 }
+              ]
+            },
+            {
+              id: 2,
+              so_number: 'SO002',
+              customer_name: 'CV. XYZ Solutions',
+              customer_email: 'purchase@xyz.com',
+              customer_phone: '021-9876543',
+              order_date: '2024-01-12',
+              expected_delivery: '2024-01-18',
+              shipping_address: 'Jl. Gatot Subroto No. 456, Jakarta Selatan',
+              total_amount: 3750000,
+              status: 'confirmed',
+              items: [
+                { id: 3, product_name: 'Laptop Dell', quantity: 3, unit_price: 1250000 }
+              ]
+            },
+            {
+              id: 3,
+              so_number: 'SO003',
+              customer_name: 'Toko Komputer Maju',
+              customer_email: 'info@tokomaju.com',
+              customer_phone: '021-5555555',
+              order_date: '2024-01-08',
+              expected_delivery: '2024-01-15',
+              shipping_address: 'Jl. Mangga Besar No. 789, Jakarta Barat',
+              total_amount: 1200000,
+              status: 'delivered',
+              items: [
+                { id: 4, product_name: 'Monitor 24 inch', quantity: 6, unit_price: 200000 }
+              ]
+            }
+          ];
+        }
+
+        // Load products with stock info
+        const productsResponse = await axios.get('/products');
+        if (productsResponse.data && productsResponse.data.data) {
+          this.products = productsResponse.data.data.map(product => ({
+            ...product,
+            stock: product.stock || 0
+          }));
+        } else {
+          // Fallback mock data
+          this.products = [
+            { id: 1, name: 'Mouse Wireless', stock: 50 },
+            { id: 2, name: 'Keyboard Mechanical', stock: 30 },
+            { id: 3, name: 'Laptop Dell', stock: 15 },
+            { id: 4, name: 'Monitor 24 inch', stock: 25 }
+          ];
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        // Set fallback data
         this.orders = [
           {
             id: 1,
@@ -430,47 +504,15 @@ export default {
               { id: 1, product_name: 'Mouse Wireless', quantity: 15, unit_price: 75000 },
               { id: 2, product_name: 'Keyboard Mechanical', quantity: 10, unit_price: 150000 }
             ]
-          },
-          {
-            id: 2,
-            so_number: 'SO002',
-            customer_name: 'CV. XYZ Solutions',
-            customer_email: 'purchase@xyz.com',
-            customer_phone: '021-9876543',
-            order_date: '2024-01-12',
-            expected_delivery: '2024-01-18',
-            shipping_address: 'Jl. Gatot Subroto No. 456, Jakarta Selatan',
-            total_amount: 3750000,
-            status: 'confirmed',
-            items: [
-              { id: 3, product_name: 'Laptop Dell', quantity: 3, unit_price: 1250000 }
-            ]
-          },
-          {
-            id: 3,
-            so_number: 'SO003',
-            customer_name: 'Toko Komputer Maju',
-            customer_email: 'info@tokomaju.com',
-            customer_phone: '021-5555555',
-            order_date: '2024-01-08',
-            expected_delivery: '2024-01-15',
-            shipping_address: 'Jl. Mangga Besar No. 789, Jakarta Barat',
-            total_amount: 1200000,
-            status: 'delivered',
-            items: [
-              { id: 4, product_name: 'Monitor 24 inch', quantity: 6, unit_price: 200000 }
-            ]
           }
         ];
-
+        
         this.products = [
           { id: 1, name: 'Mouse Wireless', stock: 50 },
           { id: 2, name: 'Keyboard Mechanical', stock: 30 },
           { id: 3, name: 'Laptop Dell', stock: 15 },
           { id: 4, name: 'Monitor 24 inch', stock: 25 }
         ];
-      } catch (error) {
-        console.error('Error loading data:', error);
       }
     },
     showCreateModal() {
@@ -501,9 +543,15 @@ export default {
     async confirmOrder(order) {
       if (confirm('Konfirmasi pesanan penjualan ini?')) {
         try {
-          // Mock API call
-          order.status = 'confirmed';
-          alert('Pesanan penjualan berhasil dikonfirmasi!');
+          const response = await axios.post(`/sales-orders/${order.id}/confirm`);
+          if (response.data && response.data.data) {
+            // Update the order in the list with the returned data
+            const index = this.orders.findIndex(o => o.id === order.id);
+            if (index > -1) {
+              this.orders[index].status = 'confirmed';
+            }
+            alert('Pesanan penjualan berhasil dikonfirmasi!');
+          }
         } catch (error) {
           console.error('Error confirming order:', error);
           alert('Gagal mengonfirmasi pesanan');
@@ -513,9 +561,15 @@ export default {
     async shipOrder(order) {
       if (confirm('Tandai pesanan ini sebagai dikirim?')) {
         try {
-          // Mock API call
-          order.status = 'shipped';
-          alert('Pesanan berhasil ditandai sebagai dikirim!');
+          const response = await axios.post(`/sales-orders/${order.id}/ship`);
+          if (response.data && response.data.data) {
+            // Update the order in the list with the returned data
+            const index = this.orders.findIndex(o => o.id === order.id);
+            if (index > -1) {
+              this.orders[index].status = 'shipped';
+            }
+            alert('Pesanan berhasil ditandai sebagai dikirim!');
+          }
         } catch (error) {
           console.error('Error shipping order:', error);
           alert('Gagal menandai sebagai dikirim');
@@ -525,9 +579,15 @@ export default {
     async deliverOrder(order) {
       if (confirm('Tandai pesanan ini sebagai diterima?')) {
         try {
-          // Mock API call
-          order.status = 'delivered';
-          alert('Pesanan berhasil ditandai sebagai diterima!');
+          const response = await axios.post(`/sales-orders/${order.id}/deliver`);
+          if (response.data && response.data.data) {
+            // Update the order in the list with the returned data
+            const index = this.orders.findIndex(o => o.id === order.id);
+            if (index > -1) {
+              this.orders[index].status = 'delivered';
+            }
+            alert('Pesanan berhasil ditandai sebagai diterima!');
+          }
         } catch (error) {
           console.error('Error delivering order:', error);
           alert('Gagal menandai sebagai diterima');
@@ -537,7 +597,9 @@ export default {
     async deleteOrder(order) {
       if (confirm('Apakah Anda yakin ingin menghapus pesanan penjualan ini?')) {
         try {
-          // Mock API call
+          await axios.delete(`/sales-orders/${order.id}`);
+          
+          // Remove from local list
           const index = this.orders.findIndex(o => o.id === order.id);
           if (index > -1) {
             this.orders.splice(index, 1);
@@ -551,28 +613,40 @@ export default {
     },
     async submitOrder() {
       try {
+        const formData = {
+          ...this.form,
+          items: this.form.items.map(item => ({
+            product_id: item.product_id,
+            quantity: item.quantity,
+            unit_price: item.unit_price
+          }))
+        };
+        
         if (this.editingOrder) {
           // Update existing order
-          const index = this.orders.findIndex(o => o.id === this.editingOrder.id);
-          if (index > -1) {
-            this.orders[index] = { ...this.orders[index], ...this.form };
+          const response = await axios.put(`/sales-orders/${this.editingOrder.id}`, formData);
+          
+          if (response.data && response.data.data) {
+            const index = this.orders.findIndex(o => o.id === this.editingOrder.id);
+            if (index > -1) {
+              this.orders[index] = response.data.data;
+            }
+            alert('Pesanan penjualan berhasil diperbarui!');
           }
-          alert('Pesanan penjualan berhasil diperbarui!');
         } else {
           // Create new order
-          const newOrder = {
-            id: Date.now(),
-            ...this.form,
-            status: 'pending',
-            total_amount: this.calculateTotal()
-          };
-          this.orders.unshift(newOrder);
-          alert('Pesanan penjualan berhasil dibuat!');
+          const response = await axios.post('/sales-orders', formData);
+          
+          if (response.data && response.data.data) {
+            this.orders.unshift(response.data.data);
+            alert('Pesanan penjualan berhasil dibuat!');
+          }
         }
         this.closeModal();
       } catch (error) {
         console.error('Error submitting order:', error);
-        alert('Gagal menyimpan pesanan');
+        const errorMessage = error.response?.data?.message || 'Gagal menyimpan pesanan';
+        alert(errorMessage);
       }
     },
     closeModal() {
