@@ -1,24 +1,32 @@
-/* Footer Styles */
+/* Modern Full-width Footer Styles */
 .app-footer {
   background-color: #001529;
   color: rgba(255, 255, 255, 0.65);
-  padding: 20px 24px;
+  padding: 16px 0;
   width: 100%;
   border-top: 1px solid #002a4a;
+  margin-top: auto;
 }
 
 .footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  padding: 0 24px;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  max-width: none; /* Hapus batasan max-width */
+}
+
+.footer-row {
+  display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
   width: 100%;
 }
 
 .footer-logo {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -39,6 +47,7 @@
   color: rgba(255, 255, 255, 0.65);
   text-decoration: none;
   transition: all 0.3s;
+  padding: 4px 0;
 }
 
 .footer-link:hover {
@@ -49,18 +58,42 @@
 .footer-copyright {
   width: 100%;
   text-align: center;
-  margin-top: 15px;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 14px;
 }
 
 @media (max-width: 768px) {
-  .footer-content {
+  .footer-row {
     flex-direction: column;
     text-align: center;
     gap: 12px;
   }
   
   .footer-links {
-    margin: 10px 0;
+    margin: 0;
+    gap: 16px;
+  }
+  
+  .footer-content {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .app-footer {
+    padding: 12px 0;
+  }
+  
+  .footer-copyright {
+    padding-top: 12px;
+    margin-top: 12px;
+    font-size: 12px;
+  }
+  
+  .footer-links {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }

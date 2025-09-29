@@ -29,7 +29,7 @@
 body {
   margin: 0;
   padding: 0;
-  width: 100vw;
+  width: 100%;
   min-height: 100vh;
   background-color: var(--background-light);
   overflow-x: hidden;
@@ -58,7 +58,9 @@ h1 {
 
 #app {
   width: 100%;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
 }
 
 .logo {
@@ -116,22 +118,21 @@ button:focus-visible {
 
 @media (min-width: 1024px) {
   body {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 50px;
+    display: block; /* Ubah ke block untuk menghindari centering */
+    padding: 0;
   }
 
   #app {
-    max-width: 900px;
-    padding: 3rem;
+    max-width: none; /* Hapus pembatasan lebar */
+    padding: 0;
+    width: 100%;
   }
 
   .card {
-    margin: 0 auto;
-    max-width: 900px;
-    padding: 3em;
+    margin: 0;
+    max-width: none;
+    width: 100%;
+    padding: 1.5rem;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     border-radius: 12px;
   }

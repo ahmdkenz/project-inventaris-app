@@ -11,8 +11,8 @@
   .product-list,
   .dashboard-content,
   .settings-container {
-    max-width: 1800px;
     padding: 2.5rem;
+    max-width: none; /* Remove max-width constraint */
   }
   
   .table {
@@ -113,10 +113,10 @@ img, svg, video, canvas, audio, iframe, embed, object {
   }
 }
 
-/* Fix for form views - respect max-width from app-layout.css */
-/* We are not overriding the max-width of content-wrapper here */
+/* Fix for form views - use full width */
+/* Note: Content-wrapper has been removed */
 
-.content-wrapper .card {
+.card {
   width: 100%;
   margin-bottom: 1.5rem;
 }
@@ -127,18 +127,22 @@ form {
   max-width: 100%;
 }
 
-/* Fix for container padding on very small screens */
+/* Ensure all containers use full width on small screens */
 @media (max-width: 360px) {
   .main-content,
   .product-list,
   .dashboard-content,
   .settings-container {
     padding: 0.5rem;
+    width: 100%;
+    max-width: none;
   }
   
   .card {
     padding: 0.75rem !important;
     border-radius: 5px !important;
+    width: 100%;
+    max-width: none;
   }
 }
 

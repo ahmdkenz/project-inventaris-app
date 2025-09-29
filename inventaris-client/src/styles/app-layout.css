@@ -1,9 +1,11 @@
-/* App Layout Styles */
+/* App Layout Styles - Modern responsive layout */
 .app-layout {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   background-color: #f0f2f5;
   overflow: hidden;
+  flex-direction: row;
+  width: 100%;
 }
 
 .main-container {
@@ -16,17 +18,21 @@
   position: relative;
 }
 
-.main-content {
-  flex-grow: 1;
-  overflow-y: auto; /* Allows content to scroll */
-  padding: 24px;
-  width: 100%; /* Ensure full width */
+.main-container.sidebar-collapsed {
+  margin-left: 64px; /* Width of collapsed sidebar */
+  width: calc(100% - 64px);
 }
 
-.content-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
+.main-content {
+  flex: 1;
+  overflow-y: auto; /* Allows content to scroll */
+  padding: 1.5rem;
   width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  max-width: none; /* Hapus batasan max-width */
 }
 
 /* Responsive adjustments */
@@ -34,6 +40,15 @@
   .main-container {
     margin-left: 200px;
     width: calc(100% - 200px);
+  }
+  
+  .main-container.sidebar-collapsed {
+    margin-left: 64px;
+    width: calc(100% - 64px);
+  }
+  
+  .main-content {
+    padding: 1.25rem;
   }
 }
 
@@ -43,13 +58,18 @@
     width: calc(100% - 60px);
   }
   
+  .main-container.sidebar-collapsed {
+    margin-left: 0;
+    width: 100%;
+  }
+  
   .main-content {
-    padding: 16px;
+    padding: 1rem;
   }
 }
 
 @media (max-width: 576px) {
-  .content-wrapper {
-    padding: 0 8px;
+  .main-content {
+    padding: 0.75rem;
   }
 }
