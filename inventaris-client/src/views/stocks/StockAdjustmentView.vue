@@ -1,14 +1,5 @@
 <template>
   <AppLayout>
-    <div class="header">
-      <h1>Penyesuaian Stok</h1>
-      <div class="actions">
-        <button @click="refreshData" class="btn btn-secondary">
-          Segarkan Data
-        </button>
-      </div>
-    </div>
-
     <!-- Adjustment Form -->
     <div class="adjustment-form">
       <h2>Buat Penyesuaian Stok</h2>
@@ -60,9 +51,14 @@
             placeholder="Tambahkan catatan tambahan..."
           ></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">
-          Simpan Penyesuaian
-        </button>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">
+            Simpan Penyesuaian
+          </button>
+          <button type="button" @click="refreshData" class="btn btn-secondary">
+            Segarkan Data
+          </button>
+        </div>
       </form>
     </div>
 
@@ -374,4 +370,5 @@ export default {
 @import "../../styles/stock-adjustment.css";
 @import "../../styles/stocks.css";
 @import "../../styles/minimal-stock.css";
+@import "../../styles/stock-actions.css";
 </style>
