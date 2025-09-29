@@ -34,28 +34,28 @@
         </div>
         
         <div class="form-group">
-          <label for="purchase_price">Harga Beli *</label>
+          <label for="purchase_price">Harga Beli (Rp) *</label>
           <input 
             id="purchase_price" 
-            v-model="product.purchase_price" 
-            type="number" 
-            step="0.01" 
-            class="form-control"
+            :value="formattedPurchasePrice"
+            @input="handlePurchasePriceInput"
+            type="text"
+            class="form-control idr-input"
             required 
-            placeholder="0.00"
+            placeholder="0"
           />
         </div>
         
         <div class="form-group">
-          <label for="selling_price">Harga Jual *</label>
+          <label for="selling_price">Harga Jual (Rp) *</label>
           <input 
             id="selling_price" 
-            v-model="product.selling_price" 
-            type="number" 
-            step="0.01" 
-            class="form-control"
+            :value="formattedSellingPrice"
+            @input="handleSellingPriceInput"
+            type="text"
+            class="form-control idr-input"
             required 
-            placeholder="0.00"
+            placeholder="0"
           />
         </div>
         
@@ -108,6 +108,7 @@
 import FormWrapper from '@/components/common/FormWrapper.vue';
 import AppLayout from '@/components/layout/AppLayout.vue';
 import axios from '@/services/axios';
+import { formatIDR, parseIDR } from '@/utils/formatters';
 
 export default {
   name: 'ProductCreateView',
@@ -140,7 +141,27 @@ export default {
       error: null
     };
   },
+  computed: {
+    formattedPurchasePrice() {
+      return formatIDR(this.product.purchase_price);
+    },
+    formattedSellingPrice() {
+      return formatIDR(this.product.selling_price);
+    }
+  },
   methods: {
+    handlePurchasePriceInput(event) {
+      // Hanya izinkan angka dan titik
+      const rawValue = event.target.value.replace(/[^\d]/g, '');
+      // Simpan nilai numerik (tanpa format)
+      this.product.purchase_price = rawValue ? parseInt(rawValue) : '';
+    },
+    handleSellingPriceInput(event) {
+      // Hanya izinkan angka dan titik
+      const rawValue = event.target.value.replace(/[^\d]/g, '');
+      // Simpan nilai numerik (tanpa format)
+      this.product.selling_price = rawValue ? parseInt(rawValue) : '';
+    },
     async createProduct() {
       this.isSubmitting = true;
       this.error = null;

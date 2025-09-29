@@ -177,3 +177,10 @@ textarea {
   margin-bottom: 0.25rem !important;
   display: block;
 }
+
+/* Styling untuk input mata uang IDR */
+.idr-input {
+  text-align: right !important;
+  font-family: monospace !important;
+  letter-spacing: 0.5px !important;
+}

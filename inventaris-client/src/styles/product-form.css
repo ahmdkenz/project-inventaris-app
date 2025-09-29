@@ -25,6 +25,11 @@
   text-align: right; /* Better alignment for numeric values */
 }
 
+/* Khusus input dalam format IDR */
+.currency-input input[type="number"] {
+  text-align: left;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .product-form .grid-2 {
