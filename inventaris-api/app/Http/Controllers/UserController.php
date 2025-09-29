@@ -61,13 +61,17 @@ class UserController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
+            
+            // Generate unique ID for user
+            $userId = $this->generateUserId();
 
             $user = User::create([
+                'id' => $userId,
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
-                'status' => $request->status ?? 'active'
+                'status' => $request->status ?? 'active',
             ]);
 
             return response()->json([
@@ -219,5 +223,28 @@ class UserController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+    
+    /**
+     * Generate unique user ID
+     * 
+     * @return string
+     */
+    private function generateUserId(): string
+    {
+        $prefix = 'USR'; // Prefix untuk user
+        $timestamp = substr(time(), -6); // 6 digit terakhir dari timestamp
+        $random = str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT); // 4 digit random
+        
+        // Format: USR-[timestamp]-[random]
+        $userId = $prefix . '-' . $timestamp . '-' . $random;
+        
+        // Cek apakah ID sudah ada, jika ya, generate ulang
+        while (User::where('id', $userId)->exists()) {
+            $random = str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            $userId = $prefix . '-' . $timestamp . '-' . $random;
+        }
+        
+        return $userId;
     }
 }
