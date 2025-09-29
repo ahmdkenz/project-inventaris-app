@@ -1,17 +1,5 @@
 <template>
   <AppLayout>
-    <div class="header">
-      <h1>Manajemen Pengguna</h1>
-      <div class="actions">
-        <button @click="showAddUserModal = true" class="btn btn-primary">
-          Tambah Pengguna Baru
-        </button>
-        <button @click="refreshUsers" class="btn btn-secondary">
-          Refresh
-        </button>
-      </div>
-    </div>
-
     <!-- User Stats -->
     <div class="user-stats">
       <div class="stat-card">
@@ -131,6 +119,16 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Buttons moved below the table -->
+      <div class="actions">
+        <button @click="showAddUserModal = true" class="btn btn-primary">
+          Tambah Pengguna Baru
+        </button>
+        <button @click="refreshUsers" class="btn btn-secondary">
+          Refresh
+        </button>
+      </div>
     </div>
 
     <!-- Pagination -->
@@ -435,4 +433,39 @@ export default {
 <style scoped>
 @import "@/styles/users.css";
 @import "@/styles/responsive-fixes.css";
+
+.user-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th, .users-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
 </style>
