@@ -18,11 +18,11 @@
             v-model="searchQuery" 
             type="text" 
             placeholder="Search suppliers..."
-            class="search-input"
+            class="search-input supplier-input"
           >
         </div>
         <div class="filter-group">
-          <select v-model="statusFilter" class="filter-select">
+          <select v-model="statusFilter" class="filter-select supplier-input">
             <option value="">All Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
@@ -100,12 +100,13 @@
 
       <!-- Create/Edit Modal -->
       <div v-if="showModal" class="modal-overlay" @click="closeModal">
-        <div class="modal" @click.stop>
+        <div class="modal supplier-form-modal" @click.stop>
           <div class="modal-header">
             <h2>{{ editingSupplier ? 'Edit' : 'Create' }} Supplier</h2>
             <button @click="closeModal" class="close-btn">×</button>
           </div>
           <div class="modal-body">
+            <p class="supplier-modal-tip" v-if="!editingSupplier">Add a new supplier to your inventory system</p>
             <form @submit.prevent="submitSupplier">
               <div class="form-group">
                 <label class="required">Name</label>
@@ -114,6 +115,7 @@
                   type="text"
                   required
                   placeholder="Enter supplier name"
+                  class="supplier-input"
                 >
               </div>
               <div class="form-group">
@@ -122,6 +124,7 @@
                   v-model="form.contact_person" 
                   type="text"
                   placeholder="Enter contact person name"
+                  class="supplier-input"
                 >
               </div>
               <div class="form-group">
@@ -130,6 +133,7 @@
                   v-model="form.email" 
                   type="email"
                   placeholder="Enter email address"
+                  class="supplier-input"
                 >
               </div>
               <div class="form-group">
@@ -138,6 +142,7 @@
                   v-model="form.phone" 
                   type="text"
                   placeholder="Enter phone number"
+                  class="supplier-input"
                 >
               </div>
               <div class="form-group">
@@ -146,6 +151,7 @@
                   v-model="form.address"
                   placeholder="Enter full address"
                   rows="3"
+                  class="supplier-input"
                 ></textarea>
               </div>
               <div class="form-group">
@@ -154,14 +160,19 @@
                   v-model="form.notes"
                   placeholder="Enter additional notes"
                   rows="3"
+                  class="supplier-input"
                 ></textarea>
               </div>
               <div v-if="editingSupplier" class="form-group">
                 <label>Status</label>
-                <select v-model="form.status">
+                <select v-model="form.status" class="supplier-input">
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                 </select>
+              </div>
+
+              <div v-if="formMessage" class="supplier-form-message" :class="formMessageType">
+                {{ formMessage }}
               </div>
 
               <div class="modal-footer">
@@ -250,6 +261,8 @@ export default {
       showViewModal: false,
       editingSupplier: null,
       selectedSupplier: null,
+      formMessage: '',
+      formMessageType: 'success',
       form: {
         name: '',
         contact_person: '',
@@ -425,7 +438,14 @@ export default {
             if (index > -1) {
               this.suppliers[index] = response.data.data;
             }
-            alert('Supplier updated successfully!');
+            
+            this.formMessage = 'Supplier updated successfully!';
+            this.formMessageType = 'success';
+            
+            // Close modal after a short delay to show message
+            setTimeout(() => {
+              this.closeModal();
+            }, 1500);
           }
         } else {
           // Create new supplier
@@ -433,20 +453,31 @@ export default {
           
           if (response.data && response.data.data) {
             this.suppliers.unshift(response.data.data);
-            alert('Supplier created successfully!');
+            
+            this.formMessage = 'Supplier created successfully!';
+            this.formMessageType = 'success';
+            
+            // Reset form but don't close modal yet to show success message
+            this.resetForm();
+            
+            // Close modal after a short delay
+            setTimeout(() => {
+              this.closeModal();
+            }, 1500);
           }
         }
-        this.closeModal();
       } catch (error) {
         console.error('Error submitting supplier:', error);
         const errorMessage = error.response?.data?.message || 'Failed to save supplier';
-        alert(errorMessage);
+        this.formMessage = errorMessage;
+        this.formMessageType = 'error';
       }
     },
     closeModal() {
       this.showModal = false;
       this.editingSupplier = null;
       this.resetForm();
+      this.formMessage = '';
     },
     closeViewModal() {
       this.showViewModal = false;
@@ -462,6 +493,7 @@ export default {
         notes: '',
         status: 'active'
       };
+      this.formMessage = '';
     },
     formatDate(dateString) {
       if (!dateString) return '-';
@@ -473,4 +505,133 @@ export default {
 
 <style scoped>
 @import "../../styles/suppliers.css";
+
+/* Enhanced form styling for better contrast */
+.supplier-form-modal {
+  max-width: 550px;
+}
+
+.supplier-form-modal .modal-body {
+  padding: 15px 25px;
+  background-color: #f9fafb;
+}
+
+.supplier-form-modal .form-group {
+  margin-bottom: 16px;
+}
+
+.supplier-form-modal label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #111827;
+  font-size: 0.9rem;
+}
+
+/* Enhanced inputs for all supplier-related elements */
+.supplier-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #111827;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Enhanced filter styles */
+.filters {
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 25px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.filters .filter-group {
+  margin-right: 15px;
+}
+
+.filters .search-input.supplier-input {
+  min-width: 300px;
+  height: 42px;
+  font-weight: 500;
+  padding-left: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+  background-position: 10px center;
+  background-repeat: no-repeat;
+  background-size: 20px;
+}
+
+.filters .filter-select.supplier-input {
+  min-width: 160px;
+  height: 42px;
+  font-weight: 500;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.supplier-input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+  outline: none;
+}
+
+.supplier-input:hover {
+  border-color: #9ca3af;
+}
+
+/* Specific filter hover/focus effects */
+.filters .search-input.supplier-input:hover,
+.filters .filter-select.supplier-input:hover {
+  border-color: #9ca3af;
+}
+
+.filters .search-input.supplier-input:focus,
+.filters .filter-select.supplier-input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.supplier-modal-tip {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.supplier-form-message {
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin: 12px 0;
+}
+
+.supplier-form-message.success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.supplier-form-message.error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.modal-footer {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+  margin-top: 16px;
+}
 </style>
