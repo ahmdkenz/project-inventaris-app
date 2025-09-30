@@ -32,18 +32,24 @@
           </select>
         </div>
         <div class="filter-group">
-          <input 
-            v-model="dateFrom" 
-            type="date" 
-            class="filter-input"
-            placeholder="Date From"
-          >
-          <input 
-            v-model="dateTo" 
-            type="date" 
-            class="filter-input"
-            placeholder="Date To"
-          >
+          <div class="date-input-container filter-date-container">
+            <input 
+              v-model="dateFrom" 
+              type="date" 
+              class="date-input filter-input"
+              placeholder="Date From"
+            >
+            <span class="date-icon">📅</span>
+          </div>
+          <div class="date-input-container filter-date-container">
+            <input 
+              v-model="dateTo" 
+              type="date" 
+              class="date-input filter-input"
+              placeholder="Date To"
+            >
+            <span class="date-icon">📅</span>
+          </div>
         </div>
       </div>
 
@@ -147,18 +153,26 @@
               </div>
               <div class="form-group">
                 <label>Order Date</label>
-                <input 
-                  v-model="form.order_date" 
-                  type="date" 
-                  required
-                >
+                <div class="date-input-container">
+                  <input 
+                    v-model="form.order_date" 
+                    type="date" 
+                    class="date-input"
+                    required
+                  >
+                  <span class="date-icon">📅</span>
+                </div>
               </div>
               <div class="form-group">
                 <label>Expected Delivery</label>
-                <input 
-                  v-model="form.expected_delivery" 
-                  type="date"
-                >
+                <div class="date-input-container">
+                  <input 
+                    v-model="form.expected_delivery" 
+                    type="date"
+                    class="date-input"
+                  >
+                  <span class="date-icon">📅</span>
+                </div>
               </div>
               
               <!-- Order Items -->
@@ -179,11 +193,12 @@
                     required
                   >
                   <input 
-                    v-model.number="item.unit_price" 
-                    type="number" 
-                    step="0.01"
-                    placeholder="Unit Price"
+                    :value="formatPriceDisplay(item.unit_price)" 
+                    @input="handleUnitPriceInput($event, index)"
+                    type="text" 
+                    placeholder="Unit Price (contoh: 1.000.000)"
                     required
+                    class="formatted-price-input"
                   >
                   <button type="button" @click="removeItem(index)" class="btn-danger">Remove</button>
                 </div>
@@ -871,7 +886,7 @@ export default {
       this.form.items.push({
         product_id: '',
         quantity: 1,
-        unit_price: 0
+        unit_price: 0  // Akan diformat secara otomatis
       });
     },
     removeItem(index) {
@@ -890,6 +905,29 @@ export default {
         style: 'currency',
         currency: 'IDR'
       }).format(amount);
+    },
+    
+    // Format unit price untuk tampilan (dengan pemisah ribuan)
+    formatPriceDisplay(price) {
+      if (price === null || price === undefined || price === '') return '';
+      return new Intl.NumberFormat('id-ID', {
+        maximumFractionDigits: 0
+      }).format(price);
+    },
+    
+    // Handle input pada unit price dengan format angka
+    handleUnitPriceInput(event, index) {
+      // Ambil nilai dari input
+      let value = event.target.value;
+      
+      // Hapus semua karakter non-digit (titik, koma, spasi, dll)
+      value = value.replace(/[^\d]/g, '');
+      
+      // Convert ke number
+      const numericValue = value ? parseInt(value, 10) : 0;
+      
+      // Update nilai pada item
+      this.form.items[index].unit_price = numericValue;
     }
   }
 };
@@ -899,4 +937,5 @@ export default {
 @import "../../styles/purchase-orders.css";
 @import "../../styles/quick-supplier.css";
 @import "../../styles/supplier-dropdown.css";
+@import "../../styles/date-price-inputs.css";
 </style>
