@@ -242,6 +242,24 @@
                 >
               </div>
               
+              <div class="form-group">
+                <label>Email</label>
+                <input 
+                  v-model="supplierForm.email" 
+                  type="email"
+                  placeholder="Enter email address"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label>Address</label>
+                <textarea 
+                  v-model="supplierForm.address" 
+                  rows="3"
+                  placeholder="Enter supplier address"
+                ></textarea>
+              </div>
+              
               <div v-if="supplierAddedMessage" class="supplier-added-success">
                 {{ supplierAddedMessage }}
               </div>
@@ -479,27 +497,8 @@ export default {
           ];
         }
 
-        // For suppliers, we could get them from the backend if you have a suppliers table
-        // For now, we'll extract unique suppliers from the orders
-        const uniqueSuppliers = new Map();
-        this.orders.forEach(order => {
-          if (!uniqueSuppliers.has(order.supplier_name)) {
-            uniqueSuppliers.set(order.supplier_name, {
-              id: uniqueSuppliers.size + 1,
-              name: order.supplier_name
-            });
-          }
-        });
-        this.suppliers = Array.from(uniqueSuppliers.values());
-
-        if (this.suppliers.length === 0) {
-          // Fallback mock data
-          this.suppliers = [
-            { id: 1, name: 'Tech Supplier Co.' },
-            { id: 2, name: 'Office Supplies Ltd.' },
-            { id: 3, name: 'Hardware Solutions' }
-          ];
-        }
+        // Load suppliers from API
+        await this.loadSuppliers();
       } catch (error) {
         console.error('Error loading data:', error);
         // Set fallback data
@@ -530,6 +529,60 @@ export default {
           { id: 3, name: 'Laptop Dell' },
           { id: 4, name: 'Monitor 24 inch' }
         ];
+      }
+    },
+    
+    async loadSuppliers() {
+      try {
+        // Get suppliers from API
+        const suppliersResponse = await axios.get('/suppliers');
+        if (suppliersResponse.data && suppliersResponse.data.data) {
+          this.suppliers = suppliersResponse.data.data;
+        } else {
+          // If API fails or returns no data, extract from orders
+          const uniqueSuppliers = new Map();
+          this.orders.forEach(order => {
+            if (!uniqueSuppliers.has(order.supplier_name)) {
+              uniqueSuppliers.set(order.supplier_name, {
+                id: uniqueSuppliers.size + 1,
+                name: order.supplier_name
+              });
+            }
+          });
+          this.suppliers = Array.from(uniqueSuppliers.values());
+          
+          if (this.suppliers.length === 0) {
+            // Fallback mock data if no suppliers found
+            this.suppliers = [
+              { id: 1, name: 'Tech Supplier Co.' },
+              { id: 2, name: 'Office Supplies Ltd.' },
+              { id: 3, name: 'Hardware Solutions' }
+            ];
+          }
+        }
+      } catch (error) {
+        console.error('Error loading suppliers:', error);
+        
+        // Fallback to extracting from orders if API fails
+        const uniqueSuppliers = new Map();
+        this.orders.forEach(order => {
+          if (!uniqueSuppliers.has(order.supplier_name)) {
+            uniqueSuppliers.set(order.supplier_name, {
+              id: uniqueSuppliers.size + 1,
+              name: order.supplier_name
+            });
+          }
+        });
+        this.suppliers = Array.from(uniqueSuppliers.values());
+        
+        if (this.suppliers.length === 0) {
+          // Fallback mock data
+          this.suppliers = [
+            { id: 1, name: 'Tech Supplier Co.' },
+            { id: 2, name: 'Office Supplies Ltd.' },
+            { id: 3, name: 'Hardware Solutions' }
+          ];
+        }
       }
     },
     showCreateModal() {
@@ -681,11 +734,14 @@ export default {
         if (response.data && response.data.data) {
           const newSupplier = response.data.data;
           
-          // Add to suppliers list
-          this.suppliers.unshift(newSupplier);
+          // Keep a reference to the newly added supplier ID for dropdown selection
+          const addedSupplierId = newSupplier.id || newSupplier._id;
+          
+          // Reload the full suppliers list from API to ensure consistency
+          await this.loadSuppliers();
           
           // Select the new supplier in the form
-          this.form.supplier_id = newSupplier.id;
+          this.form.supplier_id = addedSupplierId;
           
           // Show success message
           this.supplierAddedMessage = 'Supplier added successfully!';
@@ -700,9 +756,13 @@ export default {
             notes: ''
           };
           
-          // Close modal after 1.5 seconds
+          // Close modal after 1.5 seconds and ensure proper selection
           setTimeout(() => {
             this.closeQuickSupplierModal();
+            // Double-check that the supplier is still selected
+            this.$nextTick(() => {
+              this.form.supplier_id = addedSupplierId;
+            });
           }, 1500);
         }
       } catch (error) {
