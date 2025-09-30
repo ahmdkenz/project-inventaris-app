@@ -134,7 +134,7 @@
               </div>
               <div class="form-group">
                 <label>Supplier</label>
-                <select v-model="form.supplier_id" required>
+                <select v-model="form.supplier_id" required class="supplier-input">
                   <option value="">Select Supplier</option>
                   <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
                     {{ supplier.name }}
@@ -165,7 +165,7 @@
               <div class="order-items">
                 <h3>Order Items</h3>
                 <div v-for="(item, index) in form.items" :key="index" class="item-row">
-                  <select v-model="item.product_id" class="item-select" required>
+                  <select v-model="item.product_id" class="item-select supplier-input" required>
                     <option value="">Select Product</option>
                     <option v-for="product in products" :key="product.id" :value="product.id">
                       {{ product.name }}
@@ -484,18 +484,7 @@ export default {
         }
 
         // Load products for order items
-        const productsResponse = await axios.get('/products');
-        if (productsResponse.data && productsResponse.data.data) {
-          this.products = productsResponse.data.data;
-        } else {
-          // Fallback mock data
-          this.products = [
-            { id: 1, name: 'Mouse Wireless' },
-            { id: 2, name: 'Keyboard Mechanical' },
-            { id: 3, name: 'Laptop Dell' },
-            { id: 4, name: 'Monitor 24 inch' }
-          ];
-        }
+        await this.loadProducts();
 
         // Load suppliers from API
         await this.loadSuppliers();
@@ -537,19 +526,43 @@ export default {
         // Get suppliers from API
         const suppliersResponse = await axios.get('/suppliers');
         if (suppliersResponse.data && suppliersResponse.data.data) {
-          this.suppliers = suppliersResponse.data.data;
+          // Use actual supplier data from database
+          let suppliers = suppliersResponse.data.data;
+          
+          // Normalize supplier objects to ensure consistent ID field
+          suppliers = suppliers.map(supplier => ({
+            id: supplier.id || supplier._id, // Handle both SQL and MongoDB style IDs
+            name: supplier.name,
+            contact_person: supplier.contact_person,
+            email: supplier.email,
+            phone: supplier.phone,
+            address: supplier.address,
+            status: supplier.status || 'active'
+          }));
+          
+          // Sort suppliers alphabetically by name for easier selection
+          suppliers.sort((a, b) => a.name.localeCompare(b.name));
+          
+          // Update the suppliers list
+          this.suppliers = suppliers;
+          
+          console.log('Suppliers loaded from API:', this.suppliers.length);
         } else {
           // If API fails or returns no data, extract from orders
+          console.log('No suppliers data from API, extracting from orders');
           const uniqueSuppliers = new Map();
           this.orders.forEach(order => {
-            if (!uniqueSuppliers.has(order.supplier_name)) {
+            if (order.supplier_name && !uniqueSuppliers.has(order.supplier_name)) {
               uniqueSuppliers.set(order.supplier_name, {
-                id: uniqueSuppliers.size + 1,
+                id: order.supplier_id || uniqueSuppliers.size + 1,
                 name: order.supplier_name
               });
             }
           });
           this.suppliers = Array.from(uniqueSuppliers.values());
+          
+          // Sort suppliers alphabetically
+          this.suppliers.sort((a, b) => a.name.localeCompare(b.name));
           
           if (this.suppliers.length === 0) {
             // Fallback mock data if no suppliers found
@@ -566,14 +579,17 @@ export default {
         // Fallback to extracting from orders if API fails
         const uniqueSuppliers = new Map();
         this.orders.forEach(order => {
-          if (!uniqueSuppliers.has(order.supplier_name)) {
+          if (order.supplier_name && !uniqueSuppliers.has(order.supplier_name)) {
             uniqueSuppliers.set(order.supplier_name, {
-              id: uniqueSuppliers.size + 1,
+              id: order.supplier_id || uniqueSuppliers.size + 1,
               name: order.supplier_name
             });
           }
         });
         this.suppliers = Array.from(uniqueSuppliers.values());
+        
+        // Sort suppliers alphabetically
+        this.suppliers.sort((a, b) => a.name.localeCompare(b.name));
         
         if (this.suppliers.length === 0) {
           // Fallback mock data
@@ -585,13 +601,69 @@ export default {
         }
       }
     },
-    showCreateModal() {
+    
+    async loadProducts() {
+      try {
+        // Get products from API
+        const productsResponse = await axios.get('/products');
+        if (productsResponse.data && productsResponse.data.data) {
+          // Use actual product data from database
+          let products = productsResponse.data.data;
+          
+          // Normalize product objects to ensure consistent ID field
+          products = products.map(product => ({
+            id: product.id || product._id, // Handle both SQL and MongoDB style IDs
+            name: product.name
+          }));
+          
+          // Sort products alphabetically by name for easier selection
+          products.sort((a, b) => a.name.localeCompare(b.name));
+          
+          // Update the products list
+          this.products = products;
+          
+          console.log('Products loaded from API:', this.products.length);
+        } else {
+          // Fallback mock data
+          this.products = [
+            { id: 1, name: 'Mouse Wireless' },
+            { id: 2, name: 'Keyboard Mechanical' },
+            { id: 3, name: 'Laptop Dell' },
+            { id: 4, name: 'Monitor 24 inch' }
+          ];
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+        
+        // Fallback mock data
+        this.products = [
+          { id: 1, name: 'Mouse Wireless' },
+          { id: 2, name: 'Keyboard Mechanical' },
+          { id: 3, name: 'Laptop Dell' },
+          { id: 4, name: 'Monitor 24 inch' }
+        ];
+      }
+    },
+    async showCreateModal() {
       this.editingOrder = null;
       this.resetForm();
       this.generatePONumber();
+      
+      // Refresh data lists to ensure we have the latest data
+      await Promise.all([
+        this.loadSuppliers(),
+        this.loadProducts()
+      ]);
+      
       this.showModal = true;
     },
-    editOrder(order) {
+    async editOrder(order) {
+      // Refresh data lists first to ensure we have the latest data
+      await Promise.all([
+        this.loadSuppliers(),
+        this.loadProducts()
+      ]);
+      
       this.editingOrder = order;
       this.form = {
         po_number: order.po_number,
@@ -710,7 +782,11 @@ export default {
       this.selectedOrder = null;
     },
     
-    showQuickAddSupplierModal() {
+    async showQuickAddSupplierModal() {
+      // Pastikan data supplier terupdate terlebih dahulu
+      await this.loadSuppliers();
+      
+      // Reset form supplier
       this.supplierForm = {
         name: '',
         contact_person: '',
@@ -788,7 +864,10 @@ export default {
       const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
       this.form.po_number = `PO${year}${month}${random}`;
     },
-    addItem() {
+    async addItem() {
+      // Refresh product list to ensure latest data is available
+      await this.loadProducts();
+      
       this.form.items.push({
         product_id: '',
         quantity: 1,
@@ -819,4 +898,5 @@ export default {
 <style scoped>
 @import "../../styles/purchase-orders.css";
 @import "../../styles/quick-supplier.css";
+@import "../../styles/supplier-dropdown.css";
 </style>
