@@ -79,6 +79,9 @@
                 <span v-if="order.status === 'pending'" class="status-note">
                   Waiting for admin approval
                 </span>
+                <span v-if="order.status === 'cancelled'" class="status-note error">
+                  Rejected by admin
+                </span>
               </td>
               <td class="actions">
                 <button @click="viewOrder(order)" class="btn-info" title="View Details">
@@ -317,6 +320,12 @@
                 <span :class="'status status-' + selectedOrder.status">
                   {{ selectedOrder.status }}
                 </span>
+              </div>
+              
+              <!-- Rejection Reason (if cancelled/rejected) -->
+              <div v-if="selectedOrder.status === 'cancelled' && selectedOrder.rejection_reason" class="detail-row rejection-reason">
+                <label>Rejection Reason:</label>
+                <span class="rejection-text">{{ selectedOrder.rejection_reason }}</span>
               </div>
               <div class="detail-row">
                 <label>Total Amount:</label>
@@ -756,6 +765,10 @@ export default {
           ...this.form,
           // Ensure we have all required fields
           supplier_name: this.form.supplier_name || this.suppliers.find(s => s.id === this.form.supplier_id)?.name,
+          // Add creator information and set initial status
+          created_by: this.user.name || 'Staff',
+          creator_id: this.user.id,
+          status: 'pending', // Ensure all new orders require approval
           items: this.form.items.map(item => ({
             product_id: item.product_id,
             quantity: item.quantity,

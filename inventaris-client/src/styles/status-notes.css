@@ -6,3 +6,20 @@
   margin-top: 4px;
   font-style: italic;
 }
+
+.status-note.error {
+  color: #721c24;
+  font-weight: 500;
+}
+
+/* Rejection Reason Styling */
+.rejection-reason {
+  background-color: #f8d7da;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.rejection-text {
+  color: #721c24;
+  font-weight: 500;
+}

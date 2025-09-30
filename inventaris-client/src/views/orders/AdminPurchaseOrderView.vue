@@ -65,6 +65,10 @@
                   <span class="value">{{ order.supplier_name }}</span>
                 </div>
                 <div class="info-row">
+                  <span class="label">Created By:</span>
+                  <span class="value">{{ order.created_by || 'N/A' }}</span>
+                </div>
+                <div class="info-row">
                   <span class="label">Order Date:</span>
                   <span class="value">{{ formatDate(order.order_date) }}</span>
                 </div>
@@ -336,6 +340,18 @@ export default {
   async mounted() {
     this.loadUserData();
     await this.loadData();
+    
+    // Set up interval to refresh data every minute
+    this.refreshInterval = setInterval(async () => {
+      await this.loadData();
+    }, 60000); // 60 seconds
+  },
+  
+  beforeUnmount() {
+    // Clear the refresh interval when component is destroyed
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
   },
   methods: {
     loadUserData() {

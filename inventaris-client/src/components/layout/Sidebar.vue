@@ -41,6 +41,7 @@
         <router-link to="/admin/orders/purchase-approval" class="nav-item admin-menu highlight-menu">
           <CheckCircle :size="20" />
           <span>Purchase Order Approval</span>
+          <span v-if="pendingOrdersCount > 0" class="pending-badge">{{ pendingOrdersCount }}</span>
         </router-link>
 
         <router-link to="/products/create" class="nav-item admin-menu">
@@ -78,6 +79,7 @@ import {
   Truck as TruckIcon,
   CheckCircle
 } from 'lucide-vue-next';
+import axios from '../../services/axios';
 import { RouterLink } from 'vue-router';
 
 export default {
@@ -100,7 +102,8 @@ export default {
       user: null,
       isCollapsed: false,
       isHovered: false,
-      screenWidth: window.innerWidth
+      screenWidth: window.innerWidth,
+      pendingOrdersCount: 0
     };
   },
   computed: {
@@ -116,6 +119,12 @@ export default {
     // Default sidebar to collapsed state
     this.isCollapsed = true;
     localStorage.setItem('sidebarCollapsed', 'true');
+    
+    // Start checking for pending orders if user is admin
+    if (this.isAdmin) {
+      this.loadPendingOrdersCount();
+      this.pendingOrdersInterval = setInterval(this.loadPendingOrdersCount, 60000); // Check every minute
+    }
   },
   mounted() {
     // Auto-collapse by default on all screens
@@ -131,6 +140,11 @@ export default {
     const sidebar = this.$el;
     sidebar.removeEventListener('mouseenter', this.handleMouseEnter);
     sidebar.removeEventListener('mouseleave', this.handleMouseLeave);
+    
+    // Clear the interval when component is destroyed
+    if (this.pendingOrdersInterval) {
+      clearInterval(this.pendingOrdersInterval);
+    }
   },
   methods: {
     loadUserData() {
@@ -158,6 +172,30 @@ export default {
       // Auto-collapse on smaller screens
       if (this.screenWidth <= 768) {
         this.isCollapsed = true;
+      }
+    },
+    
+    async loadPendingOrdersCount() {
+      if (!this.isAdmin) return;
+      
+      try {
+        const response = await axios.get('/purchase-orders', {
+          params: { status: 'pending', count_only: true }
+        });
+        
+        if (response.data && response.data.count !== undefined) {
+          this.pendingOrdersCount = response.data.count;
+        } else {
+          // Fallback if API doesn't support count_only parameter
+          const ordersResponse = await axios.get('/purchase-orders');
+          if (ordersResponse.data && ordersResponse.data.data) {
+            this.pendingOrdersCount = ordersResponse.data.data.filter(
+              order => order.status === 'pending'
+            ).length;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading pending orders count:', error);
       }
     }
   }
