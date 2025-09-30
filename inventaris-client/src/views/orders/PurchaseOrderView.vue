@@ -140,6 +140,10 @@
                     {{ supplier.name }}
                   </option>
                 </select>
+                <div class="quick-add-supplier">
+                  <span>Can't find your supplier?</span>
+                  <button type="button" @click="showQuickAddSupplierModal">+ Add New Supplier</button>
+                </div>
               </div>
               <div class="form-group">
                 <label>Order Date</label>
@@ -196,6 +200,55 @@
                 <button type="submit" class="btn-primary">
                   {{ editingOrder ? 'Update' : 'Create' }} Order
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Add Supplier Modal -->
+      <div v-if="showQuickSupplierModal" class="modal-overlay quick-supplier-modal" @click="closeQuickSupplierModal">
+        <div class="modal" @click.stop>
+          <div class="modal-header">
+            <h2>Add New Supplier</h2>
+            <button @click="closeQuickSupplierModal" class="close-btn">×</button>
+          </div>
+          <div class="modal-body">
+            <p class="supplier-modal-tip">Add a new supplier to be used immediately in your purchase order</p>
+            <form @submit.prevent="submitQuickSupplier">
+              <div class="form-group">
+                <label class="required">Name</label>
+                <input 
+                  v-model="supplierForm.name" 
+                  type="text"
+                  required
+                  placeholder="Enter supplier name"
+                >
+              </div>
+              <div class="form-group">
+                <label>Contact Person</label>
+                <input 
+                  v-model="supplierForm.contact_person" 
+                  type="text"
+                  placeholder="Enter contact person name"
+                >
+              </div>
+              <div class="form-group">
+                <label>Phone</label>
+                <input 
+                  v-model="supplierForm.phone" 
+                  type="text"
+                  placeholder="Enter phone number"
+                >
+              </div>
+              
+              <div v-if="supplierAddedMessage" class="supplier-added-success">
+                {{ supplierAddedMessage }}
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" @click="closeQuickSupplierModal" class="btn-secondary">Close</button>
+                <button type="submit" class="btn-primary">Add Supplier</button>
               </div>
             </form>
           </div>
@@ -288,8 +341,10 @@ export default {
       itemsPerPage: 10,
       showModal: false,
       showViewModal: false,
+      showQuickSupplierModal: false,
       editingOrder: null,
       selectedOrder: null,
+      supplierAddedMessage: '',
       form: {
         po_number: '',
         supplier_id: '',
@@ -297,6 +352,14 @@ export default {
         expected_delivery: '',
         notes: '',
         items: []
+      },
+      supplierForm: {
+        name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: ''
       },
       user: {}
     };
@@ -593,6 +656,61 @@ export default {
       this.showViewModal = false;
       this.selectedOrder = null;
     },
+    
+    showQuickAddSupplierModal() {
+      this.supplierForm = {
+        name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: ''
+      };
+      this.supplierAddedMessage = '';
+      this.showQuickSupplierModal = true;
+    },
+    
+    closeQuickSupplierModal() {
+      this.showQuickSupplierModal = false;
+    },
+    
+    async submitQuickSupplier() {
+      try {
+        const response = await axios.post('/suppliers', this.supplierForm);
+        
+        if (response.data && response.data.data) {
+          const newSupplier = response.data.data;
+          
+          // Add to suppliers list
+          this.suppliers.unshift(newSupplier);
+          
+          // Select the new supplier in the form
+          this.form.supplier_id = newSupplier.id;
+          
+          // Show success message
+          this.supplierAddedMessage = 'Supplier added successfully!';
+          
+          // Clear form fields but don't close modal yet
+          this.supplierForm = {
+            name: '',
+            contact_person: '',
+            phone: '',
+            email: '',
+            address: '',
+            notes: ''
+          };
+          
+          // Close modal after 1.5 seconds
+          setTimeout(() => {
+            this.closeQuickSupplierModal();
+          }, 1500);
+        }
+      } catch (error) {
+        console.error('Error adding supplier:', error);
+        const errorMessage = error.response?.data?.message || 'Failed to add supplier';
+        alert(errorMessage);
+      }
+    },
     resetForm() {
       this.form = {
         po_number: '',
@@ -640,4 +758,5 @@ export default {
 
 <style scoped>
 @import "../../styles/purchase-orders.css";
+@import "../../styles/quick-supplier.css";
 </style>

@@ -48,6 +48,11 @@
           <span>User Management</span>
         </router-link>
         
+        <router-link to="/settings/suppliers" class="nav-item admin-menu">
+          <TruckIcon :size="20" />
+          <span>Supplier Management</span>
+        </router-link>
+        
         <router-link to="/settings/system" class="nav-item admin-menu">
           <Cog :size="20" />
           <span>System Settings</span>
@@ -64,7 +69,8 @@ import {
   BarChart,
   Plus,
   Users,
-  Cog
+  Cog,
+  Truck as TruckIcon
 } from 'lucide-vue-next';
 import { RouterLink } from 'vue-router';
 
@@ -79,6 +85,7 @@ export default {
     Plus,
     Users,
     Cog,
+    TruckIcon,
     RouterLink
   },
   data() {

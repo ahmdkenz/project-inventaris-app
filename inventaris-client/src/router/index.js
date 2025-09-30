@@ -99,6 +99,12 @@ const routes = [
     meta: { requiresAuth: true, role: 'admin' }
   },
   {
+    path: '/settings/suppliers',
+    name: 'SupplierManagement',
+    component: () => import('../views/suppliers/SupplierView.vue'),
+    meta: { requiresAuth: true, role: 'admin' }
+  },
+  {
     path: '/settings/system',
     name: 'SystemSettings',
     component: () => import('../views/settings/SystemSettingsView.vue'),

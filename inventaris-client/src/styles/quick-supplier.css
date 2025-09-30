@@ -1,0 +1,48 @@
+.quick-add-supplier {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.quick-add-supplier button {
+  border: none;
+  background: none;
+  color: #4f46e5;
+  padding: 0;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: underline;
+  margin-left: 5px;
+}
+
+.quick-add-supplier button:hover {
+  color: #4338ca;
+}
+
+/* Quick Supplier Modal */
+.quick-supplier-modal .modal {
+  max-width: 500px;
+}
+
+.quick-supplier-modal .modal-body {
+  padding: 15px 20px;
+}
+
+.quick-supplier-modal .form-group {
+  margin-bottom: 14px;
+}
+
+.supplier-added-success {
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.supplier-modal-tip {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}

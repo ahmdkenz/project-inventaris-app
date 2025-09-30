@@ -14,10 +14,22 @@ use Illuminate\Support\Facades\Log;
 class OrderService
 {
     protected $stockService;
+    protected $supplierService;
 
     public function __construct(StockService $stockService)
     {
         $this->stockService = $stockService;
+    }
+    
+    /**
+     * Set the supplier service.
+     *
+     * @param \App\Services\SupplierService $supplierService
+     * @return void
+     */
+    public function setSupplierService(SupplierService $supplierService)
+    {
+        $this->supplierService = $supplierService;
     }
 
     /**
@@ -37,15 +49,32 @@ class OrderService
             }
 
             // Create purchase order
-            $purchaseOrder = PurchaseOrder::create([
+            $purchaseOrderData = [
                 'po_number' => $data['po_number'],
-                'supplier_name' => $data['supplier_name'],
+                'supplier_name' => $data['supplier_name'] ?? null,
                 'order_date' => $data['order_date'],
                 'expected_delivery' => $data['expected_delivery'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'total_amount' => $total,
                 'status' => 'pending'
-            ]);
+            ];
+            
+            // Add supplier_id if provided
+            if (isset($data['supplier_id'])) {
+                $purchaseOrderData['supplier_id'] = $data['supplier_id'];
+                
+                // If we have supplier_id but no supplier_name, get it from the supplier model
+                if (empty($purchaseOrderData['supplier_name']) && $this->supplierService) {
+                    try {
+                        $supplier = $this->supplierService->getSupplierById($data['supplier_id']);
+                        $purchaseOrderData['supplier_name'] = $supplier->name;
+                    } catch (\Exception $e) {
+                        Log::warning('Could not find supplier for ID: ' . $data['supplier_id']);
+                    }
+                }
+            }
+            
+            $purchaseOrder = PurchaseOrder::create($purchaseOrderData);
 
             // Create order items
             foreach ($data['items'] as $item) {
@@ -140,12 +169,30 @@ class OrderService
             DB::beginTransaction();
 
             // Update order data
-            $order->update([
-                'supplier_name' => $data['supplier_name'] ?? $order->supplier_name,
+            $updateData = [
                 'order_date' => $data['order_date'] ?? $order->order_date,
                 'expected_delivery' => $data['expected_delivery'] ?? $order->expected_delivery,
                 'notes' => $data['notes'] ?? $order->notes,
-            ]);
+            ];
+            
+            // Update supplier information
+            if (isset($data['supplier_id'])) {
+                $updateData['supplier_id'] = $data['supplier_id'];
+                
+                // If supplier_id changes, update supplier_name as well
+                if ($this->supplierService && $data['supplier_id'] != $order->supplier_id) {
+                    try {
+                        $supplier = $this->supplierService->getSupplierById($data['supplier_id']);
+                        $updateData['supplier_name'] = $supplier->name;
+                    } catch (\Exception $e) {
+                        $updateData['supplier_name'] = $data['supplier_name'] ?? $order->supplier_name;
+                    }
+                }
+            } else if (isset($data['supplier_name'])) {
+                $updateData['supplier_name'] = $data['supplier_name'];
+            }
+            
+            $order->update($updateData);
 
             // Update items if provided
             if (isset($data['items'])) {

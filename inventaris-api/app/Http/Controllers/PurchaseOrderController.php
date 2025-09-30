@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\Transaction;
+use App\Services\OrderService;
 use App\Services\StockService;
+use App\Services\SupplierService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,10 +16,15 @@ use Illuminate\Support\Facades\Validator;
 class PurchaseOrderController extends Controller
 {
     protected $stockService;
+    protected $orderService;
+    protected $supplierService;
 
-    public function __construct(StockService $stockService)
+    public function __construct(StockService $stockService, OrderService $orderService, SupplierService $supplierService)
     {
         $this->stockService = $stockService;
+        $this->orderService = $orderService;
+        $this->supplierService = $supplierService;
+        $this->orderService->setSupplierService($this->supplierService);
     }
 
     /**
@@ -27,7 +34,7 @@ class PurchaseOrderController extends Controller
      */
     public function index()
     {
-        $orders = PurchaseOrder::with('items.product')->orderBy('created_at', 'desc')->get();
+        $orders = PurchaseOrder::with(['items.product', 'supplier'])->orderBy('created_at', 'desc')->get();
         return response()->json(['data' => $orders]);
     }
 
@@ -41,7 +48,8 @@ class PurchaseOrderController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'po_number' => 'required|string|max:50|unique:purchase_orders',
-            'supplier_name' => 'required|string|max:100',
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'supplier_name' => 'nullable|string|max:100',
             'order_date' => 'required|date',
             'expected_delivery' => 'nullable|date',
             'notes' => 'nullable|string',
@@ -50,6 +58,14 @@ class PurchaseOrderController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0'
         ]);
+        
+        // Validate that either supplier_id or supplier_name is provided
+        if (!$request->has('supplier_id') && !$request->has('supplier_name')) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => ['supplier' => ['Either supplier_id or supplier_name must be provided']]
+            ], 422);
+        }
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
@@ -64,25 +80,16 @@ class PurchaseOrderController extends Controller
                 $total_amount += $item['quantity'] * $item['unit_price'];
             }
 
-            // Create purchase order
-            $purchaseOrder = PurchaseOrder::create([
+            // Create purchase order using OrderService
+            $purchaseOrder = $this->orderService->createPurchaseOrder([
                 'po_number' => $request->po_number,
+                'supplier_id' => $request->supplier_id,
                 'supplier_name' => $request->supplier_name,
                 'order_date' => $request->order_date,
                 'expected_delivery' => $request->expected_delivery,
                 'notes' => $request->notes,
-                'total_amount' => $total_amount,
-                'status' => 'pending'
+                'items' => $request->items
             ]);
-
-            // Add items
-            foreach ($request->items as $item) {
-                $purchaseOrder->items()->create([
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price']
-                ]);
-            }
 
             DB::commit();
 
@@ -106,7 +113,7 @@ class PurchaseOrderController extends Controller
      */
     public function show($id)
     {
-        $purchaseOrder = PurchaseOrder::with('items.product')->find($id);
+        $purchaseOrder = PurchaseOrder::with(['items.product', 'supplier'])->find($id);
         
         if (!$purchaseOrder) {
             return response()->json(['message' => 'Purchase order not found'], 404);
@@ -136,7 +143,8 @@ class PurchaseOrderController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'supplier_name' => 'sometimes|required|string|max:100',
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'supplier_name' => 'nullable|string|max:100',
             'order_date' => 'sometimes|required|date',
             'expected_delivery' => 'nullable|date',
             'notes' => 'nullable|string',
@@ -153,33 +161,20 @@ class PurchaseOrderController extends Controller
         try {
             DB::beginTransaction();
 
-            // Update purchase order
-            $purchaseOrder->update([
-                'supplier_name' => $request->supplier_name ?? $purchaseOrder->supplier_name,
-                'order_date' => $request->order_date ?? $purchaseOrder->order_date,
+            // Update purchase order using OrderService
+            $updateData = [
+                'supplier_id' => $request->supplier_id,
+                'supplier_name' => $request->supplier_name,
+                'order_date' => $request->order_date,
                 'expected_delivery' => $request->expected_delivery,
                 'notes' => $request->notes
-            ]);
-
-            // Update items if provided
+            ];
+            
             if ($request->has('items')) {
-                // Remove existing items
-                $purchaseOrder->items()->delete();
-                
-                // Add new items
-                $total_amount = 0;
-                foreach ($request->items as $item) {
-                    $purchaseOrder->items()->create([
-                        'product_id' => $item['product_id'],
-                        'quantity' => $item['quantity'],
-                        'unit_price' => $item['unit_price']
-                    ]);
-                    $total_amount += $item['quantity'] * $item['unit_price'];
-                }
-
-                // Update total amount
-                $purchaseOrder->update(['total_amount' => $total_amount]);
+                $updateData['items'] = $request->items;
             }
+            
+            $purchaseOrder = $this->orderService->updatePurchaseOrder($purchaseOrder, $updateData);
 
             DB::commit();
 

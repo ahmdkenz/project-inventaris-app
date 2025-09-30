@@ -7,6 +7,7 @@ use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +50,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // User Management
     Route::apiResource('users', UserController::class);
     Route::patch('/users/{user}/status', [UserController::class, 'updateStatus']);
+    
+    // Supplier Management
+    Route::apiResource('suppliers', SupplierController::class);
+    Route::patch('/suppliers/{supplier}/status', [SupplierController::class, 'updateStatus']);
     
     // Orders
     Route::get('/orders/stats', [OrderController::class, 'stats']);
