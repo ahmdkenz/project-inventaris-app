@@ -38,6 +38,11 @@
       <!-- Menu khusus admin -->
       <template v-if="isAdmin">
         <div class="divider"></div>
+        <router-link to="/admin/orders/purchase-approval" class="nav-item admin-menu highlight-menu">
+          <CheckCircle :size="20" />
+          <span>Purchase Order Approval</span>
+        </router-link>
+
         <router-link to="/products/create" class="nav-item admin-menu">
           <Plus :size="20" />
           <span>Add Product</span>
@@ -70,7 +75,8 @@ import {
   Plus,
   Users,
   Cog,
-  Truck as TruckIcon
+  Truck as TruckIcon,
+  CheckCircle
 } from 'lucide-vue-next';
 import { RouterLink } from 'vue-router';
 
@@ -86,6 +92,7 @@ export default {
     Users,
     Cog,
     TruckIcon,
+    CheckCircle,
     RouterLink
   },
   data() {

@@ -180,6 +180,16 @@
   position: relative;
 }
 
+/* Style untuk menu Purchase Order Approval yang disorot */
+.nav-item.highlight-menu {
+  background-color: rgba(82, 196, 26, 0.1);
+  border-left: 3px solid #52c41a;
+}
+
+.nav-item.highlight-menu svg {
+  color: #52c41a;
+}
+
 .nav-item.admin-menu::before {
   background-color: #52c41a;
 }
