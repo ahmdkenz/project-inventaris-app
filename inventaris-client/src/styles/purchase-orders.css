@@ -311,26 +311,28 @@
 }
 
 .modal {
-  background: white;
-  border-radius: 8px;
+  background: #ffffff; /* Latar belakang putih bersih */
+  border-radius: 10px; /* Sudut membulat lebih halus */
   width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  max-width: 700px; /* Ukuran maksimum modal */
+  max-height: 85vh; /* Tinggi maksimum modal */
+  overflow-y: auto; /* Scroll jika konten terlalu panjang */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Shadow lebih lembut */
+  padding: 20px; /* Padding untuk konten modal */
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eaeaea; /* Garis pemisah halus */
 }
 
 .modal-header h2 {
   margin: 0;
-  color: #2c3e50;
+  font-size: 1.5rem;
+  color: #333333; /* Teks lebih gelap untuk kontras */
 }
 
 .close-btn {
@@ -354,16 +356,15 @@
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 20px 0; /* Jarak vertikal untuk konten modal */
 }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;
   padding-top: 15px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #eaeaea; /* Garis pemisah halus */
 }
 
 /* Form elements */
@@ -373,43 +374,85 @@
 
 .form-group label {
   display: block;
-  margin-bottom: 6px;
-  font-weight: 500;
-  color: #333;
+  margin-bottom: 8px; /* Jarak antara label dan input */
+  font-weight: 700; /* Teks label lebih tebal */
+  color: #222222; /* Warna teks label sangat gelap untuk kontras maksimal */
+  font-size: 1rem; /* Ukuran font yang cukup besar */
+  letter-spacing: 0.2px; /* Sedikit jarak antar huruf untuk keterbacaan */
 }
 
 .form-group input, .form-group select, .form-group textarea {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 12px 14px; /* Padding lebih besar untuk kenyamanan */
+  border: 1px solid #aaaaaa; /* Border yang lebih gelap untuk kontras */
+  border-radius: 6px; /* Sudut membulat */
   font-size: 14px;
-  transition: border-color 0.2s ease;
+  color: #000000; /* Warna hitam untuk teks agar maksimal kontras */
+  background: #ffffff; /* Latar belakang putih bersih */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Animasi transisi */
 }
 
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+  border-color: #0066cc; /* Warna biru lebih gelap untuk fokus */
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.3); /* Efek fokus lebih jelas dengan warna lebih gelap */
+  outline: none; /* Hilangkan outline default */
+  background-color: #f0f8ff; /* Latar belakang biru sangat terang saat fokus */
+  color: #000000; /* Tetap warna hitam untuk teks saat fokus */
 }
 
 .form-group textarea {
-  resize: vertical;
-  min-height: 80px;
+  resize: vertical; /* Hanya bisa di-resize secara vertikal */
+  min-height: 100px; /* Tinggi minimum untuk textarea */
+}
+
+/* Tombol di Modal */
+.modal-footer .btn-primary {
+  background: #007bff; /* Warna biru utama */
+  color: #ffffff; /* Teks putih */
+  padding: 10px 20px; /* Padding lebih besar */
+  border-radius: 6px; /* Sudut membulat */
+  font-size: 14px;
+  font-weight: 600; /* Teks lebih tebal */
+  transition: background-color 0.2s ease, transform 0.2s ease; /* Animasi transisi */
+}
+
+.modal-footer .btn-primary:hover {
+  background: #0056b3; /* Warna biru lebih gelap saat hover */
+  transform: translateY(-2px); /* Efek hover naik sedikit */
+}
+
+.modal-footer .btn-secondary {
+  background: #6c757d; /* Warna abu-abu */
+  color: #ffffff; /* Teks putih */
+  padding: 10px 20px; /* Padding lebih besar */
+  border-radius: 6px; /* Sudut membulat */
+  font-size: 14px;
+  font-weight: 600; /* Teks lebih tebal */
+  transition: background-color 0.2s ease, transform 0.2s ease; /* Animasi transisi */
+}
+
+.modal-footer .btn-secondary:hover {
+  background: #5a6268; /* Warna abu-abu lebih gelap saat hover */
+  transform: translateY(-2px); /* Efek hover naik sedikit */
 }
 
 /* Order Items */
 .order-items {
   margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #ddd;
+  padding: 20px;
+  border: 1px solid #bbbbbb; /* Border lebih gelap */
   border-radius: 6px;
-  background: #f8f9fa;
+  background: #ffffff; /* Background putih bersih */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Shadow halus untuk efek elevasi */
 }
 
 .order-items h3 {
   margin: 0 0 15px 0;
-  color: #2c3e50;
+  color: #1a1a1a; /* Warna lebih gelap untuk judul */
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dddddd; /* Garis bawah untuk pemisah visual */
 }
 
 .item-row {
@@ -421,10 +464,13 @@
 }
 
 .item-select, .item-row input {
-  padding: 8px 10px;
-  border: 1px solid #ddd;
+  padding: 10px 12px;
+  border: 1px solid #aaaaaa;
   border-radius: 4px;
   font-size: 14px;
+  color: #000000; /* Warna hitam untuk teks agar maksimal kontras */
+  background: #ffffff; /* Latar belakang putih bersih */
+  font-weight: 500; /* Sedikit lebih tebal untuk keterbacaan */
 }
 
 /* Order Details */
