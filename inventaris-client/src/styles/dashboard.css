@@ -204,6 +204,33 @@
   transform: translateY(-2px);
 }
 
+.action-card.highlight-card {
+  border: 2px solid #28a745;
+  background-color: #f0fff4;
+  position: relative;
+}
+
+.action-card.highlight-card::before {
+  content: "Admin";
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #28a745;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 0 0 0 5px;
+}
+
+.action-card.highlight-card .action-btn {
+  background-color: #28a745;
+}
+
+.action-card.highlight-card .action-btn:hover {
+  background-color: #218838;
+}
+
 .action-card .icon {
   font-size: 2rem;
   margin-bottom: 1rem;

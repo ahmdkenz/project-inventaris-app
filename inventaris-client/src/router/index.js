@@ -84,6 +84,12 @@ const routes = [
     component: () => import('../views/orders/OrderDetailView.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/admin/orders/purchase-approval',
+    name: 'AdminPurchaseOrders',
+    component: () => import('../views/orders/AdminPurchaseOrderView.vue'),
+    meta: { requiresAuth: true, role: 'admin' }
+  },
   // Reports routes
   {
     path: '/reports',

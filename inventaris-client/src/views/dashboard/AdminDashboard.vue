@@ -32,6 +32,12 @@
           <p>Add new products to inventory</p>
           <router-link to="/products/create" class="action-btn">Add Product</router-link>
         </div>
+        <div class="action-card highlight-card">
+          <div class="icon">✅</div>
+          <h4>Purchase Order Approval</h4>
+          <p>Review and approve purchase orders</p>
+          <router-link to="/admin/orders/purchase-approval" class="action-btn">Approve Orders</router-link>
+        </div>
         <div class="action-card">
           <div class="icon">👥</div>
           <h4>Manage Users</h4>

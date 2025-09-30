@@ -76,6 +76,9 @@
                 <span :class="'status status-' + order.status">
                   {{ order.status }}
                 </span>
+                <span v-if="order.status === 'pending'" class="status-note">
+                  Waiting for admin approval
+                </span>
               </td>
               <td class="actions">
                 <button @click="viewOrder(order)" class="btn-info" title="View Details">
@@ -938,4 +941,5 @@ export default {
 @import "../../styles/quick-supplier.css";
 @import "../../styles/supplier-dropdown.css";
 @import "../../styles/date-price-inputs.css";
+@import "../../styles/status-notes.css";
 </style>
