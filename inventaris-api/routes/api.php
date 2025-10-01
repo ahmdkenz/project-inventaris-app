@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
+// Utility routes
+Route::get('/generate-po-number', [App\Http\Controllers\UtilityController::class, 'generatePONumber']);
+
 // Protected routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

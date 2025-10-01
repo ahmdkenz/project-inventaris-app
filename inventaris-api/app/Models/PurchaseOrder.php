@@ -13,7 +13,10 @@ class PurchaseOrder extends Model
         'expected_delivery',
         'notes',
         'total_amount',
-        'status'
+        'status',
+        'rejection_reason',
+        'created_by',
+        'updated_by'
     ];
 
     public function items()

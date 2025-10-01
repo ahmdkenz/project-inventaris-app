@@ -676,6 +676,17 @@ export default {
       this.resetForm();
       this.generatePONumber();
       
+      // Set default order date to today
+      const today = new Date().toISOString().split('T')[0];
+      this.form.order_date = today;
+      
+      // Add default empty item
+      this.form.items = [{
+        product_id: '',
+        quantity: 1,
+        unit_price: 0
+      }];
+      
       // Refresh data lists to ensure we have the latest data
       await Promise.all([
         this.loadSuppliers(),
@@ -683,6 +694,8 @@ export default {
       ]);
       
       this.showModal = true;
+      
+      console.log('Create modal opened with form data:', this.form);
     },
     async editOrder(order) {
       // Refresh data lists first to ensure we have the latest data
@@ -761,46 +774,92 @@ export default {
     },
     async submitOrder() {
       try {
-        const formData = {
-          ...this.form,
-          // Ensure we have all required fields
-          supplier_name: this.form.supplier_name || this.suppliers.find(s => s.id === this.form.supplier_id)?.name,
-          // Add creator information and set initial status
-          created_by: this.user.name || 'Staff',
-          creator_id: this.user.id,
-          status: 'pending', // Ensure all new orders require approval
-          items: this.form.items.map(item => ({
-            product_id: item.product_id,
-            quantity: item.quantity,
-            unit_price: item.unit_price
-          }))
-        };
-        
-        if (this.editingOrder) {
-          // Update existing order
-          const response = await axios.put(`/purchase-orders/${this.editingOrder.id}`, formData);
-          
-          if (response.data && response.data.data) {
-            const index = this.orders.findIndex(o => o.id === this.editingOrder.id);
-            if (index > -1) {
-              this.orders[index] = response.data.data;
-            }
-            alert('Purchase order updated successfully!');
+        // Validasi form
+        if (!this.form.supplier_id) {
+          alert('Supplier harus dipilih!');
+          return;
+        }
+
+        if (!this.form.order_date) {
+          alert('Tanggal order harus diisi!');
+          return;
+        }
+
+        if (this.form.items.length === 0) {
+          alert('Minimal satu item harus ditambahkan!');
+          return;
+        }
+
+        // Validasi items
+        for (const [index, item] of this.form.items.entries()) {
+          if (!item.product_id) {
+            alert(`Produk pada item ke-${index + 1} harus dipilih!`);
+            return;
           }
-        } else {
-          // Create new order
-          const response = await axios.post('/purchase-orders', formData);
-          
-          if (response.data && response.data.data) {
-            this.orders.unshift(response.data.data);
-            alert('Purchase order created successfully!');
+
+          if (!item.quantity || item.quantity <= 0) {
+            alert(`Kuantitas pada item ke-${index + 1} harus lebih dari 0!`);
+            return;
+          }
+
+          if (!item.unit_price || item.unit_price <= 0) {
+            alert(`Harga satuan pada item ke-${index + 1} harus lebih dari 0!`);
+            return;
           }
         }
-        this.closeModal();
+
+        // Tambahkan supplier_name jika tersedia
+        if (this.form.supplier_id) {
+          const selectedSupplier = this.suppliers.find(s => s.id == this.form.supplier_id);
+          if (selectedSupplier) {
+            this.form.supplier_name = selectedSupplier.name;
+          }
+        }
+
+        // Enrichment data untuk setiap item dengan nama produk
+        for (const item of this.form.items) {
+          const selectedProduct = this.products.find(p => p.id == item.product_id);
+          if (selectedProduct) {
+            item.product_name = selectedProduct.name;
+          }
+        }
+
+        // Log untuk debugging
+        console.log('Submitting form data:', this.form);
+
+        // Log untuk debugging data yang dikirim
+        console.log('Data yang dikirim ke backend:', this.form);
+
+        // Kirim data ke backend
+        const response = this.editingOrder
+          ? await axios.put(`/purchase-orders/${this.editingOrder.id}`, this.form)
+          : await axios.post('/purchase-orders', this.form);
+
+        if (response.data && response.data.data) {
+          // Handle sukses dengan data yang dikembalikan dari server
+          alert(`Purchase Order berhasil ${this.editingOrder ? 'diperbarui' : 'dibuat'}!`);
+          this.closeModal();
+          await this.loadData();
+        } else if (response.data && response.data.success) {
+          // Fallback jika menggunakan format response lama
+          alert(`Purchase Order berhasil ${this.editingOrder ? 'diperbarui' : 'dibuat'}!`);
+          this.closeModal();
+          await this.loadData();
+        } else {
+          alert('Terjadi kesalahan saat menyimpan Purchase Order.');
+        }
       } catch (error) {
+        console.error('Respon error dari backend:', error.response);
         console.error('Error submitting order:', error);
-        const errorMessage = error.response?.data?.message || 'Failed to save order';
-        alert(errorMessage);
+        if (error.response && error.response.data && error.response.data.errors) {
+          // Tampilkan error validasi dari server jika ada
+          const errorMessages = Object.values(error.response.data.errors).flat();
+          alert('Error: ' + errorMessages.join('\n'));
+        } else if (error.response && error.response.data && error.response.data.message) {
+          alert('Error: ' + error.response.data.message);
+        } else {
+          alert('Gagal menyimpan Purchase Order. Silakan coba lagi.');
+        }
       }
     },
     closeModal() {
@@ -888,12 +947,31 @@ export default {
         items: []
       };
     },
-    generatePONumber() {
-      const date = new Date();
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-      this.form.po_number = `PO${year}${month}${random}`;
+    async generatePONumber() {
+      try {
+        // Coba gunakan API untuk mendapatkan nomor PO yang unik
+        const response = await axios.get('/generate-po-number');
+        if (response.data && response.data.po_number) {
+          this.form.po_number = response.data.po_number;
+        } else {
+          // Fallback ke generasi nomor PO lokal
+          const date = new Date();
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+          this.form.po_number = `PO${year}${month}${day}${random}`;
+        }
+      } catch (error) {
+        console.error('Error generating PO number:', error);
+        // Fallback ke generasi nomor PO lokal
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        this.form.po_number = `PO${year}${month}${day}${random}`;
+      }
     },
     async addItem() {
       // Refresh product list to ensure latest data is available
@@ -944,6 +1022,9 @@ export default {
       
       // Update nilai pada item
       this.form.items[index].unit_price = numericValue;
+      
+      // Log untuk debugging
+      console.log(`Updated unit price for item ${index} to ${numericValue}`);
     }
   }
 };
