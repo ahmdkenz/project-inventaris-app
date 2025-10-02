@@ -124,7 +124,7 @@
           <h2>{{ editingOrder ? 'Edit' : 'Buat' }} Pesanan Penjualan</h2>
           <button @click="closeModal" class="close-btn">×</button>
         </div>
-          <div class="modal-body">
+        <div class="modal-body">
           <form @submit.prevent="submitOrder">
             <div class="form-group">
               <label>Nomor SO</label>
@@ -139,43 +139,72 @@
               <label>Nama Pelanggan</label>
               <input 
                 v-model="form.customer_name" 
-                type="text"
+                type="text" 
                 required
+                class="customer-input"
               >
+              <div class="quick-add-customer">
+                <span>Pelanggan baru?</span>
+                <button type="button" @click="showQuickAddCustomerModal">+ Tambah Pelanggan Baru</button>
+              </div>
             </div>
+            <div class="form-group">
+              <label>Tanggal Pesanan</label>
+              <div class="date-input-container">
+                <input 
+                  v-model="form.order_date" 
+                  type="date" 
+                  class="date-input"
+                  required
+                >
+                <span class="date-icon">📅</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Perkiraan Pengiriman</label>
+              <div class="date-input-container">
+                <input 
+                  v-model="form.expected_delivery" 
+                  type="date"
+                  class="date-input"
+                >
+                <span class="date-icon">📅</span>
+              </div>
+            </div>
+            
             <div class="form-group">
               <label>Email Pelanggan</label>
               <input 
                 v-model="form.customer_email" 
                 type="email"
+                placeholder="Email pelanggan (opsional)"
               >
             </div>
+            
             <div class="form-group">
               <label>Telepon Pelanggan</label>
               <input 
                 v-model="form.customer_phone" 
                 type="tel"
+                placeholder="Nomor telepon pelanggan (opsional)"
               >
             </div>
+            
             <div class="form-group">
-              <label>Tanggal Pesanan</label>
-              <input 
-                v-model="form.order_date" 
-                type="date" 
+              <label>Alamat Pengiriman</label>
+              <textarea 
+                v-model="form.shipping_address" 
+                rows="3" 
                 required
-              >
+                placeholder="Masukkan alamat pengiriman lengkap"
+              ></textarea>
             </div>
-            <div class="form-group">
-              <label>Perkiraan Pengiriman</label>
-              <input 
-                v-model="form.expected_delivery" 
-                type="date"
-              >
-            </div>            <!-- Item Pesanan -->
+            
+            <!-- Order Items -->
             <div class="order-items">
               <h3>Item Pesanan</h3>
               <div v-for="(item, index) in form.items" :key="index" class="item-row">
-                <select v-model="item.product_id" class="item-select" required>
+                <select v-model="item.product_id" class="item-select customer-input" required>
                   <option value="">Pilih Produk</option>
                   <option v-for="product in products" :key="product.id" :value="product.id">
                     {{ product.name }} (Stok: {{ product.stock }})
@@ -189,11 +218,12 @@
                   required
                 >
                 <input 
-                  v-model.number="item.unit_price" 
-                  type="number" 
-                  step="0.01"
-                  placeholder="Harga Satuan"
+                  :value="formatPriceDisplay(item.unit_price)" 
+                  @input="handleUnitPriceInput($event, index)"
+                  type="text" 
+                  placeholder="Harga Satuan (contoh: 1.000.000)"
                   required
+                  class="formatted-price-input"
                 >
                 <button type="button" @click="removeItem(index)" class="btn-danger">Hapus</button>
               </div>
@@ -201,13 +231,8 @@
             </div>
 
             <div class="form-group">
-              <label>Alamat Pengiriman</label>
-              <textarea v-model="form.shipping_address" rows="3" required></textarea>
-            </div>
-
-            <div class="form-group">
               <label>Catatan</label>
-              <textarea v-model="form.notes" rows="3"></textarea>
+              <textarea v-model="form.notes" rows="3" placeholder="Catatan tambahan (opsional)"></textarea>
             </div>
 
             <div class="modal-footer">
@@ -301,6 +326,40 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal Tambah Pelanggan Baru -->
+    <div v-if="showQuickCustomerModal" class="modal-overlay" @click="closeQuickCustomerModal">
+      <div class="modal" @click.stop>
+        <div class="modal-header">
+          <h2>Tambah Pelanggan Baru</h2>
+          <button @click="closeQuickCustomerModal" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="submitQuickCustomer">
+            <div class="form-group">
+              <label class="required">Nama</label>
+              <input v-model="customerForm.name" type="text" required placeholder="Masukkan nama pelanggan">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input v-model="customerForm.email" type="email" placeholder="Masukkan email pelanggan">
+            </div>
+            <div class="form-group">
+              <label>Telepon</label>
+              <input v-model="customerForm.phone" type="text" placeholder="Masukkan nomor telepon">
+            </div>
+            <div class="form-group">
+              <label>Alamat</label>
+              <textarea v-model="customerForm.address" rows="3" placeholder="Masukkan alamat pelanggan"></textarea>
+            </div>
+            <div class="modal-footer">
+              <button type="button" @click="closeQuickCustomerModal" class="btn-secondary">Tutup</button>
+              <button type="submit" class="btn-primary">Tambah Pelanggan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
     </div>
   </AppLayout>
 </template>
@@ -339,7 +398,14 @@ export default {
         notes: '',
         items: []
       },
-      user: {}
+      user: {},
+      showQuickCustomerModal: false,
+      customerForm: {
+        name: '',
+        email: '',
+        phone: '',
+        address: ''
+      }
     };
   },
   computed: {
@@ -648,6 +714,32 @@ export default {
         alert(errorMessage);
       }
     },
+    showQuickAddCustomerModal() {
+      this.customerForm = {
+        name: '',
+        email: '',
+        phone: '',
+        address: ''
+      };
+      this.showQuickCustomerModal = true;
+    },
+    closeQuickCustomerModal() {
+      this.showQuickCustomerModal = false;
+    },
+    async submitQuickCustomer() {
+      try {
+        const response = await axios.post('/customers', this.customerForm);
+        if (response.data && response.data.data) {
+          const newCustomer = response.data.data;
+          this.form.customer_name = newCustomer.name;
+          this.closeQuickCustomerModal();
+          alert('Pelanggan berhasil ditambahkan!');
+        }
+      } catch (error) {
+        console.error('Error adding customer:', error);
+        alert('Gagal menambahkan pelanggan.');
+      }
+    },
     closeModal() {
       this.showModal = false;
       this.editingOrder = null;
@@ -700,11 +792,37 @@ export default {
         style: 'currency',
         currency: 'IDR'
       }).format(amount);
+    },
+    // Format unit price untuk tampilan (dengan pemisah ribuan)
+    formatPriceDisplay(price) {
+      if (price === null || price === undefined || price === '') return '';
+      return new Intl.NumberFormat('id-ID', {
+        maximumFractionDigits: 0
+      }).format(price);
+    },
+    
+    // Handle input pada unit price dengan format angka
+    handleUnitPriceInput(event, index) {
+      // Ambil nilai dari input
+      let value = event.target.value;
+      
+      // Hapus semua karakter non-digit (titik, koma, spasi, dll)
+      value = value.replace(/[^\d]/g, '');
+      
+      // Convert ke number
+      const numericValue = value ? parseInt(value, 10) : 0;
+      
+      // Update nilai pada item
+      this.form.items[index].unit_price = numericValue;
     }
   }
 };
 </script>
 
-<style scoped>
+<style>
+/* Pindahkan gaya ke file CSS terpusat */
 @import "../../styles/sales-orders.css";
+@import "../../styles/quick-customer.css";
+@import "../../styles/date-price-inputs.css";
+@import "../../styles/status-notes.css";
 </style>
