@@ -143,10 +143,6 @@
                 required
                 class="customer-input"
               >
-              <div class="quick-add-customer">
-                <span>Pelanggan baru?</span>
-                <button type="button" @click="showQuickAddCustomerModal">+ Tambah Pelanggan Baru</button>
-              </div>
             </div>
             <div class="form-group">
               <label>Tanggal Pesanan</label>
@@ -327,39 +323,7 @@
       </div>
     </div>
 
-    <!-- Modal Tambah Pelanggan Baru -->
-    <div v-if="showQuickCustomerModal" class="modal-overlay" @click="closeQuickCustomerModal">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <h2>Tambah Pelanggan Baru</h2>
-          <button @click="closeQuickCustomerModal" class="close-btn">×</button>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="submitQuickCustomer">
-            <div class="form-group">
-              <label class="required">Nama</label>
-              <input v-model="customerForm.name" type="text" required placeholder="Masukkan nama pelanggan">
-            </div>
-            <div class="form-group">
-              <label>Email</label>
-              <input v-model="customerForm.email" type="email" placeholder="Masukkan email pelanggan">
-            </div>
-            <div class="form-group">
-              <label>Telepon</label>
-              <input v-model="customerForm.phone" type="text" placeholder="Masukkan nomor telepon">
-            </div>
-            <div class="form-group">
-              <label>Alamat</label>
-              <textarea v-model="customerForm.address" rows="3" placeholder="Masukkan alamat pelanggan"></textarea>
-            </div>
-            <div class="modal-footer">
-              <button type="button" @click="closeQuickCustomerModal" class="btn-secondary">Tutup</button>
-              <button type="submit" class="btn-primary">Tambah Pelanggan</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+
     </div>
   </AppLayout>
 </template>
@@ -398,14 +362,7 @@ export default {
         notes: '',
         items: []
       },
-      user: {},
-      showQuickCustomerModal: false,
-      customerForm: {
-        name: '',
-        email: '',
-        phone: '',
-        address: ''
-      }
+      user: {}
     };
   },
   computed: {
@@ -714,32 +671,7 @@ export default {
         alert(errorMessage);
       }
     },
-    showQuickAddCustomerModal() {
-      this.customerForm = {
-        name: '',
-        email: '',
-        phone: '',
-        address: ''
-      };
-      this.showQuickCustomerModal = true;
-    },
-    closeQuickCustomerModal() {
-      this.showQuickCustomerModal = false;
-    },
-    async submitQuickCustomer() {
-      try {
-        const response = await axios.post('/customers', this.customerForm);
-        if (response.data && response.data.data) {
-          const newCustomer = response.data.data;
-          this.form.customer_name = newCustomer.name;
-          this.closeQuickCustomerModal();
-          alert('Pelanggan berhasil ditambahkan!');
-        }
-      } catch (error) {
-        console.error('Error adding customer:', error);
-        alert('Gagal menambahkan pelanggan.');
-      }
-    },
+
     closeModal() {
       this.showModal = false;
       this.editingOrder = null;
@@ -822,7 +754,6 @@ export default {
 <style>
 /* Pindahkan gaya ke file CSS terpusat */
 @import "../../styles/sales-orders.css";
-@import "../../styles/quick-customer.css";
 @import "../../styles/date-price-inputs.css";
 @import "../../styles/status-notes.css";
 </style>
