@@ -2,124 +2,134 @@
 
 namespace App\Services;
 
-use Kreait\Firebase\Contract\Firestore;
+use Kreait\Firebase\Contract\Database;
 use Illuminate\Support\Carbon;
 
 class FirebaseService
 {
-    protected $firestore;
+    protected $database;
 
-    public function __construct(Firestore $firestore)
+    public function __construct(Database $database)
     {
-        $this->firestore = $firestore;
+        $this->database = $database;
 
-        // Log untuk memastikan kredensial dan project_id terbaca
+        // Log untuk memastikan kredensial terbaca
         logger('Firebase credentials path: ' . config('services.firebase.credentials'));
-        logger('Firebase project ID: ' . config('services.firebase.project_id'));
+        logger('Firebase database URL: ' . config('services.firebase.database_url'));
     }
 
     /**
-     * Simpan data ke Firebase
+     * Simpan data ke Firebase Realtime Database
      *
-     * @param string $collection Nama koleksi di Firebase
-     * @param string $documentId ID dokumen (opsional)
+     * @param string $path Path di Firebase Realtime Database
+     * @param string $key Key (opsional)
      * @param array $data Data yang akan disimpan
-     * @return array Data yang disimpan termasuk ID
+     * @return array Data yang disimpan termasuk key
      */
-    public function saveData(string $collection, array $data, string $documentId = null)
+    public function saveData(string $path, array $data, string $key = null)
     {
-        $db = $this->firestore->database();
-        $collectionRef = $db->collection($collection);
+        $reference = $this->database->getReference($path);
 
         // Format tanggal ke format Firebase
         $data = $this->formatDates($data);
 
-        if ($documentId) {
-            $collectionRef->document($documentId)->set($data);
-            $data['id'] = $documentId;
+        if ($key) {
+            $reference->getChild($key)->set($data);
+            $data['key'] = $key;
         } else {
-            $docRef = $collectionRef->add($data);
-            $data['id'] = $docRef->id();
+            $newRef = $reference->push($data);
+            $data['key'] = $newRef->getKey();
         }
 
         return $data;
     }
 
     /**
-     * Mendapatkan data dari Firebase
+     * Mendapatkan data dari Firebase Realtime Database
      *
-     * @param string $collection Nama koleksi
-     * @param string|null $documentId ID dokumen (jika null, mengambil semua dokumen)
-     * @return array Data dari Firebase
+     * @param string $path Path di Firebase Realtime Database
+     * @param string|null $key Key (jika null, mengambil semua data)
+     * @return array|null Data dari Firebase
      */
-    public function getData(string $collection, string $documentId = null)
+    public function getData(string $path, string $key = null)
     {
-        $db = $this->firestore->database();
-        $collectionRef = $db->collection($collection);
+        $reference = $this->database->getReference($path);
 
-        if ($documentId) {
-            $snapshot = $collectionRef->document($documentId)->snapshot();
+        if ($key) {
+            $snapshot = $reference->getChild($key)->getSnapshot();
             if ($snapshot->exists()) {
-                $data = $snapshot->data();
-                $data['id'] = $snapshot->id();
-                return $data;
+                $data = $snapshot->getValue();
+                if (is_array($data)) {
+                    $data['key'] = $key;
+                    return $data;
+                }
+                return ['value' => $data, 'key' => $key];
             }
             return null;
         } else {
-            $documents = $collectionRef->documents();
+            $snapshot = $reference->getSnapshot();
+            if (!$snapshot->exists()) {
+                return [];
+            }
+            
             $data = [];
-            foreach ($documents as $document) {
-                $item = $document->data();
-                $item['id'] = $document->id();
-                $data[] = $item;
+            $value = $snapshot->getValue();
+            if (is_array($value)) {
+                foreach ($value as $childKey => $childValue) {
+                    if (is_array($childValue)) {
+                        $childValue['key'] = $childKey;
+                        $data[] = $childValue;
+                    } else {
+                        $data[] = ['value' => $childValue, 'key' => $childKey];
+                    }
+                }
             }
             return $data;
         }
     }
 
     /**
-     * Perbarui data di Firebase
+     * Perbarui data di Firebase Realtime Database
      *
-     * @param string $collection Nama koleksi
-     * @param string $documentId ID dokumen
+     * @param string $path Path di Firebase Realtime Database
+     * @param string $key Key
      * @param array $data Data yang akan diperbarui
      * @return bool Sukses atau tidak
      */
-    public function updateData(string $collection, string $documentId, array $data)
+    public function updateData(string $path, string $key, array $data)
     {
-        $db = $this->firestore->database();
-        
         // Format tanggal ke format Firebase
         $data = $this->formatDates($data);
         
         try {
-            $db->collection($collection)->document($documentId)->update($data);
+            $this->database->getReference("$path/$key")->update($data);
             return true;
         } catch (\Exception $e) {
+            logger("Firebase update error: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Hapus data di Firebase
+     * Hapus data di Firebase Realtime Database
      *
-     * @param string $collection Nama koleksi
-     * @param string $documentId ID dokumen
+     * @param string $path Path di Firebase Realtime Database
+     * @param string $key Key
      * @return bool Sukses atau tidak
      */
-    public function deleteData(string $collection, string $documentId)
+    public function deleteData(string $path, string $key)
     {
-        $db = $this->firestore->database();
         try {
-            $db->collection($collection)->document($documentId)->delete();
+            $this->database->getReference("$path/$key")->remove();
             return true;
         } catch (\Exception $e) {
+            logger("Firebase delete error: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Format tanggal Carbon ke format Timestamp Firebase
+     * Format tanggal Carbon ke format ISO string untuk Realtime Database
      *
      * @param array $data Data dengan kemungkinan objek tanggal Carbon
      * @return array Data dengan tanggal yang sudah diformat
@@ -128,11 +138,42 @@ class FirebaseService
     {
         foreach ($data as $key => $value) {
             if ($value instanceof Carbon) {
-                $data[$key] = ['seconds' => $value->timestamp, 'nanoseconds' => 0];
+                $data[$key] = $value->toIso8601String();
             } elseif (is_array($value)) {
                 $data[$key] = $this->formatDates($value);
             }
         }
         return $data;
+    }
+    
+    /**
+     * Sinkronkan data dari database SQL ke Firebase
+     *
+     * @param string $table Nama tabel SQL
+     * @param string $path Path di Firebase
+     * @param array $records Data record dari SQL
+     * @return bool Sukses atau tidak
+     */
+    public function syncFromSQL(string $table, string $path, array $records)
+    {
+        try {
+            // Hapus data lama di path tersebut
+            $this->database->getReference($path)->remove();
+            
+            // Masukkan data baru
+            foreach ($records as $record) {
+                $id = $record['id'] ?? null;
+                if ($id) {
+                    $this->saveData($path, $record, $id);
+                } else {
+                    $this->saveData($path, $record);
+                }
+            }
+            
+            return true;
+        } catch (\Exception $e) {
+            logger("Firebase sync error for $table: " . $e->getMessage());
+            return false;
+        }
     }
 }

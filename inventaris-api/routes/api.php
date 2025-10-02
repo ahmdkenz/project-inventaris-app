@@ -82,4 +82,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/system-info', [App\Http\Controllers\SettingController::class, 'systemInfo']);
     Route::post('/system/backup', [App\Http\Controllers\SettingController::class, 'createBackup']);
     Route::get('/system/backup/latest', [App\Http\Controllers\SettingController::class, 'downloadBackup']);
+    
+    // Firebase Sync
+    Route::post('/firebase/sync', [App\Http\Controllers\FirebaseSyncController::class, 'sync']);
+    Route::get('/firebase/status', [App\Http\Controllers\FirebaseSyncController::class, 'status']);
 });
