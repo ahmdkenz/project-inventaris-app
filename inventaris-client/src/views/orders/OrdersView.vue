@@ -5,17 +5,7 @@
         <h1>Order Management</h1>
       </div>
       
-      <!-- Orders Navigation -->
-      <nav class="orders-nav">
-        <router-link to="/orders/purchase" class="order-nav-item">
-          <span class="icon">📥</span>
-          <span class="label">Purchase Orders</span>
-        </router-link>
-        <router-link to="/orders/sales" class="order-nav-item">
-          <span class="icon">📤</span>
-          <span class="label">Sales Orders</span>
-        </router-link>
-      </nav>
+      <!-- Note: Orders Navigation moved to sidebar -->
       
       <!-- Orders Statistics -->
       <div class="order-stats">

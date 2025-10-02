@@ -3,7 +3,6 @@
     <div class="sales-orders">
       <div class="page-header">
         <div class="header-left">
-          <router-link to="/orders" class="back-link">← Kembali ke Pesanan</router-link>
           <h1>Pesanan Penjualan</h1>
         </div>
         <button v-if="canCreate" @click="showCreateModal" class="btn-primary">

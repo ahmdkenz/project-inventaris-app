@@ -24,11 +24,18 @@
         <span>Stock Management</span>
       </router-link>
       
-      <!-- Menu Orders hanya tampil untuk staff, tidak untuk admin -->
-      <router-link to="/orders" class="nav-item" v-if="!isAdmin">
-        <ShoppingCart :size="20" />
-        <span>Orders</span>
-      </router-link>
+      <!-- Menu Purchase Order dan Sales Order untuk menggantikan menu Orders -->
+      <template v-if="!isAdmin">
+        <router-link to="/orders/purchase" class="nav-item">
+          <ShoppingBag :size="20" />
+          <span>Purchase Order</span>
+        </router-link>
+        
+        <router-link to="/orders/sales" class="nav-item">
+          <ShoppingCart :size="20" />
+          <span>Sales Order</span>
+        </router-link>
+      </template>
       
       <router-link to="/reports" class="nav-item">
         <BarChart :size="20" />
@@ -72,6 +79,7 @@ import {
   Box,
   Warehouse,
   ShoppingCart,
+  ShoppingBag,
   BarChart,
   Plus,
   Users,
@@ -89,6 +97,7 @@ export default {
     Box,
     Warehouse,
     ShoppingCart,
+    ShoppingBag,
     BarChart,
     Plus,
     Users,
