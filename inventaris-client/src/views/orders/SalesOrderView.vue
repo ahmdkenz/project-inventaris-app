@@ -200,7 +200,12 @@
             <div class="order-items">
               <h3>Item Pesanan</h3>
               <div v-for="(item, index) in form.items" :key="index" class="item-row">
-                <select v-model="item.product_id" class="item-select customer-input" required>
+                <select 
+                  v-model="item.product_id" 
+                  class="item-select customer-input" 
+                  required
+                  @change="updateProductPrice(index, item.product_id)"
+                >
                   <option value="">Pilih Produk</option>
                   <option v-for="product in products" :key="product.id" :value="product.id">
                     {{ product.name }} (Stok: {{ product.stock }})
@@ -212,6 +217,7 @@
                   placeholder="Jumlah" 
                   min="1"
                   required
+                  @input="updateItemTotal(index)"
                 >
                 <input 
                   :value="formatPriceDisplay(item.unit_price)" 
@@ -221,9 +227,19 @@
                   required
                   class="formatted-price-input"
                 >
+                <div class="item-subtotal">
+                  {{ formatCurrency(item.quantity * item.unit_price) }}
+                </div>
                 <button type="button" @click="removeItem(index)" class="btn-danger">Hapus</button>
               </div>
               <button type="button" @click="addItem" class="btn-secondary">Tambah Item</button>
+            </div>
+
+            <div class="order-summary">
+              <div class="summary-row">
+                <span class="summary-label">Total Pesanan:</span>
+                <span class="summary-value">{{ formatCurrency(calculateTotal()) }}</span>
+              </div>
             </div>
 
             <div class="form-group">
@@ -360,7 +376,8 @@ export default {
         expected_delivery: '',
         shipping_address: '',
         notes: '',
-        items: []
+        items: [],
+        total_amount: 0
       },
       user: {}
     };
@@ -454,8 +471,8 @@ export default {
               total_amount: 2250000,
               status: 'pending',
               items: [
-                { id: 1, product_name: 'Mouse Wireless', quantity: 15, unit_price: 75000 },
-                { id: 2, product_name: 'Keyboard Mechanical', quantity: 10, unit_price: 150000 }
+                { id: 1, product_id: 1, product_name: 'Mouse Wireless', quantity: 15, unit_price: 75000 },
+                { id: 2, product_id: 2, product_name: 'Keyboard Mechanical', quantity: 10, unit_price: 150000 }
               ]
             },
             {
@@ -470,7 +487,7 @@ export default {
               total_amount: 3750000,
               status: 'confirmed',
               items: [
-                { id: 3, product_name: 'Laptop Dell', quantity: 3, unit_price: 1250000 }
+                { id: 3, product_id: 3, product_name: 'Laptop Dell', quantity: 3, unit_price: 1250000 }
               ]
             },
             {
@@ -485,7 +502,7 @@ export default {
               total_amount: 1200000,
               status: 'delivered',
               items: [
-                { id: 4, product_name: 'Monitor 24 inch', quantity: 6, unit_price: 200000 }
+                { id: 4, product_id: 4, product_name: 'Monitor 24 inch', quantity: 6, unit_price: 200000 }
               ]
             }
           ];
@@ -496,15 +513,16 @@ export default {
         if (productsResponse.data && productsResponse.data.data) {
           this.products = productsResponse.data.data.map(product => ({
             ...product,
-            stock: product.stock || 0
+            stock: product.stock || 0,
+            price: product.price || 0
           }));
         } else {
           // Fallback mock data
           this.products = [
-            { id: 1, name: 'Mouse Wireless', stock: 50 },
-            { id: 2, name: 'Keyboard Mechanical', stock: 30 },
-            { id: 3, name: 'Laptop Dell', stock: 15 },
-            { id: 4, name: 'Monitor 24 inch', stock: 25 }
+            { id: 1, name: 'Mouse Wireless', stock: 50, price: 75000 },
+            { id: 2, name: 'Keyboard Mechanical', stock: 30, price: 150000 },
+            { id: 3, name: 'Laptop Dell', stock: 15, price: 1250000 },
+            { id: 4, name: 'Monitor 24 inch', stock: 25, price: 200000 }
           ];
         }
       } catch (error) {
@@ -523,17 +541,17 @@ export default {
             total_amount: 2250000,
             status: 'pending',
             items: [
-              { id: 1, product_name: 'Mouse Wireless', quantity: 15, unit_price: 75000 },
-              { id: 2, product_name: 'Keyboard Mechanical', quantity: 10, unit_price: 150000 }
+              { id: 1, product_id: 1, product_name: 'Mouse Wireless', quantity: 15, unit_price: 75000 },
+              { id: 2, product_id: 2, product_name: 'Keyboard Mechanical', quantity: 10, unit_price: 150000 }
             ]
           }
         ];
         
         this.products = [
-          { id: 1, name: 'Mouse Wireless', stock: 50 },
-          { id: 2, name: 'Keyboard Mechanical', stock: 30 },
-          { id: 3, name: 'Laptop Dell', stock: 15 },
-          { id: 4, name: 'Monitor 24 inch', stock: 25 }
+            { id: 1, name: 'Mouse Wireless', stock: 50, price: 75000 },
+            { id: 2, name: 'Keyboard Mechanical', stock: 30, price: 150000 },
+            { id: 3, name: 'Laptop Dell', stock: 15, price: 1250000 },
+            { id: 4, name: 'Monitor 24 inch', stock: 25, price: 200000 }
         ];
       }
     },
@@ -541,6 +559,14 @@ export default {
       this.editingOrder = null;
       this.resetForm();
       this.generateSONumber();
+      
+      // Set default order date to today
+      const today = new Date().toISOString().split('T')[0];
+      this.form.order_date = today;
+      
+      // Add default empty item
+      this.addItem();
+      
       this.showModal = true;
     },
     editOrder(order) {
@@ -691,7 +717,8 @@ export default {
         expected_delivery: '',
         shipping_address: '',
         notes: '',
-        items: []
+        items: [],
+        total_amount: 0
       };
     },
     generateSONumber() {
@@ -707,10 +734,43 @@ export default {
         quantity: 1,
         unit_price: 0
       });
+      // Update total setelah menambah item baru
+      this.form.total_amount = this.calculateTotal();
     },
     removeItem(index) {
       this.form.items.splice(index, 1);
+      // Update total setelah menghapus item
+      this.form.total_amount = this.calculateTotal();
     },
+    updateProductPrice(index, productId) {
+      if (!productId) return;
+      
+      const product = this.products.find(p => p.id == productId);
+      if (product && product.price) {
+        // Jika produk memiliki harga, gunakan harga produk
+        this.form.items[index].unit_price = product.price;
+      } else {
+        // Jika produk tidak memiliki harga, coba cari dari data order yang ada
+        const existingItems = this.orders.flatMap(order => order.items || []);
+        const existingItem = existingItems.find(item => item.product_id == productId);
+        
+        if (existingItem) {
+          this.form.items[index].unit_price = existingItem.unit_price;
+        } else {
+          // Default ke 0 jika tidak ada harga yang ditemukan
+          this.form.items[index].unit_price = 0;
+        }
+      }
+      
+      // Update total setelah mengubah harga
+      this.updateItemTotal(index);
+    },
+    
+    updateItemTotal(index) {
+      // Update total pesanan setelah perubahan kuantitas atau harga
+      this.form.total_amount = this.calculateTotal();
+    },
+    
     calculateTotal() {
       return this.form.items.reduce((total, item) => {
         return total + (item.quantity * item.unit_price);
@@ -746,6 +806,9 @@ export default {
       
       // Update nilai pada item
       this.form.items[index].unit_price = numericValue;
+      
+      // Update total setelah mengubah harga
+      this.updateItemTotal(index);
     }
   }
 };
@@ -756,4 +819,5 @@ export default {
 @import "../../styles/sales-orders.css";
 @import "../../styles/date-price-inputs.css";
 @import "../../styles/status-notes.css";
+@import "../../styles/order-summary.css";
 </style>

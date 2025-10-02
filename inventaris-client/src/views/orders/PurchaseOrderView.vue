@@ -184,7 +184,12 @@
               <div class="order-items">
                 <h3>Order Items</h3>
                 <div v-for="(item, index) in form.items" :key="index" class="item-row">
-                  <select v-model="item.product_id" class="item-select supplier-input" required>
+                  <select 
+                    v-model="item.product_id" 
+                    class="item-select supplier-input" 
+                    required
+                    @change="updateProductPrice(index, item.product_id)"
+                  >
                     <option value="">Select Product</option>
                     <option v-for="product in products" :key="product.id" :value="String(product.id)">
                       {{ product.name }} (ID: {{ product.id }})
@@ -196,6 +201,7 @@
                     placeholder="Quantity" 
                     min="1"
                     required
+                    @input="updateItemTotal(index)"
                   >
                   <input 
                     :value="formatPriceDisplay(item.unit_price)" 
@@ -205,9 +211,19 @@
                     required
                     class="formatted-price-input"
                   >
+                  <div class="item-subtotal">
+                    {{ formatCurrency(item.quantity * item.unit_price) }}
+                  </div>
                   <button type="button" @click="removeItem(index)" class="btn-danger">Remove</button>
                 </div>
                 <button type="button" @click="addItem" class="btn-secondary">Add Item</button>
+              </div>
+
+              <div class="order-summary">
+                <div class="summary-row">
+                  <span class="summary-label">Total Order:</span>
+                  <span class="summary-value">{{ formatCurrency(calculateTotal()) }}</span>
+                </div>
               </div>
 
               <div class="form-group">
@@ -395,7 +411,8 @@ export default {
         order_date: '',
         expected_delivery: '',
         notes: '',
-        items: []
+        items: [],
+        total_amount: 0
       },
       supplierForm: {
         name: '',
@@ -640,6 +657,7 @@ export default {
           products = products.map(product => ({
             id: String(product.id || product._id), // Ensure ID is always string
             name: product.name,
+            price: product.price || 0,
             originalData: product // Keep original data for debugging
           }));
           
@@ -967,7 +985,8 @@ export default {
         order_date: '',
         expected_delivery: '',
         notes: '',
-        items: []
+        items: [],
+        total_amount: 0
       };
     },
     async generatePONumber() {
@@ -1005,9 +1024,14 @@ export default {
         quantity: 1,
         unit_price: 0  // Akan diformat secara otomatis
       });
+      
+      // Update total setelah menambah item baru
+      this.form.total_amount = this.calculateTotal();
     },
     removeItem(index) {
       this.form.items.splice(index, 1);
+      // Update total setelah menghapus item
+      this.form.total_amount = this.calculateTotal();
     },
     calculateTotal() {
       return this.form.items.reduce((total, item) => {
@@ -1033,6 +1057,41 @@ export default {
     },
     
     // Handle input pada unit price dengan format angka
+    updateProductPrice(index, productId) {
+      if (!productId) return;
+      
+      const product = this.products.find(p => String(p.id) === String(productId));
+      if (product && product.price) {
+        // Jika produk memiliki harga, gunakan harga produk
+        this.form.items[index].unit_price = product.price;
+      } else {
+        // Jika produk tidak memiliki harga, coba cari dari data order yang ada
+        const existingItems = this.orders.flatMap(order => order.items || []);
+        const existingItem = existingItems.find(item => String(item.product_id) === String(productId));
+        
+        if (existingItem) {
+          this.form.items[index].unit_price = existingItem.unit_price;
+        } else {
+          // Default ke 0 jika tidak ada harga yang ditemukan
+          this.form.items[index].unit_price = 0;
+        }
+      }
+      
+      // Update total setelah mengubah harga
+      this.updateItemTotal(index);
+    },
+    
+    updateItemTotal(index) {
+      // Update total pesanan setelah perubahan kuantitas atau harga
+      this.form.total_amount = this.calculateTotal();
+    },
+    
+    calculateTotal() {
+      return this.form.items.reduce((total, item) => {
+        return total + (item.quantity * item.unit_price);
+      }, 0);
+    },
+    
     handleUnitPriceInput(event, index) {
       // Ambil nilai dari input
       let value = event.target.value;
@@ -1045,6 +1104,9 @@ export default {
       
       // Update nilai pada item
       this.form.items[index].unit_price = numericValue;
+      
+      // Update total setelah mengubah harga
+      this.updateItemTotal(index);
       
       // Log untuk debugging
       console.log(`Updated unit price for item ${index} to ${numericValue}`);
@@ -1059,4 +1121,5 @@ export default {
 @import "../../styles/supplier-dropdown.css";
 @import "../../styles/date-price-inputs.css";
 @import "../../styles/status-notes.css";
+@import "../../styles/order-summary.css";
 </style>
