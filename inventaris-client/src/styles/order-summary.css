@@ -1,0 +1,41 @@
+.item-subtotal {
+  padding: 8px 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-weight: bold;
+  color: #28a745;
+  text-align: right;
+  min-width: 100px;
+  margin-right: 8px;
+}
+
+.order-summary {
+  margin-top: 20px;
+  border-top: 2px solid #eee;
+  padding-top: 15px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.summary-label {
+  font-weight: bold;
+  color: #333;
+}
+
+.summary-value {
+  font-weight: bold;
+  color: #28a745;
+  font-size: 1.2em;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: 3fr 1fr 2fr 2fr auto;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
