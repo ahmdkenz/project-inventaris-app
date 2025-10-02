@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "postinstall": "npm install vite"
+    "postinstall": "npm install vite",
+    "prepare": "npm install vite"
   },
   "dependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
