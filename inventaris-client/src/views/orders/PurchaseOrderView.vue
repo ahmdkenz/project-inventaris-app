@@ -187,8 +187,8 @@
                 <div v-for="(item, index) in form.items" :key="index" class="item-row">
                   <select v-model="item.product_id" class="item-select supplier-input" required>
                     <option value="">Select Product</option>
-                    <option v-for="product in products" :key="product.id" :value="product.id">
-                      {{ product.name }}
+                    <option v-for="product in products" :key="product.id" :value="String(product.id)">
+                      {{ product.name }} (ID: {{ product.id }})
                     </option>
                   </select>
                   <input 
@@ -637,11 +637,16 @@ export default {
           // Use actual product data from database
           let products = productsResponse.data.data;
           
-          // Normalize product objects to ensure consistent ID field
+          // Normalize product objects to ensure consistent ID field as string
           products = products.map(product => ({
-            id: product.id || product._id, // Handle both SQL and MongoDB style IDs
-            name: product.name
+            id: String(product.id || product._id), // Ensure ID is always string
+            name: product.name,
+            originalData: product // Keep original data for debugging
           }));
+          
+          // Log the products for debugging
+          console.log('Raw products from API:', productsResponse.data.data);
+          console.log('Normalized product IDs:', products.map(p => ({id: p.id, type: typeof p.id})));
           
           // Sort products alphabetically by name for easier selection
           products.sort((a, b) => a.name.localeCompare(b.name));
@@ -651,23 +656,23 @@ export default {
           
           console.log('Products loaded from API:', this.products.length);
         } else {
-          // Fallback mock data
+          // Fallback mock data with string IDs
           this.products = [
-            { id: 1, name: 'Mouse Wireless' },
-            { id: 2, name: 'Keyboard Mechanical' },
-            { id: 3, name: 'Laptop Dell' },
-            { id: 4, name: 'Monitor 24 inch' }
+            { id: "1", name: 'Mouse Wireless' },
+            { id: "2", name: 'Keyboard Mechanical' },
+            { id: "3", name: 'Laptop Dell' },
+            { id: "4", name: 'Monitor 24 inch' }
           ];
         }
       } catch (error) {
         console.error('Error loading products:', error);
         
-        // Fallback mock data
+        // Fallback mock data with string IDs
         this.products = [
-          { id: 1, name: 'Mouse Wireless' },
-          { id: 2, name: 'Keyboard Mechanical' },
-          { id: 3, name: 'Laptop Dell' },
-          { id: 4, name: 'Monitor 24 inch' }
+          { id: "1", name: 'Mouse Wireless' },
+          { id: "2", name: 'Keyboard Mechanical' },
+          { id: "3", name: 'Laptop Dell' },
+          { id: "4", name: 'Monitor 24 inch' }
         ];
       }
     },
@@ -818,9 +823,14 @@ export default {
 
         // Enrichment data untuk setiap item dengan nama produk
         for (const item of this.form.items) {
-          const selectedProduct = this.products.find(p => p.id == item.product_id);
+          // Pastikan product_id selalu disimpan sebagai string
+          item.product_id = String(item.product_id);
+          
+          const selectedProduct = this.products.find(p => String(p.id) === item.product_id);
           if (selectedProduct) {
             item.product_name = selectedProduct.name;
+          } else {
+            console.error(`Produk dengan ID ${item.product_id} tidak ditemukan dalam daftar produk`);
           }
         }
 
@@ -829,6 +839,20 @@ export default {
 
         // Log untuk debugging data yang dikirim
         console.log('Data yang dikirim ke backend:', this.form);
+        
+        // Log khusus untuk items
+        console.log('Detail items yang akan dikirim:', JSON.stringify(this.form.items, null, 2));
+        
+        // Debugging produk yang dipilih
+        for (const item of this.form.items) {
+          const product = this.products.find(p => String(p.id) === item.product_id);
+          console.log('Product details for item:', { 
+            product_id: item.product_id, 
+            product_id_type: typeof item.product_id,
+            product_found: !!product,
+            product_details: product
+          });
+        }
 
         // Kirim data ke backend
         const response = this.editingOrder

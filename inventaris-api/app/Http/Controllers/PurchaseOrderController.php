@@ -46,28 +46,37 @@ class PurchaseOrderController extends Controller
      */
     public function store(Request $request)
     {
+        // Log data yang diterima dari front-end untuk debugging
+        Log::info('Menerima request pembuatan purchase order baru', [
+            'request_data' => $request->all()
+        ]);
+        
         $validator = Validator::make($request->all(), [
             'po_number' => 'required|string|max:50|unique:purchase_orders',
-            'supplier_id' => 'nullable|exists:suppliers,id',
+            'supplier_id' => 'nullable',
             'supplier_name' => 'nullable|string|max:100',
             'order_date' => 'required|date',
             'expected_delivery' => 'nullable|date',
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => 'required|string', // pastikan product_id adalah string
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0'
         ]);
         
         // Validate that either supplier_id or supplier_name is provided
         if (!$request->has('supplier_id') && !$request->has('supplier_name')) {
+            Log::warning('Validasi gagal: supplier_id atau supplier_name tidak disediakan');
             return response()->json([
-                'message' => 'Validation failed',
-                'errors' => ['supplier' => ['Either supplier_id or supplier_name must be provided']]
+                'message' => 'Validasi gagal',
+                'errors' => ['supplier' => ['Supplier ID atau nama supplier harus disediakan']]
             ], 422);
         }
 
         if ($validator->fails()) {
+            Log::warning('Validasi gagal untuk purchase order', [
+                'errors' => $validator->errors()->toArray()
+            ]);
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
@@ -79,8 +88,67 @@ class PurchaseOrderController extends Controller
             foreach ($request->items as $item) {
                 $total_amount += $item['quantity'] * $item['unit_price'];
             }
+            
+            Log::info('Total amount dihitung', [
+                'total_amount' => $total_amount
+            ]);
+
+            // Verifikasi produk dan konversi data
+            $items = $request->input('items');
+            $processedItems = [];
+            
+            foreach ($items as $index => $item) {
+                // Pastikan product_id adalah string
+                $productId = (string) $item['product_id'];
+                
+                Log::info('Verifikasi produk', [
+                    'product_id' => $productId,
+                    'product_id_type' => gettype($productId)
+                ]);
+                
+                $product = Product::find($productId);
+                if (!$product) {
+                    Log::warning('Produk tidak ditemukan', [
+                        'product_id' => $productId,
+                        'index' => $index
+                    ]);
+                    
+                    // Coba dengan metode lain
+                    $product = Product::where('id', $productId)->first();
+                    
+                    if (!$product) {
+                        // Mencoba lihat semua produk untuk debug
+                        $allProducts = Product::all()->pluck('id')->toArray();
+                        Log::warning('Semua ID produk yang tersedia:', [
+                            'products' => $allProducts,
+                            'count' => count($allProducts)
+                        ]);
+                        
+                        throw new \Exception('Produk dengan ID ' . $productId . ' tidak ditemukan dalam sistem');
+                    }
+                }
+                
+                // Buat item baru dengan data yang diproses
+                $processedItem = $item;
+                $processedItem['product_id'] = $productId;
+                
+                // Tambahkan product_name jika tidak ada
+                if (!isset($processedItem['product_name'])) {
+                    $processedItem['product_name'] = $product->name;
+                }
+                
+                $processedItems[] = $processedItem;
+            }
 
             // Create purchase order using OrderService
+            Log::info('Mencoba membuat purchase order dengan data', [
+                'po_number' => $request->po_number,
+                'supplier_id' => $request->supplier_id,
+                'supplier_name' => $request->supplier_name,
+                'order_date' => $request->order_date,
+                'total_items' => count($processedItems)
+            ]);
+            
             $purchaseOrder = $this->orderService->createPurchaseOrder([
                 'po_number' => $request->po_number,
                 'supplier_id' => $request->supplier_id,
@@ -88,20 +156,28 @@ class PurchaseOrderController extends Controller
                 'order_date' => $request->order_date,
                 'expected_delivery' => $request->expected_delivery,
                 'notes' => $request->notes,
-                'items' => $request->items
+                'items' => $processedItems
             ]);
 
             DB::commit();
+            
+            Log::info('Purchase order berhasil dibuat', [
+                'id' => $purchaseOrder->id,
+                'po_number' => $purchaseOrder->po_number
+            ]);
 
             return response()->json([
-                'message' => 'Purchase order created successfully',
+                'message' => 'Purchase order berhasil dibuat',
                 'data' => $purchaseOrder->load('items.product')
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error creating purchase order: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to create purchase order', 'error' => $e->getMessage()], 500);
+            Log::error('Error membuat purchase order: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['message' => 'Gagal membuat purchase order', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -149,7 +225,7 @@ class PurchaseOrderController extends Controller
             'expected_delivery' => 'nullable|date',
             'notes' => 'nullable|string',
             'items' => 'sometimes|required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => 'required|string', // pastikan product_id adalah string
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0'
         ]);
@@ -161,7 +237,7 @@ class PurchaseOrderController extends Controller
         try {
             DB::beginTransaction();
 
-            // Update purchase order using OrderService
+            // Update purchase order data
             $updateData = [
                 'supplier_id' => $request->supplier_id,
                 'supplier_name' => $request->supplier_name,
@@ -170,8 +246,38 @@ class PurchaseOrderController extends Controller
                 'notes' => $request->notes
             ];
             
+            // Proses items jika ada
             if ($request->has('items')) {
-                $updateData['items'] = $request->items;
+                $items = $request->input('items');
+                $processedItems = [];
+                
+                foreach ($items as $index => $item) {
+                    // Pastikan product_id adalah string
+                    $productId = (string) $item['product_id'];
+                    
+                    $product = Product::find($productId);
+                    if (!$product) {
+                        // Coba dengan metode lain
+                        $product = Product::where('id', $productId)->first();
+                        
+                        if (!$product) {
+                            throw new \Exception('Produk dengan ID ' . $productId . ' tidak ditemukan');
+                        }
+                    }
+                    
+                    // Buat item baru dengan data yang diproses
+                    $processedItem = $item;
+                    $processedItem['product_id'] = $productId;
+                    
+                    // Tambahkan product_name jika tidak ada
+                    if (!isset($processedItem['product_name'])) {
+                        $processedItem['product_name'] = $product->name;
+                    }
+                    
+                    $processedItems[] = $processedItem;
+                }
+                
+                $updateData['items'] = $processedItems;
             }
             
             $purchaseOrder = $this->orderService->updatePurchaseOrder($purchaseOrder, $updateData);
@@ -185,7 +291,10 @@ class PurchaseOrderController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating purchase order: ' . $e->getMessage());
+            Log::error('Error updating purchase order: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json(['message' => 'Failed to update purchase order', 'error' => $e->getMessage()], 500);
         }
     }

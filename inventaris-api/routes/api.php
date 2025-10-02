@@ -18,6 +18,9 @@ Route::post('/register', [AuthController::class, 'register']);
 // Utility routes
 Route::get('/generate-po-number', [App\Http\Controllers\UtilityController::class, 'generatePONumber']);
 
+// Debug routes
+Route::get('/debug/check-product/{productId}', [App\Http\Controllers\DebugController::class, 'checkProduct']);
+
 // Protected routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

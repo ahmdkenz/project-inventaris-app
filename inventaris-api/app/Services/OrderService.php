@@ -78,12 +78,50 @@ class OrderService
 
             // Create order items
             foreach ($data['items'] as $item) {
-                PurchaseOrderItem::create([
+                // Get the product name from the database
+                $product = Product::find($item['product_id']);
+                
+                if (!$product) {
+                    Log::error('Produk tidak ditemukan', [
+                        'product_id' => $item['product_id'],
+                        'product_id_type' => gettype($item['product_id'])
+                    ]);
+                    throw new \Exception("Produk dengan ID '{$item['product_id']}' tidak ditemukan");
+                }
+                
+                $productName = $product->name;
+                
+                // Pastikan product_id adalah string
+                $productId = (string) $item['product_id'];
+                
+                // Log untuk debugging
+                Log::info('Membuat purchase order item', [
                     'purchase_order_id' => $purchaseOrder->id,
-                    'product_id' => $item['product_id'],
+                    'product_id' => $productId,
+                    'product_id_type' => gettype($productId),
+                    'product_name' => $item['product_name'] ?? $productName,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price']
                 ]);
+                
+                try {
+                    // Create the purchase order item with product name
+                    PurchaseOrderItem::create([
+                        'purchase_order_id' => $purchaseOrder->id,
+                        'product_id' => $productId,
+                        'product_name' => $item['product_name'] ?? $productName,
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $item['unit_price']
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Gagal membuat purchase order item: ' . $e->getMessage(), [
+                        'purchase_order_id' => $purchaseOrder->id,
+                        'product_id' => $productId,
+                        'exception' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    throw $e;
+                }
             }
 
             DB::commit();
@@ -202,13 +240,50 @@ class OrderService
                 // Create new items
                 $total = 0;
                 foreach ($data['items'] as $item) {
-                    PurchaseOrderItem::create([
+                    // Get the product name from the database
+                    $product = Product::find($item['product_id']);
+                    
+                    if (!$product) {
+                        Log::error('Produk tidak ditemukan saat memperbarui', [
+                            'product_id' => $item['product_id'],
+                            'product_id_type' => gettype($item['product_id'])
+                        ]);
+                        throw new \Exception("Produk dengan ID '{$item['product_id']}' tidak ditemukan");
+                    }
+                    
+                    $productName = $product->name;
+                    
+                    // Pastikan product_id adalah string
+                    $productId = (string) $item['product_id'];
+                    
+                    // Log untuk debugging
+                    Log::info('Memperbarui purchase order item', [
                         'purchase_order_id' => $order->id,
-                        'product_id' => $item['product_id'],
+                        'product_id' => $productId,
+                        'product_id_type' => gettype($productId),
+                        'product_name' => $item['product_name'] ?? $productName,
                         'quantity' => $item['quantity'],
                         'unit_price' => $item['unit_price']
                     ]);
-                    $total += $item['quantity'] * $item['unit_price'];
+                    
+                    try {
+                        PurchaseOrderItem::create([
+                            'purchase_order_id' => $order->id,
+                            'product_id' => $productId,
+                            'product_name' => $item['product_name'] ?? $productName,
+                            'quantity' => $item['quantity'],
+                            'unit_price' => $item['unit_price']
+                        ]);
+                        $total += $item['quantity'] * $item['unit_price'];
+                    } catch (\Exception $e) {
+                        Log::error('Gagal memperbarui purchase order item: ' . $e->getMessage(), [
+                            'purchase_order_id' => $order->id,
+                            'product_id' => $productId,
+                            'exception' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                        throw $e;
+                    }
                 }
 
                 // Update total

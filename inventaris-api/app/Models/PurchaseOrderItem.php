@@ -14,6 +14,7 @@ class PurchaseOrderItem extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        // Hubungkan dengan model Product dan tentukan kunci asing dan kunci lokal
+        return $this->belongsTo(Product::class, 'product_id', 'id');
     }
 }
