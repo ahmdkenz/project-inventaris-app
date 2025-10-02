@@ -514,15 +514,16 @@ export default {
           this.products = productsResponse.data.data.map(product => ({
             ...product,
             stock: product.stock || 0,
-            price: product.price || 0
+            price: product.price || 0,
+            selling_price: product.selling_price || product.price || 0
           }));
         } else {
           // Fallback mock data
           this.products = [
-            { id: 1, name: 'Mouse Wireless', stock: 50, price: 75000 },
-            { id: 2, name: 'Keyboard Mechanical', stock: 30, price: 150000 },
-            { id: 3, name: 'Laptop Dell', stock: 15, price: 1250000 },
-            { id: 4, name: 'Monitor 24 inch', stock: 25, price: 200000 }
+            { id: 1, name: 'Mouse Wireless', stock: 50, price: 70000, selling_price: 75000 },
+            { id: 2, name: 'Keyboard Mechanical', stock: 30, price: 130000, selling_price: 150000 },
+            { id: 3, name: 'Laptop Dell', stock: 15, price: 1150000, selling_price: 1250000 },
+            { id: 4, name: 'Monitor 24 inch', stock: 25, price: 180000, selling_price: 200000 }
           ];
         }
       } catch (error) {
@@ -746,20 +747,28 @@ export default {
       if (!productId) return;
       
       const product = this.products.find(p => p.id == productId);
-      if (product && product.price) {
-        // Jika produk memiliki harga, gunakan harga produk
-        this.form.items[index].unit_price = product.price;
-      } else {
-        // Jika produk tidak memiliki harga, coba cari dari data order yang ada
-        const existingItems = this.orders.flatMap(order => order.items || []);
-        const existingItem = existingItems.find(item => item.product_id == productId);
-        
-        if (existingItem) {
-          this.form.items[index].unit_price = existingItem.unit_price;
+      if (product) {
+        // Gunakan harga jual untuk Sales Order
+        if (product.selling_price !== undefined) {
+          this.form.items[index].unit_price = product.selling_price;
+        } else if (product.price !== undefined) {
+          // Fallback ke price jika selling_price tidak ada
+          this.form.items[index].unit_price = product.price;
         } else {
-          // Default ke 0 jika tidak ada harga yang ditemukan
-          this.form.items[index].unit_price = 0;
+          // Coba cari dari data order yang ada
+          const existingItems = this.orders.flatMap(order => order.items || []);
+          const existingItem = existingItems.find(item => item.product_id == productId);
+          
+          if (existingItem) {
+            this.form.items[index].unit_price = existingItem.unit_price;
+          } else {
+            // Default ke 0 jika tidak ada harga yang ditemukan
+            this.form.items[index].unit_price = 0;
+          }
         }
+      } else {
+        // Produk tidak ditemukan, set harga default
+        this.form.items[index].unit_price = 0;
       }
       
       // Update total setelah mengubah harga

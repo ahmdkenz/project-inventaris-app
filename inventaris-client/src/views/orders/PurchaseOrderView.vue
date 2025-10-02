@@ -658,6 +658,7 @@ export default {
             id: String(product.id || product._id), // Ensure ID is always string
             name: product.name,
             price: product.price || 0,
+            purchase_price: product.purchase_price || product.price || 0, // Tambahkan purchase_price
             originalData: product // Keep original data for debugging
           }));
           
@@ -675,10 +676,10 @@ export default {
         } else {
           // Fallback mock data with string IDs
           this.products = [
-            { id: "1", name: 'Mouse Wireless' },
-            { id: "2", name: 'Keyboard Mechanical' },
-            { id: "3", name: 'Laptop Dell' },
-            { id: "4", name: 'Monitor 24 inch' }
+            { id: "1", name: 'Mouse Wireless', price: 70000, purchase_price: 60000 },
+            { id: "2", name: 'Keyboard Mechanical', price: 130000, purchase_price: 110000 },
+            { id: "3", name: 'Laptop Dell', price: 1150000, purchase_price: 1000000 },
+            { id: "4", name: 'Monitor 24 inch', price: 180000, purchase_price: 160000 }
           ];
         }
       } catch (error) {
@@ -686,10 +687,10 @@ export default {
         
         // Fallback mock data with string IDs
         this.products = [
-          { id: "1", name: 'Mouse Wireless' },
-          { id: "2", name: 'Keyboard Mechanical' },
-          { id: "3", name: 'Laptop Dell' },
-          { id: "4", name: 'Monitor 24 inch' }
+          { id: "1", name: 'Mouse Wireless', price: 70000, purchase_price: 60000 },
+          { id: "2", name: 'Keyboard Mechanical', price: 130000, purchase_price: 110000 },
+          { id: "3", name: 'Laptop Dell', price: 1150000, purchase_price: 1000000 },
+          { id: "4", name: 'Monitor 24 inch', price: 180000, purchase_price: 160000 }
         ];
       }
     },
@@ -1061,20 +1062,28 @@ export default {
       if (!productId) return;
       
       const product = this.products.find(p => String(p.id) === String(productId));
-      if (product && product.price) {
-        // Jika produk memiliki harga, gunakan harga produk
-        this.form.items[index].unit_price = product.price;
-      } else {
-        // Jika produk tidak memiliki harga, coba cari dari data order yang ada
-        const existingItems = this.orders.flatMap(order => order.items || []);
-        const existingItem = existingItems.find(item => String(item.product_id) === String(productId));
-        
-        if (existingItem) {
-          this.form.items[index].unit_price = existingItem.unit_price;
+      if (product) {
+        // Gunakan purchase_price jika tersedia, jika tidak gunakan price
+        if (product.purchase_price !== undefined) {
+          this.form.items[index].unit_price = product.purchase_price;
+        } else if (product.price !== undefined) {
+          // Fallback ke price jika purchase_price tidak ada
+          this.form.items[index].unit_price = product.price;
         } else {
-          // Default ke 0 jika tidak ada harga yang ditemukan
-          this.form.items[index].unit_price = 0;
+          // Jika tidak ada harga, coba cari dari data order yang ada
+          const existingItems = this.orders.flatMap(order => order.items || []);
+          const existingItem = existingItems.find(item => String(item.product_id) === String(productId));
+          
+          if (existingItem) {
+            this.form.items[index].unit_price = existingItem.unit_price;
+          } else {
+            // Default ke 0 jika tidak ada harga yang ditemukan
+            this.form.items[index].unit_price = 0;
+          }
         }
+      } else {
+        // Produk tidak ditemukan, set harga default
+        this.form.items[index].unit_price = 0;
       }
       
       // Update total setelah mengubah harga
