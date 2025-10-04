@@ -314,7 +314,10 @@
         <div class="modal" @click.stop>
           <div class="modal-header">
             <h2>Purchase Order Details</h2>
-            <button @click="closeViewModal" class="close-btn">×</button>
+            <div class="header-buttons">
+              <button @click="printPurchaseOrder" class="print-btn">Print</button>
+              <button @click="closeViewModal" class="close-btn">×</button>
+            </div>
           </div>
           <div class="modal-body">
             <div v-if="selectedOrder" class="order-details">
@@ -914,6 +917,212 @@ export default {
       this.selectedOrder = null;
     },
     
+    printPurchaseOrder() {
+      if (!this.selectedOrder) return;
+      
+      // Membuat konten yang akan dicetak
+      const printContent = this.generatePurchaseOrderPrintContent();
+      
+      // Membuat jendela cetak baru
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      
+      // Tunggu hingga gambar dan stylesheet dimuat lalu cetak
+      setTimeout(() => {
+        printWindow.print();
+        // printWindow.close(); // Dikomentari agar user bisa menutup sendiri jendela cetak
+      }, 500);
+    },
+    
+    generatePurchaseOrderPrintContent() {
+      const order = this.selectedOrder;
+      const date = new Date().toLocaleDateString('id-ID');
+      
+      // Buat tabel item pesanan
+      let itemsTableHTML = `
+        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th>No</th>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      
+      let totalAmount = 0;
+      order.items.forEach((item, index) => {
+        const itemTotal = item.quantity * item.unit_price;
+        totalAmount += itemTotal;
+        itemsTableHTML += `
+          <tr>
+            <td style="text-align: center;">${index + 1}</td>
+            <td>${item.product ? item.product.name : item.product_name || 'Unknown Product'}</td>
+            <td style="text-align: center;">${item.quantity}</td>
+            <td style="text-align: right;">${this.formatCurrency(item.unit_price)}</td>
+            <td style="text-align: right;">${this.formatCurrency(itemTotal)}</td>
+          </tr>
+        `;
+      });
+      
+      itemsTableHTML += `
+          </tbody>
+          <tfoot>
+            <tr style="font-weight: bold; background-color: #f2f2f2;">
+              <td colspan="4" style="text-align: right;">Total</td>
+              <td style="text-align: right;">${this.formatCurrency(totalAmount)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Purchase Order - ${order.po_number}</title>
+          <meta charset="utf-8">
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 20px;
+              font-size: 14px;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+            }
+            .header h1 {
+              margin: 0;
+              color: #333;
+            }
+            .company-info {
+              margin-bottom: 20px;
+            }
+            .order-info {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 20px;
+            }
+            .supplier-info, .order-details {
+              width: 48%;
+            }
+            .section-title {
+              background-color: #f2f2f2;
+              padding: 5px 10px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            .info-row {
+              margin-bottom: 5px;
+            }
+            .label {
+              font-weight: bold;
+              display: inline-block;
+              width: 140px;
+            }
+            .notes {
+              margin-top: 20px;
+              margin-bottom: 30px;
+              padding: 10px;
+              border: 1px dashed #ccc;
+            }
+            .footer {
+              margin-top: 50px;
+              text-align: center;
+              font-size: 12px;
+              color: #777;
+            }
+            @media print {
+              body {
+                padding: 0;
+                margin: 0;
+              }
+              button {
+                display: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>PURCHASE ORDER</h1>
+            <p>Print Date: ${date}</p>
+          </div>
+          
+          <div class="company-info">
+            <h2>PT. Inventaris App</h2>
+            <p>Jl. Contoh No. 123, Jakarta Selatan<br>
+            Telp: (021) 123-4567<br>
+            Email: procurement@inventaris-app.com</p>
+          </div>
+          
+          <div class="order-info">
+            <div class="supplier-info">
+              <div class="section-title">SUPPLIER INFORMATION</div>
+              <div class="info-row">
+                <span class="label">Supplier Name:</span> ${order.supplier_name}
+              </div>
+              <div class="info-row">
+                <span class="label">Email:</span> ${order.supplier ? order.supplier.email || '-' : '-'}
+              </div>
+              <div class="info-row">
+                <span class="label">Phone:</span> ${order.supplier ? order.supplier.phone || '-' : '-'}
+              </div>
+              <div class="info-row">
+                <span class="label">Address:</span> ${order.supplier ? order.supplier.address || '-' : '-'}
+              </div>
+            </div>
+            
+            <div class="order-details">
+              <div class="section-title">ORDER DETAILS</div>
+              <div class="info-row">
+                <span class="label">PO Number:</span> ${order.po_number}
+              </div>
+              <div class="info-row">
+                <span class="label">Order Date:</span> ${this.formatDate(order.order_date)}
+              </div>
+              <div class="info-row">
+                <span class="label">Status:</span> ${order.status}
+              </div>
+            </div>
+          </div>
+          
+          <div class="section-title">ORDER ITEMS</div>
+          ${itemsTableHTML}
+          
+          ${order.notes ? `
+          <div class="notes">
+            <strong>Notes:</strong><br>
+            ${order.notes}
+          </div>
+          ` : ''}
+          
+          <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+            <div style="width: 30%; text-align: center;">
+              <div>Approved By</div>
+              <div style="margin-top: 70px;">( ________________ )</div>
+            </div>
+            
+            <div style="width: 30%; text-align: center;">
+              <div>Procurement Officer</div>
+              <div style="margin-top: 70px;">( ________________ )</div>
+            </div>
+          </div>
+          
+          <div class="footer">
+            <p>This document is automatically generated and valid without signature</p>
+          </div>
+        </body>
+        </html>
+      `;
+    },
+    
     async showQuickAddSupplierModal() {
       // Pastikan data supplier terupdate terlebih dahulu
       await this.loadSuppliers();
@@ -1131,4 +1340,5 @@ export default {
 @import "../../styles/date-price-inputs.css";
 @import "../../styles/status-notes.css";
 @import "../../styles/order-summary.css";
+@import "../../styles/print-buttons.css";
 </style>

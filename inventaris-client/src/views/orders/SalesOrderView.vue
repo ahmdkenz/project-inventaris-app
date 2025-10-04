@@ -239,7 +239,10 @@
       <div class="modal" @click.stop>
         <div class="modal-header">
           <h2>Detail Pesanan Penjualan</h2>
-          <button @click="closeViewModal" class="close-btn">×</button>
+          <div class="header-buttons">
+            <button @click="printSalesOrder" class="print-btn">Cetak</button>
+            <button @click="closeViewModal" class="close-btn">×</button>
+          </div>
         </div>
         <div class="modal-body">
           <div v-if="selectedOrder" class="order-details">
@@ -612,6 +615,216 @@ export default {
       this.showViewModal = false;
       this.selectedOrder = null;
     },
+    
+    printSalesOrder() {
+      if (!this.selectedOrder) return;
+      
+      // Membuat konten yang akan dicetak
+      const printContent = this.generateSalesOrderPrintContent();
+      
+      // Membuat jendela cetak baru
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      
+      // Tunggu hingga gambar dan stylesheet dimuat lalu cetak
+      setTimeout(() => {
+        printWindow.print();
+        // printWindow.close(); // Dikomentari agar user bisa menutup sendiri jendela cetak
+      }, 500);
+    },
+    
+    generateSalesOrderPrintContent() {
+      const order = this.selectedOrder;
+      const date = new Date().toLocaleDateString('id-ID');
+      
+      // Buat tabel item pesanan
+      let itemsTableHTML = `
+        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th>No</th>
+              <th>Produk</th>
+              <th>Jumlah</th>
+              <th>Harga Satuan</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      
+      let totalAmount = 0;
+      order.items.forEach((item, index) => {
+        const itemTotal = item.quantity * item.unit_price;
+        totalAmount += itemTotal;
+        itemsTableHTML += `
+          <tr>
+            <td style="text-align: center;">${index + 1}</td>
+            <td>${item.product ? item.product.name : item.product_name || 'Produk tidak diketahui'}</td>
+            <td style="text-align: center;">${item.quantity}</td>
+            <td style="text-align: right;">${this.formatCurrency(item.unit_price)}</td>
+            <td style="text-align: right;">${this.formatCurrency(itemTotal)}</td>
+          </tr>
+        `;
+      });
+      
+      itemsTableHTML += `
+          </tbody>
+          <tfoot>
+            <tr style="font-weight: bold; background-color: #f2f2f2;">
+              <td colspan="4" style="text-align: right;">Total</td>
+              <td style="text-align: right;">${this.formatCurrency(totalAmount)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Sales Order - ${order.so_number}</title>
+          <meta charset="utf-8">
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 20px;
+              font-size: 14px;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+            }
+            .header h1 {
+              margin: 0;
+              color: #333;
+            }
+            .company-info {
+              margin-bottom: 20px;
+            }
+            .order-info {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 20px;
+            }
+            .customer-info, .order-details {
+              width: 48%;
+            }
+            .section-title {
+              background-color: #f2f2f2;
+              padding: 5px 10px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            .info-row {
+              margin-bottom: 5px;
+            }
+            .label {
+              font-weight: bold;
+              display: inline-block;
+              width: 140px;
+            }
+            .shipping-info {
+              margin-top: 20px;
+              margin-bottom: 20px;
+            }
+            .notes {
+              margin-top: 20px;
+              margin-bottom: 30px;
+              padding: 10px;
+              border: 1px dashed #ccc;
+            }
+            .footer {
+              margin-top: 50px;
+              text-align: center;
+              font-size: 12px;
+              color: #777;
+            }
+            @media print {
+              body {
+                padding: 0;
+                margin: 0;
+              }
+              button {
+                display: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>PESANAN PENJUALAN</h1>
+            <p>Tanggal Cetak: ${date}</p>
+          </div>
+          
+          <div class="company-info">
+            <h2>PT. Inventaris App</h2>
+            <p>Jl. Contoh No. 123, Jakarta Selatan<br>
+            Telp: (021) 123-4567<br>
+            Email: info@inventaris-app.com</p>
+          </div>
+          
+          <div class="order-info">
+            <div class="customer-info">
+              <div class="section-title">DATA PELANGGAN</div>
+              <div class="info-row">
+                <span class="label">Nama:</span> ${order.customer_name}
+              </div>
+              <div class="info-row">
+                <span class="label">Email:</span> ${order.customer_email || '-'}
+              </div>
+              <div class="info-row">
+                <span class="label">Telepon:</span> ${order.customer_phone || '-'}
+              </div>
+              <div class="info-row">
+                <span class="label">Alamat:</span> ${order.shipping_address || '-'}
+              </div>
+            </div>
+            
+            <div class="order-details">
+              <div class="section-title">DETAIL PESANAN</div>
+              <div class="info-row">
+                <span class="label">No. Pesanan:</span> ${order.so_number}
+              </div>
+              <div class="info-row">
+                <span class="label">Tanggal Pesan:</span> ${this.formatDate(order.order_date)}
+              </div>
+              <div class="info-row">
+                <span class="label">Perkiraan Kirim:</span> ${order.expected_delivery ? this.formatDate(order.expected_delivery) : '-'}
+              </div>
+            </div>
+          </div>
+          
+          <div class="section-title">ITEM PESANAN</div>
+          ${itemsTableHTML}
+          
+          ${order.notes ? `
+          <div class="notes">
+            <strong>Catatan:</strong><br>
+            ${order.notes}
+          </div>
+          ` : ''}
+          
+          <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+            <div style="width: 30%; text-align: center;">
+              <div>Pelanggan</div>
+              <div style="margin-top: 70px;">( ${order.customer_name} )</div>
+            </div>
+            
+            <div style="width: 30%; text-align: center;">
+              <div>Hormat Kami</div>
+              <div style="margin-top: 70px;">( ________________ )</div>
+            </div>
+          </div>
+          
+          <div class="footer">
+            <p>Dokumen ini dicetak secara otomatis dan sah tanpa tanda tangan</p>
+          </div>
+        </body>
+        </html>
+      `;
+    },
     resetForm() {
       this.form = {
         so_number: '',
@@ -733,4 +946,5 @@ export default {
 @import "../../styles/date-price-inputs.css";
 @import "../../styles/status-notes.css";
 @import "../../styles/order-summary.css";
+@import "../../styles/print-buttons.css";
 </style>
