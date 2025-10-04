@@ -36,7 +36,7 @@ return [
     ],
 
     'firebase' => [
-        'credentials' => 'd:/My Programs/Project/project-inventaris-app/inventaris-api/storage/app/firebase/firebase_credentials.json',
+        'credentials' => env('FIREBASE_CREDENTIALS_PATH', 'd:/My Programs/Project/project-inventaris-app/inventaris-api/storage/app/firebase/firebase_credentials.json'),
         'database_url' => env('FIREBASE_DATABASE_URL', 'https://project-inventaris-apps-default-rtdb.firebaseio.com/'),
         'project_id' => env('FIREBASE_PROJECT_ID', 'project-inventaris-apps'),
     ],

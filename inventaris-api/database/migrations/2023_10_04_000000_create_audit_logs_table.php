@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable(); // User yang melakukan aksi
+            $table->string('user_id', 20)->nullable(); // User yang melakukan aksi (string untuk kompatibilitas dengan users.id)
             $table->string('action'); // Create, Update, Delete, etc.
             $table->string('model_type'); // Model yang dimodifikasi
-            $table->unsignedBigInteger('model_id')->nullable(); // ID dari model yang dimodifikasi
+            $table->string('model_id', 20)->nullable(); // ID dari model yang dimodifikasi (string untuk kompatibilitas)
             $table->text('old_values')->nullable(); // Nilai sebelum perubahan (JSON)
             $table->text('new_values')->nullable(); // Nilai setelah perubahan (JSON)
             $table->string('url')->nullable(); // URL yang memicu aksi

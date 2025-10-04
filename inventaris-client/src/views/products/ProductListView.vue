@@ -198,7 +198,12 @@ export default {
       }
     },
     async loadProducts() {
+      console.log('Starting to load products...');
       try {
+        // Tampilkan token yang akan digunakan
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+        console.log('Token available:', !!token);
+        
         const response = await axios.get('/products', {
           params: {
             search: this.searchQuery,
@@ -211,24 +216,32 @@ export default {
           }
         });
         
+        console.log('Products API response:', response.status, response.data);
+        
         if (response.data && response.data.data) {
           this.products = response.data.data;
+          console.log('Products loaded:', this.products.length);
           this.filteredProducts = [...this.products];
           // Extract unique categories from products
           this.categories = [...new Set(this.products.map(product => product.category).filter(Boolean))];
           
           // Save last update timestamp
           this.lastUpdate = new Date();
+        } else {
+          console.warn('Response data structure is unexpected:', response.data);
         }
       } catch (error) {
-        console.error('Error loading products:', error);
+        console.error('Error loading products:', error.response?.status, error.message);
+        console.error('Details:', error.response?.data);
+        
         // Only use fallback mock data if no products are loaded yet
         if (!this.products.length) {
+          console.warn('Using fallback mock data');
           this.products = [
-            { id: 1, name: 'Laptop Dell', category: 'Electronics', purchase_price: 800, selling_price: 999, stock: 15, status: 'active' },
-            { id: 2, name: 'Mouse Wireless', category: 'Electronics', purchase_price: 15, selling_price: 25, stock: 5, status: 'active' },
-            { id: 3, name: 'T-Shirt', category: 'Clothing', purchase_price: 10, selling_price: 20, stock: 50, status: 'active' },
-            { id: 4, name: 'Programming Book', category: 'Books', purchase_price: 30, selling_price: 45, stock: 8, status: 'inactive' }
+            { id: 'PRD-MOCK-001', name: 'Laptop Dell', category: 'Electronics', purchase_price: 800, selling_price: 999, stock: 15, status: 'active' },
+            { id: 'PRD-MOCK-002', name: 'Mouse Wireless', category: 'Electronics', purchase_price: 15, selling_price: 25, stock: 5, status: 'active' },
+            { id: 'PRD-MOCK-003', name: 'T-Shirt', category: 'Clothing', purchase_price: 10, selling_price: 20, stock: 50, status: 'active' },
+            { id: 'PRD-MOCK-004', name: 'Programming Book', category: 'Books', purchase_price: 30, selling_price: 45, stock: 8, status: 'inactive' }
           ];
           this.filteredProducts = [...this.products];
         }

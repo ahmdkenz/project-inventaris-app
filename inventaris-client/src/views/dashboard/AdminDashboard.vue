@@ -154,6 +154,7 @@ export default {
         console.error('Logout error:', error);
       } finally {
         localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
         localStorage.removeItem('user');
         this.$router.push('/login');
       }
