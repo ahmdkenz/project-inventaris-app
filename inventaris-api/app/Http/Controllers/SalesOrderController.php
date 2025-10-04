@@ -94,13 +94,38 @@ class SalesOrderController extends Controller
                 'status' => 'pending'
             ]);
 
-            // Add items
+            // Add items and reduce stock immediately
             foreach ($request->items as $item) {
                 $salesOrder->items()->create([
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price']
                 ]);
+                
+                // Update product stock immediately
+                $product = Product::find($item['product_id']);
+                $oldStock = $product->stock;
+                $newStock = $oldStock - $item['quantity'];
+                
+                // Update product stock
+                $product->update(['stock' => $newStock]);
+
+                // Create transaction record
+                try {
+                    Transaction::create([
+                        'product_id' => $item['product_id'],
+                        'type' => 'out',
+                        'quantity' => $item['quantity'],
+                        'description' => 'Stock reduced for new SO: ' . $salesOrder->so_number,
+                        'user_id' => auth()->id() ?? 1, // Default to admin if not authenticated
+                        'old_stock' => $oldStock,
+                        'new_stock' => $newStock,
+                        'price' => $item['unit_price']
+                    ]);
+                } catch (\Exception $transactionError) {
+                    Log::error('Transaction creation error: ' . $transactionError->getMessage());
+                    throw $transactionError; // Re-throw to trigger rollback
+                }
             }
 
             DB::commit();
@@ -203,10 +228,35 @@ class SalesOrderController extends Controller
 
             // Update items if provided
             if ($request->has('items')) {
+                // Get current items to restore stock
+                $currentItems = $salesOrder->items()->get();
+                
+                // Return stock for items that will be removed or updated
+                foreach ($currentItems as $currentItem) {
+                    $product = Product::find($currentItem->product_id);
+                    $oldStock = $product->stock;
+                    $newStock = $oldStock + $currentItem->quantity;
+                    
+                    // Update product stock (return the items)
+                    $product->update(['stock' => $newStock]);
+                    
+                    // Create transaction record for returned stock
+                    Transaction::create([
+                        'product_id' => $currentItem->product_id,
+                        'type' => 'in',
+                        'quantity' => $currentItem->quantity,
+                        'description' => 'Stock returned on SO update: ' . $salesOrder->so_number,
+                        'user_id' => auth()->id() ?? 1,
+                        'old_stock' => $oldStock,
+                        'new_stock' => $newStock,
+                        'price' => $currentItem->unit_price
+                    ]);
+                }
+                
                 // Remove existing items
                 $salesOrder->items()->delete();
                 
-                // Add new items
+                // Add new items and adjust stock
                 $total_amount = 0;
                 foreach ($request->items as $item) {
                     $salesOrder->items()->create([
@@ -215,6 +265,26 @@ class SalesOrderController extends Controller
                         'unit_price' => $item['unit_price']
                     ]);
                     $total_amount += $item['quantity'] * $item['unit_price'];
+                    
+                    // Reduce stock for new items
+                    $product = Product::find($item['product_id']);
+                    $oldStock = $product->stock;
+                    $newStock = $oldStock - $item['quantity'];
+                    
+                    // Update product stock
+                    $product->update(['stock' => $newStock]);
+                    
+                    // Create transaction record
+                    Transaction::create([
+                        'product_id' => $item['product_id'],
+                        'type' => 'out',
+                        'quantity' => $item['quantity'],
+                        'description' => 'Stock reduced on SO update: ' . $salesOrder->so_number,
+                        'user_id' => auth()->id() ?? 1,
+                        'old_stock' => $oldStock,
+                        'new_stock' => $newStock,
+                        'price' => $item['unit_price']
+                    ]);
                 }
 
                 // Update total amount
@@ -256,6 +326,31 @@ class SalesOrderController extends Controller
 
         try {
             DB::beginTransaction();
+            
+            // Get items before deletion to restore stock
+            $items = $salesOrder->items()->get();
+            
+            // Return stock for all items
+            foreach ($items as $item) {
+                $product = Product::find($item->product_id);
+                $oldStock = $product->stock;
+                $newStock = $oldStock + $item->quantity;
+                
+                // Update product stock (return the items)
+                $product->update(['stock' => $newStock]);
+                
+                // Create transaction record for returned stock
+                Transaction::create([
+                    'product_id' => $item->product_id,
+                    'type' => 'in',
+                    'quantity' => $item->quantity,
+                    'description' => 'Stock returned from deleted SO: ' . $salesOrder->so_number,
+                    'user_id' => auth()->id() ?? 1,
+                    'old_stock' => $oldStock,
+                    'new_stock' => $newStock,
+                    'price' => $item->unit_price
+                ]);
+            }
 
             // Delete items first
             $salesOrder->items()->delete();

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 02, 2025 at 12:34 PM
+-- Generation Time: Oct 04, 2025 at 03:16 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -61,7 +61,13 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (22, '2025_09_30_104845_create_suppliers_table', 16),
 (23, '2025_10_01_175443_add_po_number_to_purchase_orders', 17),
 (24, '2025_10_01_175658_add_index_to_po_number', 18),
-(25, '2025_10_01_180018_add_supplier_name_to_purchase_orders', 19);
+(25, '2025_10_01_180018_add_supplier_name_to_purchase_orders', 19),
+(26, '2025_10_02_000001_create_missing_purchase_order_items_table', 20),
+(27, '2025_10_02_110000_recreate_purchase_order_items_table', 21),
+(28, '2025_10_02_145201_fix_purchase_orders_schema', 22),
+(29, '2025_10_02_161927_update_product_id_type_in_sales_order_items', 23),
+(30, '2025_10_02_180000_update_sales_orders_add_missing_columns', 24),
+(31, '2023_07_25_000001_add_missing_columns_to_sales_orders_table', 25);
 
 -- --------------------------------------------------------
 
@@ -157,7 +163,30 @@ INSERT INTO `personal_access_tokens` (`id`, `tokenable_id`, `tokenable_type`, `n
 (99, 'USR-148539-2517', 'App\\Models\\User', 'authToken', '46b3d60bf93737c1b2b94fa2b4cd616bff5eaf8389ad49262a91c3e7867e0db4', '[\"*\"]', '2025-09-30 06:39:53', NULL, '2025-09-30 06:39:25', '2025-09-30 06:39:53'),
 (100, 'USR-148539-4386', 'App\\Models\\User', 'authToken', '4d4a215e912afee02f8b2f8236de1ba8c8f0a5a07bc8bbf6e128921ef1e9057f', '[\"*\"]', '2025-10-01 10:37:04', NULL, '2025-10-01 10:36:51', '2025-10-01 10:37:04'),
 (101, 'USR-148539-2517', 'App\\Models\\User', 'authToken', 'ccbbc73f552303034551c1d0efd47f9d425e741ce3bb21ed8c19ed6f3aa48610', '[\"*\"]', '2025-10-01 11:08:48', NULL, '2025-10-01 10:37:52', '2025-10-01 11:08:48'),
-(102, 'USR-148539-4386', 'App\\Models\\User', 'authToken', 'f5eb86ed2d1ab1b6b7ed9e80fa88fbe77ea51bf9d44322c21f1b7379b0d1b653', '[\"*\"]', '2025-10-02 04:20:15', NULL, '2025-10-02 04:11:30', '2025-10-02 04:20:15');
+(102, 'USR-148539-4386', 'App\\Models\\User', 'authToken', 'f5eb86ed2d1ab1b6b7ed9e80fa88fbe77ea51bf9d44322c21f1b7379b0d1b653', '[\"*\"]', '2025-10-02 04:20:15', NULL, '2025-10-02 04:11:30', '2025-10-02 04:20:15'),
+(103, 'USR-148539-4386', 'App\\Models\\User', 'authToken', 'f5b71b9cfcf8c4dfd63dd778731f6493b242276ade6b6e7f376742d123b964f5', '[\"*\"]', '2025-10-02 06:52:07', NULL, '2025-10-02 06:49:12', '2025-10-02 06:52:07'),
+(104, 'USR-148539-4386', 'App\\Models\\User', 'authToken', 'a0c53153595ab6d6ddfc232e8ab3510cb299fbdd0a325c96b95845f55dbe9cb5', '[\"*\"]', '2025-10-02 07:12:05', NULL, '2025-10-02 07:10:34', '2025-10-02 07:12:05'),
+(105, 'USR-148539-2517', 'App\\Models\\User', 'authToken', '11cf90d56b0ebaccde7e7582c2ebf01f3d6243c5ba105007415f201991697f47', '[\"*\"]', '2025-10-02 07:31:35', NULL, '2025-10-02 07:12:06', '2025-10-02 07:31:35'),
+(106, 'USR-148539-2517', 'App\\Models\\User', 'authToken', '88e1a892c3832ccfa62828272cad981597c244374298790684ad60832d89767c', '[\"*\"]', '2025-10-02 07:54:12', NULL, '2025-10-02 07:34:06', '2025-10-02 07:54:12'),
+(107, 'USR-148539-4386', 'App\\Models\\User', 'authToken', 'a4f86ddb3faf52d42b1178d0b37e720e7d2b3c2580975fbc30c741fda0b5da0a', '[\"*\"]', '2025-10-02 07:54:50', NULL, '2025-10-02 07:54:24', '2025-10-02 07:54:50'),
+(108, 'USR-148539-2517', 'App\\Models\\User', 'authToken', 'a51488eb12d99d3a4c845fb946255bf2f2139b33beb3285ffde4351165474a1e', '[\"*\"]', '2025-10-02 09:52:34', NULL, '2025-10-02 07:54:56', '2025-10-02 09:52:34'),
+(109, 'USR-148539-4386', 'App\\Models\\User', 'authToken', '85976094fcf6ffc7ebaa207dae56f902c765d068ffd678c04206d45e320ad777', '[\"*\"]', NULL, NULL, '2025-10-02 09:41:03', '2025-10-02 09:41:03'),
+(110, 'USR-148539-4386', 'App\\Models\\User', 'authToken', 'c0d85a4cc200b5bad22c03c6dc2738cf7972cbc99d0af5bf0731622e8053ea9a', '[\"*\"]', NULL, NULL, '2025-10-02 09:42:41', '2025-10-02 09:42:41'),
+(111, 'USR-148539-4386', 'App\\Models\\User', 'authToken', 'd9a1cabd8f9e3529087793268fe43cd7b85dc7f05eb6152b96840bfb16fac3df', '[\"*\"]', NULL, NULL, '2025-10-02 09:45:12', '2025-10-02 09:45:12'),
+(112, 'USR-148539-4386', 'App\\Models\\User', 'authToken', '7eddbf0e0fffefed3aea85de9ed0e9882914df28db5ffd8faa20a20ea1b76419', '[\"*\"]', NULL, NULL, '2025-10-02 09:45:21', '2025-10-02 09:45:21'),
+(113, 'USR-148539-4386', 'App\\Models\\User', 'authToken', '22619ffdbf7512f740eba8bb939b37579f423f8b62b7db45130e2c047ecd7e28', '[\"*\"]', NULL, NULL, '2025-10-02 09:45:30', '2025-10-02 09:45:30'),
+(114, 'USR-148539-4386', 'App\\Models\\User', 'authToken', '2aff3bd8e87a195efda74dd855c2918cf775806899533d9f2d45896d32a90196', '[\"*\"]', NULL, NULL, '2025-10-02 09:45:41', '2025-10-02 09:45:41'),
+(115, 'USR-1759423786-9278', 'App\\Models\\User', 'authToken', 'bd39b31c24eecd5e45d034e74bf68c3d1c331a5843abb49b25a02d986ba2b50e', '[\"*\"]', NULL, NULL, '2025-10-02 09:49:57', '2025-10-02 09:49:57'),
+(116, 'USR-1759423786-9278', 'App\\Models\\User', 'authToken', '34e27861fdf6d3c3786e4fc2d66cd8332e7c0b3c8ea75388f7f82e960d92459b', '[\"*\"]', NULL, NULL, '2025-10-02 09:50:42', '2025-10-02 09:50:42'),
+(117, 'USR-148539-4386', 'App\\Models\\User', 'authToken', 'a59cd8c819a4c6811a6bd181f5557d6e834dce69b0203beb22b82f55943d66d7', '[\"*\"]', '2025-10-02 09:53:13', NULL, '2025-10-02 09:52:56', '2025-10-02 09:53:13'),
+(118, 'USR-148539-2517', 'App\\Models\\User', 'authToken', '60f58070f7ad18cb5afc941fe9258aa11a71f225b79b08c037b9881cc61bf92e', '[\"*\"]', '2025-10-02 10:01:04', NULL, '2025-10-02 09:53:20', '2025-10-02 10:01:04'),
+(119, 'USR-148539-4386', 'App\\Models\\User', 'authToken', 'be32bae6d37027ca3e40cf48f509ea52fff25a5cfc5c65692fde1a071a49bf99', '[\"*\"]', '2025-10-02 10:01:37', NULL, '2025-10-02 10:01:11', '2025-10-02 10:01:37'),
+(120, 'USR-148539-2517', 'App\\Models\\User', 'authToken', 'bde073d58831be0dba4cac1eee5cff7ad0f212341a1593a0a50789e78c5aa2b5', '[\"*\"]', '2025-10-02 10:33:59', NULL, '2025-10-02 10:01:42', '2025-10-02 10:33:59'),
+(121, 'USR-148539-2517', 'App\\Models\\User', 'authToken', 'e79bce96ff9395b8eb64ecbab41063e78b30cb3f299def9758ce1e916c07ba21', '[\"*\"]', '2025-10-03 19:09:39', NULL, '2025-10-03 19:07:39', '2025-10-03 19:09:39'),
+(122, 'USR-148539-4386', 'App\\Models\\User', 'authToken', 'e4d292b5686f462ee36566cd78b777f8da001b2261b78efb3c21d6f111f64f0a', '[\"*\"]', '2025-10-03 19:11:28', NULL, '2025-10-03 19:09:52', '2025-10-03 19:11:28'),
+(123, 'USR-148539-2517', 'App\\Models\\User', 'authToken', '0dcaa06c24592f79ec4f5f3f450ebc043ecdae2930a6ffeca21b1e408a3d9f68', '[\"*\"]', '2025-10-03 19:49:41', NULL, '2025-10-03 19:11:33', '2025-10-03 19:49:41'),
+(124, 'USR-148539-4386', 'App\\Models\\User', 'authToken', '6fd49c55aa9857444514dff8ce23b23d46fd0bf08a19f30da13b3de05a45535b', '[\"*\"]', '2025-10-03 19:51:05', NULL, '2025-10-03 19:49:49', '2025-10-03 19:51:05'),
+(125, 'USR-148539-2517', 'App\\Models\\User', 'authToken', 'dc543faa44b06f63c8f1a1c6c82f55e9c0824a9e2c015212c40323f1f7ae1130', '[\"*\"]', '2025-10-03 19:59:39', NULL, '2025-10-03 19:51:03', '2025-10-03 19:59:39');
 
 -- --------------------------------------------------------
 
@@ -200,6 +229,8 @@ CREATE TABLE `purchase_orders` (
   `id` bigint UNSIGNED NOT NULL,
   `po_number` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `supplier_id` bigint UNSIGNED NOT NULL,
+  `order_date` date NOT NULL,
+  `expected_delivery` date DEFAULT NULL,
   `supplier_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `total_amount` decimal(10,2) NOT NULL,
   `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -209,6 +240,37 @@ CREATE TABLE `purchase_orders` (
   `notes` text COLLATE utf8mb4_unicode_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `purchase_orders`
+--
+
+INSERT INTO `purchase_orders` (`id`, `po_number`, `supplier_id`, `order_date`, `expected_delivery`, `supplier_name`, `total_amount`, `status`, `created_at`, `updated_at`, `rejection_reason`, `notes`) VALUES
+(3, 'PO202510047184', 4, '2025-10-04', '2025-10-05', 'MUSTIKA KOMPUTER', 9000000.00, 'pending', '2025-10-03 19:09:33', '2025-10-03 19:09:33', NULL, 'Like New');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `purchase_order_items`
+--
+
+CREATE TABLE `purchase_order_items` (
+  `id` bigint UNSIGNED NOT NULL,
+  `purchase_order_id` bigint UNSIGNED NOT NULL,
+  `product_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `product_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `quantity` int NOT NULL,
+  `unit_price` decimal(12,2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `purchase_order_items`
+--
+
+INSERT INTO `purchase_order_items` (`id`, `purchase_order_id`, `product_id`, `product_name`, `quantity`, `unit_price`, `created_at`, `updated_at`) VALUES
+(3, 3, 'PRD-147462-5726', 'Laptop Thinkpad L420', 10, 900000.00, '2025-10-03 19:09:33', '2025-10-03 19:09:33');
+
 -- --------------------------------------------------------
 
 --
@@ -217,9 +279,34 @@ CREATE TABLE `purchase_orders` (
 
 CREATE TABLE `sales_orders` (
   `id` bigint UNSIGNED NOT NULL,
+  `so_number` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `customer_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `order_date` date NOT NULL,
+  `expected_delivery` date DEFAULT NULL,
+  `shipping_address` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `total_amount` decimal(10,2) NOT NULL,
-  `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('pending','confirmed','shipped','delivered','cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `updated_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sales_order_items`
+--
+
+CREATE TABLE `sales_order_items` (
+  `id` bigint UNSIGNED NOT NULL,
+  `sales_order_id` bigint UNSIGNED NOT NULL,
+  `product_id` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `quantity` int NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -313,7 +400,8 @@ CREATE TABLE `suppliers` (
 --
 
 INSERT INTO `suppliers` (`id`, `name`, `email`, `phone`, `address`, `contact_person`, `notes`, `status`, `created_at`, `updated_at`) VALUES
-(2, 'PT.DUTA OTO RAYA', 'ptdutaotoraya@gmail.com', '12312313', 'Jl.Raya H.Baping', 'DICKY', NULL, 'active', '2025-09-30 04:14:00', '2025-09-30 04:14:00');
+(2, 'PT.DUTA OTO RAYA', 'ptdutaotoraya@gmail.com', '12312313', 'Jl.Raya H.Baping', 'DICKY', NULL, 'active', '2025-09-30 04:14:00', '2025-09-30 04:14:00'),
+(4, 'MUSTIKA KOMPUTER', 'mscomm@gmail.com', '1234556788', 'Jl.Raya Poncol, Ciracas, Jakarta Timur', 'mscomm', NULL, 'active', '2025-10-03 19:08:53', '2025-10-03 19:08:53');
 
 -- --------------------------------------------------------
 
@@ -343,7 +431,7 @@ CREATE TABLE `temp_users` (
 
 CREATE TABLE `transactions` (
   `id` bigint UNSIGNED NOT NULL,
-  `product_id` bigint UNSIGNED NOT NULL,
+  `product_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `quantity` int NOT NULL,
   `old_stock` int DEFAULT NULL,
@@ -352,7 +440,7 @@ CREATE TABLE `transactions` (
   `reason` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `notes` text COLLATE utf8mb4_unicode_ci,
   `description` text COLLATE utf8mb4_unicode_ci,
-  `user_id` bigint UNSIGNED NOT NULL,
+  `user_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -382,8 +470,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `role`, `status`, `last_login`, `remember_token`, `created_at`, `updated_at`) VALUES
-('USR-148539-2517', 'Staff User', 'staff@inventaris.com', NULL, '$2y$12$rrgM9UZ0bNk6u0MjufYrSO1neZo2Q9IItZbC0iHWPoONaLdkyQPmC', 'staff', 'active', '2025-10-01 10:37:52', NULL, '2025-09-24 23:31:59', '2025-10-01 10:37:52'),
-('USR-148539-4386', 'Administrator', 'admin@inventaris.com', NULL, '$2y$12$gIECT3MA6AjfAz1v.NIgte5Kr59ZvDkBqCSLNqGodn7EZsgO/qb5y', 'admin', 'active', '2025-10-02 04:11:30', NULL, '2025-09-24 23:31:58', '2025-10-02 04:11:30');
+('USR-148539-2517', 'Staff User', 'staff@inventaris.com', NULL, '$2y$12$rrgM9UZ0bNk6u0MjufYrSO1neZo2Q9IItZbC0iHWPoONaLdkyQPmC', 'staff', 'active', '2025-10-03 19:51:03', NULL, '2025-09-24 23:31:59', '2025-10-03 19:51:03'),
+('USR-148539-4386', 'Administrator', 'admin@inventaris.com', NULL, '$2y$12$a/eK2FctmVbRs77ptSTQVOQDx8yNGKDTHlp0VL/r45atzfCdiLwDK', 'admin', 'active', '2025-10-03 19:49:49', NULL, '2025-09-24 23:31:58', '2025-10-03 19:49:49'),
+('USR-1759423786-9278', 'Test User', 'test@example.com', NULL, '$2y$12$Hnns8JUzUT2zESrkG4t6zOj.Dg50c.RF46K1zpjDqJ.1b8Zhp3Q4y', 'admin', 'active', '2025-10-02 09:50:42', NULL, '2025-10-02 09:49:47', '2025-10-02 09:50:42');
 
 --
 -- Indexes for dumped tables
@@ -420,10 +509,27 @@ ALTER TABLE `purchase_orders`
   ADD UNIQUE KEY `purchase_orders_po_number_unique` (`po_number`);
 
 --
+-- Indexes for table `purchase_order_items`
+--
+ALTER TABLE `purchase_order_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `purchase_order_items_v2_purchase_order_id_foreign` (`purchase_order_id`),
+  ADD KEY `purchase_order_items_v2_product_id_foreign` (`product_id`);
+
+--
 -- Indexes for table `sales_orders`
 --
 ALTER TABLE `sales_orders`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `sales_orders_so_number_unique` (`so_number`);
+
+--
+-- Indexes for table `sales_order_items`
+--
+ALTER TABLE `sales_order_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sales_order_items_sales_order_id_foreign` (`sales_order_id`),
+  ADD KEY `sales_order_items_product_id_foreign` (`product_id`);
 
 --
 -- Indexes for table `sessions`
@@ -479,25 +585,37 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `personal_access_tokens`
 --
 ALTER TABLE `personal_access_tokens`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=126;
 
 --
 -- AUTO_INCREMENT for table `purchase_orders`
 --
 ALTER TABLE `purchase_orders`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `purchase_order_items`
+--
+ALTER TABLE `purchase_order_items`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `sales_orders`
 --
 ALTER TABLE `sales_orders`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `sales_order_items`
+--
+ALTER TABLE `sales_order_items`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `settings`
@@ -515,13 +633,31 @@ ALTER TABLE `stocks`
 -- AUTO_INCREMENT for table `suppliers`
 --
 ALTER TABLE `suppliers`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `purchase_order_items`
+--
+ALTER TABLE `purchase_order_items`
+  ADD CONSTRAINT `purchase_order_items_v2_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
+  ADD CONSTRAINT `purchase_order_items_v2_purchase_order_id_foreign` FOREIGN KEY (`purchase_order_id`) REFERENCES `purchase_orders` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `sales_order_items`
+--
+ALTER TABLE `sales_order_items`
+  ADD CONSTRAINT `sales_order_items_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE RESTRICT,
+  ADD CONSTRAINT `sales_order_items_sales_order_id_foreign` FOREIGN KEY (`sales_order_id`) REFERENCES `sales_orders` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
