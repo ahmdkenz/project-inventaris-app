@@ -297,15 +297,35 @@ export default {
       this.loading = true;
       this.error = null;
       try {
+        console.log('Fetching users data...');
         const response = await axios.get('/users');
-        console.log('Data pengguna:', response.data);
-        this.users = response.data;
+        console.log('Users data received:', response.data);
+        
+        // Verifikasi struktur data
+        if (!Array.isArray(response.data)) {
+          throw new Error('Data yang diterima bukan array');
+        }
+        
+        this.users = response.data.map(user => ({
+          ...user,
+          // Pastikan semua properti yang dibutuhkan tersedia
+          id: user.id || 'ID tidak tersedia',
+          name: user.name || 'Nama tidak tersedia',
+          email: user.email || 'Email tidak tersedia',
+          role: user.role || 'staff',
+          status: user.status || 'active',
+          created_at: user.created_at || null,
+          last_login: user.last_login || null
+        }));
+        
         // Terapkan filter yang sedang aktif setelah refresh
         this.filteredUsers = [...this.users];
         this.filterUsers();
+        
+        console.log('Users data processed:', this.users.length, 'records');
       } catch (error) {
         console.error('Error loading users:', error);
-        this.error = 'Gagal memuat data pengguna. Silakan coba lagi.';
+        this.error = `Gagal memuat data pengguna: ${error.message || 'Terjadi kesalahan pada server'}`;
       } finally {
         this.loading = false;
       }
@@ -341,35 +361,81 @@ export default {
         const confirmMessage = `Apakah Anda yakin ingin ${newStatus === 'active' ? 'mengaktifkan' : 'menonaktifkan'} pengguna ${user.name}?`;
         
         if (confirm(confirmMessage)) {
-          await axios.patch(`/users/${user.id}/status`, { status: newStatus });
+          console.log(`Toggling status for user ${user.id} from ${user.status} to ${newStatus}`);
+          
+          const response = await axios.patch(`/users/${user.id}/status`, { status: newStatus });
+          console.log('Status update response:', response.data);
+          
+          // Update lokal sebelum refresh
           user.status = newStatus;
+          
+          // Refresh data dari server untuk memastikan konsistensi
           await this.loadUsers();
+          
+          alert(`Status pengguna berhasil diubah menjadi ${newStatus === 'active' ? 'Aktif' : 'Nonaktif'}`);
         }
       } catch (error) {
         console.error('Error updating user status:', error);
-        alert('Gagal mengubah status pengguna. Silakan coba lagi.');
+        
+        // Handling spesifik untuk forbidden action
+        if (error.response?.status === 403) {
+          alert('Anda tidak dapat menonaktifkan akun sendiri.');
+        } else {
+          alert('Gagal mengubah status pengguna. Silakan coba lagi.');
+        }
+        
+        // Refresh data untuk memastikan UI konsisten
+        await this.loadUsers();
       }
     },
     async deleteUser(userId) {
       const user = this.users.find(u => u.id === userId);
+      if (!user) {
+        console.error(`User with ID ${userId} not found in local data`);
+        alert('Pengguna tidak ditemukan. Silakan refresh halaman.');
+        return;
+      }
+      
       if (confirm(`Apakah Anda yakin ingin menghapus pengguna ${user?.name}? Tindakan ini tidak dapat dibatalkan.`)) {
         try {
-          await axios.delete(`/users/${userId}`);
+          console.log(`Deleting user: ${userId}`);
+          const response = await axios.delete(`/users/${userId}`);
+          console.log('Delete response:', response);
+          
+          // Remove user from local array
           this.users = this.users.filter(user => user.id !== userId);
           this.filterUsers();
+          
           alert('Pengguna berhasil dihapus.');
         } catch (error) {
           console.error('Error deleting user:', error);
-          alert('Gagal menghapus pengguna. Silakan coba lagi.');
+          
+          // Check if this is a self-delete attempt
+          if (error.response?.status === 403) {
+            alert('Anda tidak dapat menghapus akun sendiri.');
+          } else {
+            alert('Gagal menghapus pengguna. Silakan coba lagi.');
+          }
         }
       }
     },
     async saveUser() {
       try {
+        // Validasi data
+        if (!this.userForm.name || !this.userForm.email || (this.showAddUserModal && !this.userForm.password)) {
+          alert('Nama, email, dan password (untuk pengguna baru) harus diisi.');
+          return;
+        }
+        
         if (this.showAddUserModal) {
-          // Add new user logic
+          console.log('Creating new user:', { ...this.userForm, password: '******' });
+          
+          // Add new user
           const response = await axios.post('/users', this.userForm);
-          this.users.push(response.data);
+          console.log('User creation response:', response.data);
+          
+          // Refresh full data instead of just pushing
+          await this.loadUsers();
           
           // Tampilkan ID pengguna baru
           const idMessage = response.data.id 
@@ -378,26 +444,32 @@ export default {
             
           alert(`Pengguna baru berhasil dibuat. ${idMessage}`);
         } else {
+          console.log('Updating user ID:', this.userForm.id);
+          
           // Update existing user logic - exclude password if empty
           const updateData = { ...this.userForm };
           if (!updateData.password) {
             delete updateData.password;
           }
           
-          await axios.put(`/users/${this.userForm.id}`, updateData);
-          const index = this.users.findIndex(user => user.id === this.userForm.id);
-          if (index !== -1) {
-            this.users[index] = { ...this.users[index], ...updateData };
-          }
+          const response = await axios.put(`/users/${this.userForm.id}`, updateData);
+          console.log('User update response:', response.data);
+          
+          // Update data in local array and refresh
+          await this.loadUsers();
+          
           alert('Data pengguna berhasil diperbarui.');
         }
         
         this.closeModals();
-        this.filterUsers();
-        await this.loadUsers(); // Refresh data from server
       } catch (error) {
         console.error('Error saving user:', error);
-        if (error.response && error.response.data && error.response.data.message) {
+        
+        if (error.response?.data?.errors) {
+          // Handle validation errors
+          const errorMessages = Object.values(error.response.data.errors).flat().join('\n');
+          alert(`Validasi gagal:\n${errorMessages}`);
+        } else if (error.response?.data?.message) {
           alert(`Gagal menyimpan pengguna: ${error.response.data.message}`);
         } else {
           alert('Gagal menyimpan pengguna. Silakan coba lagi.');

@@ -6,14 +6,8 @@ return [
     'allowed_methods' => ['*'],
 
     // Allow specific frontend origins
-    'allowed_origins' => [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'http://localhost:5173',
-        'http://127.0.0.1:3000',
-        'http://127.0.0.1:3001',
-        'http://127.0.0.1:5173',
-    ],
+    // For development, allow all origins - change in production
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 

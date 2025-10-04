@@ -40,6 +40,7 @@ class Kernel extends HttpKernel
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\FirebaseSyncMiddleware::class,
+            \App\Http\Middleware\ApiRequestLogger::class,
         ],
     ];
 

@@ -64,6 +64,8 @@ class UserController extends Controller
             
             // Generate unique ID for user
             $userId = $this->generateUserId();
+            
+            \Log::info("Creating new user with ID: {$userId}, Name: {$request->name}, Email: {$request->email}");
 
             $user = User::create([
                 'id' => $userId,
@@ -73,6 +75,14 @@ class UserController extends Controller
                 'role' => $request->role,
                 'status' => $request->status ?? 'active',
             ]);
+
+            // Pastikan user berhasil dibuat dan memiliki ID
+            if (!$user || !$user->id) {
+                \Log::error("Failed to create user or get user ID");
+                throw new \Exception("Gagal membuat pengguna, data tidak tersimpan dengan benar");
+            }
+
+            \Log::info("User created successfully with ID: {$user->id}");
 
             return response()->json([
                 'id' => $user->id,
@@ -84,6 +94,10 @@ class UserController extends Controller
                 'last_login' => null,
             ], 201);
         } catch (\Exception $e) {
+            \Log::error("Error creating user: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'message' => 'Gagal membuat pengguna baru',
                 'error' => $e->getMessage()
@@ -122,17 +136,25 @@ class UserController extends Controller
     public function update(Request $request, string $id): JsonResponse
     {
         try {
+            \Log::info("Attempting to update user ID: {$id}", [
+                'request_data' => $request->except('password')
+            ]);
+            
             $user = User::findOrFail($id);
             
             $validator = Validator::make($request->all(), [
                 'name' => 'sometimes|required|string|max:255',
                 'email' => ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-                'password' => 'sometimes|string|min:8',
+                'password' => 'sometimes|nullable|string|min:8',
                 'role' => 'sometimes|required|in:admin,staff',
                 'status' => 'sometimes|in:active,inactive'
             ]);
 
             if ($validator->fails()) {
+                \Log::warning("Validation failed for user update ID: {$id}", [
+                    'errors' => $validator->errors()->toArray()
+                ]);
+                
                 return response()->json([
                     'message' => 'Data tidak valid',
                     'errors' => $validator->errors()
@@ -141,11 +163,22 @@ class UserController extends Controller
 
             $updateData = $request->only(['name', 'email', 'role', 'status']);
             
-            if ($request->has('password')) {
+            // Hanya update password jika ada nilai yang diberikan
+            if ($request->filled('password')) {
                 $updateData['password'] = Hash::make($request->password);
             }
 
+            \Log::info("Updating user with data", [
+                'user_id' => $id,
+                'update_data' => array_keys($updateData)
+            ]);
+
             $user->update($updateData);
+
+            // Pastikan update berhasil dengan me-load ulang data pengguna
+            $user->refresh();
+            
+            \Log::info("User updated successfully ID: {$id}");
 
             return response()->json([
                 'id' => $user->id,
@@ -157,6 +190,10 @@ class UserController extends Controller
                 'last_login' => $user->last_login ? $user->last_login->toISOString() : null,
             ]);
         } catch (\Exception $e) {
+            \Log::error("Error updating user ID {$id}: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'message' => 'Gagal memperbarui pengguna',
                 'error' => $e->getMessage()
@@ -170,6 +207,10 @@ class UserController extends Controller
     public function updateStatus(Request $request, string $id): JsonResponse
     {
         try {
+            \Log::info("Updating status for user ID: {$id}", [
+                'requested_status' => $request->status
+            ]);
+            
             $user = User::findOrFail($id);
             
             $validator = Validator::make($request->all(), [
@@ -177,19 +218,42 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
+                \Log::warning("Invalid status requested for user ID: {$id}", [
+                    'errors' => $validator->errors()->toArray(),
+                    'requested_status' => $request->status
+                ]);
+                
                 return response()->json([
                     'message' => 'Status tidak valid',
                     'errors' => $validator->errors()
                 ], 422);
             }
+            
+            // Cek apakah user mencoba menonaktifkan akunnya sendiri
+            if (auth()->id() === $user->id && $request->status === 'inactive') {
+                \Log::warning("User attempted to deactivate own account, ID: {$id}");
+                return response()->json([
+                    'message' => 'Anda tidak dapat menonaktifkan akun sendiri'
+                ], 403);
+            }
 
+            $oldStatus = $user->status;
             $user->update(['status' => $request->status]);
+            
+            \Log::info("User status updated for ID: {$id}", [
+                'old_status' => $oldStatus,
+                'new_status' => $user->status
+            ]);
 
             return response()->json([
                 'message' => 'Status pengguna berhasil diperbarui',
                 'status' => $user->status
             ]);
         } catch (\Exception $e) {
+            \Log::error("Error updating status for user ID {$id}: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'message' => 'Gagal memperbarui status pengguna',
                 'error' => $e->getMessage()
@@ -203,21 +267,36 @@ class UserController extends Controller
     public function destroy(string $id): JsonResponse
     {
         try {
+            \Log::info("Attempting to delete user ID: {$id}");
+            
             $user = User::findOrFail($id);
             
             // Prevent deleting the current authenticated user
             if (auth()->id() === $user->id) {
+                \Log::warning("Attempted to delete own account, user ID: {$id}");
                 return response()->json([
                     'message' => 'Tidak dapat menghapus akun sendiri'
                 ], 403);
             }
-
+            
+            // Simpan nama user untuk pesan log
+            $userName = $user->name;
+            
+            // Hapus token akses terlebih dahulu
+            \Laravel\Sanctum\PersonalAccessToken::where('tokenable_id', $id)->delete();
+            
             $user->delete();
+            
+            \Log::info("User deleted successfully: {$userName} (ID: {$id})");
 
             return response()->json([
                 'message' => 'Pengguna berhasil dihapus'
             ]);
         } catch (\Exception $e) {
+            \Log::error("Error deleting user ID {$id}: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'message' => 'Gagal menghapus pengguna',
                 'error' => $e->getMessage()
@@ -240,11 +319,20 @@ class UserController extends Controller
         $userId = $prefix . '-' . $timestamp . '-' . $random;
         
         // Cek apakah ID sudah ada, jika ya, generate ulang
+        $attempts = 0;
+        $maxAttempts = 10; // Batas maksimal percobaan
+        
         while (User::where('id', $userId)->exists()) {
+            if (++$attempts >= $maxAttempts) {
+                // Gunakan microtime untuk memastikan unik jika terlalu banyak percobaan
+                $timestamp = substr(str_replace('.', '', microtime(true)), -6);
+            }
+            
             $random = str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
             $userId = $prefix . '-' . $timestamp . '-' . $random;
         }
         
+        \Log::info("Generated unique user ID: {$userId}");
         return $userId;
     }
 }

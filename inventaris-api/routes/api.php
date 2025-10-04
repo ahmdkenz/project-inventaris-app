@@ -10,7 +10,19 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+// Test route to check API connection
+Route::get('/ping', function (Request $request) {
+    return response()->json([
+        'message' => 'API Connection Successful',
+        'timestamp' => now()->toIso8601String(),
+        'environment' => app()->environment(),
+        'api_version' => '1.0',
+        'client_ip' => $request->ip(),
+    ]);
+});
 
 // Auth routes (tidak perlu middleware)
 Route::post('/login', [AuthController::class, 'login']);
