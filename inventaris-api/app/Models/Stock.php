@@ -2,9 +2,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable;
 
 class Stock extends Model
 {
+    use Auditable;
     protected $fillable = [
         'product_id',
         'quantity',

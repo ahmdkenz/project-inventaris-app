@@ -3,7 +3,6 @@
   width: 250px;
   background-color: #001529;
   color: white;
-  flex-shrink: 0;
   height: 100vh;
   position: fixed;
   left: 0;
@@ -12,7 +11,7 @@
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   will-change: width; /* Optimize for animation */
 }

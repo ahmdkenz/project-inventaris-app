@@ -147,4 +147,75 @@ class DashboardController extends Controller
             ], 500);
         }
     }
+    
+    /**
+     * Combined dashboard summary for backward compatibility
+     */
+    public function summary(Request $request)
+    {
+        try {
+            $stats = [
+                'totalProducts' => Product::count(),
+                'lowStock' => Product::whereRaw('CAST(stock AS UNSIGNED) <= CAST(min_stock AS UNSIGNED)')
+                    ->where('stock', '>', 0)
+                    ->count(),
+                'recentTransactions' => Transaction::where('created_at', '>=', now()->subDays(7))->count(),
+                'totalUsers' => User::count(),
+            ];
+            
+            $recentActivities = collect();
+
+            // Recent product additions
+            $recentProducts = Product::with('user')
+                ->where('created_at', '>=', now()->subDays(7))
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get()
+                ->map(function ($product) {
+                    return [
+                        'id' => 'product_' . $product->id,
+                        'description' => "New product added: {$product->name}",
+                        'user_name' => $product->user->name ?? 'System',
+                        'created_at' => $product->created_at->toISOString(),
+                        'type' => 'product_added'
+                    ];
+                });
+
+            // Recent stock transactions
+            $recentTransactions = Transaction::with(['product', 'user'])
+                ->where('created_at', '>=', now()->subDays(7))
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get()
+                ->map(function ($transaction) {
+                    $productName = $transaction->product ? $transaction->product->name : 'Unknown Product';
+                    return [
+                        'id' => 'transaction_' . $transaction->id,
+                        'description' => "Stock {$transaction->type}: {$productName} (Qty: {$transaction->quantity})",
+                        'user_name' => $transaction->user ? $transaction->user->name : 'System',
+                        'created_at' => $transaction->created_at->toISOString(),
+                        'type' => 'stock_transaction'
+                    ];
+                });
+
+            // Merge and sort activities
+            $recentActivities = $recentProducts
+                ->merge($recentTransactions)
+                ->sortByDesc('created_at')
+                ->take(10)
+                ->values();
+                
+            return response()->json([
+                'success' => true,
+                'stats' => $stats,
+                'recentActivities' => $recentActivities
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to fetch dashboard summary',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

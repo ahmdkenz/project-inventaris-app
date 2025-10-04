@@ -170,11 +170,13 @@ export default {
       this.isHovered = true;
       // Emit event when sidebar is hovered
       this.$emit('sidebar-hover', true);
+      console.log('Sidebar mouse enter, emitting hover=true');
     },
     handleMouseLeave() {
       this.isHovered = false;
       // Emit event when sidebar hover ends
       this.$emit('sidebar-hover', false);
+      console.log('Sidebar mouse leave, emitting hover=false');
     },
     checkScreenSize() {
       this.screenWidth = window.innerWidth;

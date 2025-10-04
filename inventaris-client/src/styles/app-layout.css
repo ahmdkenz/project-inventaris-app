@@ -1,100 +1,122 @@
-/* App Layout Styles - Modern responsive layout */
+/* App Layout Styles - Responsive + Pure Hover Sidebar Interaction */
 .app-layout {
   display: flex;
   min-height: 100vh;
   background-color: #f0f2f5;
   overflow: hidden;
-  flex-direction: row;
   width: 100%;
-  position: relative; /* Ensure position context for absolute elements */
+  position: relative;
 }
 
+/* --- Sidebar (collapsed baseline, expand on hover) --- */
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0; /* top:0; left:0; full height */
+  width: 64px; /* collapsed baseline */
+  height: 100vh;
+  z-index: 1000;
+  transition: width 0.25s cubic-bezier(0.4,0,0.2,1);
+  will-change: width;
+}
+
+/* Expanded ONLY while hovered */
+.sidebar:hover {
+  width: 250px;
+}
+
+/* --- Main container follows sidebar width automatically --- */
 .main-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  margin-left: 250px; /* Default sidebar width */
-  width: calc(100% - 250px);
-  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  will-change: margin-left, width; /* Optimize for animation */
-}
-
-/* Collapsed sidebar - main content adjustment */
-.main-container.sidebar-collapsed {
-  margin-left: 64px; /* Width of collapsed sidebar */
+  margin-left: 64px; /* match collapsed width */
   width: calc(100% - 64px);
+  min-height: 100vh;
+  transition: margin-left 0.25s cubic-bezier(0.4,0,0.2,1), width 0.25s cubic-bezier(0.4,0,0.2,1);
+  will-change: margin-left, width;
 }
 
-/* When sidebar is collapsed but hovered */
-.main-container.sidebar-collapsed.sidebar-hovered {
-  margin-left: 250px; /* Width of expanded sidebar */
-  width: calc(100% - 250px);
-}
-
-/* Hover state - adjust main content when sidebar is hovered */
-.app-layout:has(.sidebar.collapsed:hover) .main-container {
+/* When user hovers the sidebar, shift the layout using sibling selector */
+.sidebar:hover ~ .main-container {
   margin-left: 250px;
   width: calc(100% - 250px);
 }
 
+/* Accessibility: also expand when any focusable element inside sidebar is focused (keyboard users) */
+.sidebar:focus-within {
+  width: 250px;
+}
+.sidebar:focus-within ~ .main-container {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+}
+
+/* Header / Footer / Content share same shifting via parent */
+.main-container > header,
+.main-container > footer {
+  width: 100%;
+  transition: inherit; /* follow container timing */
+}
+
+/* Header styling refinement */
+.main-container > header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+/* Main content area */
 .main-content {
   flex: 1;
-  overflow-y: auto; /* Allows content to scroll */
-  padding: 1rem; /* Reduced from 1.5rem */
+  overflow-y: auto;
+  padding: 1rem;
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease;
-  max-width: none; /* Hapus batasan max-width */
+  transition: inherit;
 }
 
-/* Responsive adjustments */
+/* (Backward compatibility) If classes still applied by JS, keep them aligned */
+.main-container.sidebar-collapsed { /* treat as collapsed baseline */
+  margin-left: 64px;
+  width: calc(100% - 64px);
+}
+.main-container.sidebar-collapsed.sidebar-hovered { /* treat as expanded */
+  margin-left: 250px;
+  width: calc(100% - 250px);
+}
+
+/* --- Responsive Breakpoints --- */
 @media (max-width: 992px) {
-  .main-container {
-    margin-left: 200px;
-    width: calc(100% - 200px);
-  }
-  
-  .main-container.sidebar-collapsed {
-    margin-left: 64px;
-    width: calc(100% - 64px);
-  }
-  
-  .main-container.sidebar-collapsed.sidebar-hovered {
-    margin-left: 200px;
-    width: calc(100% - 200px);
-  }
-  
-  .main-content {
-    padding: 0.85rem; /* Reduced from 1.25rem */
-  }
+  .sidebar:hover { width: 200px; }
+  .sidebar:focus-within { width: 200px; }
+  .sidebar:hover ~ .main-container,
+  .sidebar:focus-within ~ .main-container { margin-left: 200px; width: calc(100% - 200px); }
 }
 
 @media (max-width: 768px) {
-  .main-container {
-    margin-left: 60px;
-    width: calc(100% - 60px);
-  }
-  
-  .main-container.sidebar-collapsed {
-    margin-left: 0;
-    width: 100%;
-  }
-  
-  .main-container.sidebar-collapsed.sidebar-hovered {
-    margin-left: 200px;
-    width: calc(100% - 200px);
-  }
-  
-  .main-content {
-    padding: 0.75rem; /* Reduced from 1rem */
-  }
+  /* Mobile strategy: collapsed = off-canvas baseline */
+  .sidebar { width: 0; transform: translateX(0); }
+  .sidebar:hover, .sidebar:focus-within { width: 200px; }
+  .main-container { margin-left: 0; width: 100%; }
+  .sidebar:hover ~ .main-container,
+  .sidebar:focus-within ~ .main-container { margin-left: 200px; width: calc(100% - 200px); }
+  .main-content { padding: 0.75rem; }
 }
 
 @media (max-width: 576px) {
-  .main-content {
-    padding: 0.5rem; /* Reduced from 0.75rem */
+  .main-content { padding: 0.55rem; }
+  /* Optional overlay effect when sidebar expanded on very small screens */
+  .sidebar:hover ~ .main-container::after,
+  .sidebar:focus-within ~ .main-container::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 5;
+    pointer-events: none;
   }
 }

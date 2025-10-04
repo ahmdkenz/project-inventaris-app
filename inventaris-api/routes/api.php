@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PurchaseOrderController;
@@ -34,6 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/dashboard/activities', [DashboardController::class, 'recentActivities']);
     Route::get('/dashboard/overview', [DashboardController::class, 'overview']);
+    Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
     
     // Stock Management
     Route::apiResource('stocks', StockController::class)->except(['store', 'destroy']);
@@ -52,6 +54,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/reports/financial', [ReportController::class, 'financialReport']);
     Route::get('/reports/export', [ReportController::class, 'exportReport']);
     Route::post('/reports/custom', [ReportController::class, 'generateCustomReport']);
+    
+    // Enhanced Reports
+    Route::get('/reports/enhanced/trend-analysis', [App\Http\Controllers\EnhancedReportController::class, 'trendAnalysis']);
+    Route::get('/reports/enhanced/product-performance', [App\Http\Controllers\EnhancedReportController::class, 'productPerformance']);
+    Route::get('/reports/enhanced/inventory-efficiency', [App\Http\Controllers\EnhancedReportController::class, 'inventoryEfficiency']);
+    Route::get('/reports/enhanced/dashboard-overview', [App\Http\Controllers\EnhancedReportController::class, 'dashboardOverview']);
+    Route::get('/reports/enhanced/dashboard-status', [App\Http\Controllers\EnhancedReportController::class, 'dashboardStatus']);
     
     // User Management
     Route::apiResource('users', UserController::class);
@@ -89,4 +98,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Firebase Sync
     Route::post('/firebase/sync', [App\Http\Controllers\FirebaseSyncController::class, 'sync']);
     Route::get('/firebase/status', [App\Http\Controllers\FirebaseSyncController::class, 'status']);
+    
+    // Audit Logs
+    Route::get('/audit-logs', [AuditLogController::class, 'index']);
+    Route::get('/audit-logs/{id}', [AuditLogController::class, 'show']);
 });

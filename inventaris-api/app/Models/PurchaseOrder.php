@@ -2,9 +2,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable;
 
 class PurchaseOrder extends Model
 {
+    use Auditable;
     protected $fillable = [
         'po_number',
         'supplier_id',

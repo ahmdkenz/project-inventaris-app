@@ -66,7 +66,11 @@ export default {
       }
     },
     handleSidebarHover(isHovered) {
+      // Update the hover state
       this.sidebarHovered = isHovered;
+      
+      // Debugging console log to see hover state changes
+      console.log('Sidebar hovered:', isHovered);
     }
   }
 };
