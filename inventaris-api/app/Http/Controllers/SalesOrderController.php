@@ -109,23 +109,9 @@ class SalesOrderController extends Controller
                 
                 // Update product stock
                 $product->update(['stock' => $newStock]);
-
-                // Create transaction record
-                try {
-                    Transaction::create([
-                        'product_id' => $item['product_id'],
-                        'type' => 'out',
-                        'quantity' => $item['quantity'],
-                        'description' => 'Stock reduced for new SO: ' . $salesOrder->so_number,
-                        'user_id' => auth()->id() ?? 1, // Default to admin if not authenticated
-                        'old_stock' => $oldStock,
-                        'new_stock' => $newStock,
-                        'price' => $item['unit_price']
-                    ]);
-                } catch (\Exception $transactionError) {
-                    Log::error('Transaction creation error: ' . $transactionError->getMessage());
-                    throw $transactionError; // Re-throw to trigger rollback
-                }
+                
+                // Log stock update
+                Log::info('Stock reduced for product ' . $product->name . ' (ID: ' . $item['product_id'] . ') from ' . $oldStock . ' to ' . $newStock . ' for SO: ' . $salesOrder->so_number);
             }
 
             DB::commit();
@@ -240,17 +226,8 @@ class SalesOrderController extends Controller
                     // Update product stock (return the items)
                     $product->update(['stock' => $newStock]);
                     
-                    // Create transaction record for returned stock
-                    Transaction::create([
-                        'product_id' => $currentItem->product_id,
-                        'type' => 'in',
-                        'quantity' => $currentItem->quantity,
-                        'description' => 'Stock returned on SO update: ' . $salesOrder->so_number,
-                        'user_id' => auth()->id() ?? 1,
-                        'old_stock' => $oldStock,
-                        'new_stock' => $newStock,
-                        'price' => $currentItem->unit_price
-                    ]);
+                    // Log stock return
+                    Log::info('Stock returned for product ' . $product->name . ' (ID: ' . $currentItem->product_id . ') from ' . $oldStock . ' to ' . $newStock . ' for SO update: ' . $salesOrder->so_number);
                 }
                 
                 // Remove existing items
@@ -274,17 +251,8 @@ class SalesOrderController extends Controller
                     // Update product stock
                     $product->update(['stock' => $newStock]);
                     
-                    // Create transaction record
-                    Transaction::create([
-                        'product_id' => $item['product_id'],
-                        'type' => 'out',
-                        'quantity' => $item['quantity'],
-                        'description' => 'Stock reduced on SO update: ' . $salesOrder->so_number,
-                        'user_id' => auth()->id() ?? 1,
-                        'old_stock' => $oldStock,
-                        'new_stock' => $newStock,
-                        'price' => $item['unit_price']
-                    ]);
+                    // Log stock reduction
+                    Log::info('Stock reduced for product ' . $product->name . ' (ID: ' . $item['product_id'] . ') from ' . $oldStock . ' to ' . $newStock . ' for SO update: ' . $salesOrder->so_number);
                 }
 
                 // Update total amount
@@ -339,17 +307,8 @@ class SalesOrderController extends Controller
                 // Update product stock (return the items)
                 $product->update(['stock' => $newStock]);
                 
-                // Create transaction record for returned stock
-                Transaction::create([
-                    'product_id' => $item->product_id,
-                    'type' => 'in',
-                    'quantity' => $item->quantity,
-                    'description' => 'Stock returned from deleted SO: ' . $salesOrder->so_number,
-                    'user_id' => auth()->id() ?? 1,
-                    'old_stock' => $oldStock,
-                    'new_stock' => $newStock,
-                    'price' => $item->unit_price
-                ]);
+                // Log stock return
+                Log::info('Stock returned for product ' . $product->name . ' (ID: ' . $item->product_id . ') from ' . $oldStock . ' to ' . $newStock . ' for deleted SO: ' . $salesOrder->so_number);
             }
 
             // Delete items first
@@ -445,17 +404,8 @@ class SalesOrderController extends Controller
                 // Update product stock
                 $product->update(['stock' => $newStock]);
 
-                // Create transaction record
-                Transaction::create([
-                    'product_id' => $item->product_id,
-                    'type' => 'out',
-                    'quantity' => $item->quantity,
-                    'description' => 'Stock shipped for SO: ' . $salesOrder->so_number,
-                    'user_id' => auth()->id(),
-                    'old_stock' => $oldStock,
-                    'new_stock' => $newStock,
-                    'price' => $item->unit_price
-                ]);
+                // Log stock shipment
+                Log::info('Stock shipped for product ' . $product->name . ' (ID: ' . $item->product_id . ') from ' . $oldStock . ' to ' . $newStock . ' for SO: ' . $salesOrder->so_number);
             }
 
             DB::commit();
