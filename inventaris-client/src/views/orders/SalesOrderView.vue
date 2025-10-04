@@ -21,16 +21,7 @@
           class="search-input"
         >
       </div>
-      <div class="filter-group">
-        <select v-model="statusFilter" class="filter-select">
-          <option value="">Semua Status</option>
-          <option value="pending">Menunggu</option>
-          <option value="confirmed">Dikonfirmasi</option>
-          <option value="shipped">Dikirim</option>
-          <option value="delivered">Diterima</option>
-          <option value="cancelled">Dibatalkan</option>
-        </select>
-      </div>
+      <!-- Status filter removed -->
       <div class="filter-group">
         <input 
           v-model="dateFrom" 
@@ -56,7 +47,6 @@
             <th>Pelanggan</th>
             <th>Tanggal Pesanan</th>
             <th>Total</th>
-            <th>Status</th>
             <th>Aksi</th>
           </tr>
         </thead>
@@ -66,28 +56,14 @@
             <td>{{ order.customer_name }}</td>
             <td>{{ formatDate(order.order_date) }}</td>
             <td>{{ formatCurrency(order.total_amount) }}</td>
-            <td>
-              <span :class="'status status-' + order.status">
-                {{ translateStatus(order.status) }}
-              </span>
-            </td>
             <td class="actions">
               <button @click="viewOrder(order)" class="btn-info" title="Lihat Detail">
                 👁️
               </button>
-              <button v-if="canEdit && order.status === 'pending'" @click="editOrder(order)" class="btn-warning" title="Edit">
+              <button v-if="canEdit" @click="editOrder(order)" class="btn-warning" title="Edit">
                 ✏️
               </button>
-              <button v-if="canConfirm && order.status === 'pending'" @click="confirmOrder(order)" class="btn-success" title="Konfirmasi">
-                ✅
-              </button>
-              <button v-if="canShip && order.status === 'confirmed'" @click="shipOrder(order)" class="btn-primary" title="Kirim Pesanan">
-                🚚
-              </button>
-              <button v-if="canDeliver && order.status === 'shipped'" @click="deliverOrder(order)" class="btn-success" title="Tandai Diterima">
-                📦
-              </button>
-              <button v-if="canDelete && order.status === 'pending'" @click="deleteOrder(order)" class="btn-danger" title="Hapus">
+              <button v-if="canDelete" @click="deleteOrder(order)" class="btn-danger" title="Hapus">
                 🗑️
               </button>
             </td>
@@ -288,12 +264,6 @@
               <span>{{ formatDate(selectedOrder.order_date) }}</span>
             </div>
             <div class="detail-row">
-              <label>Status:</label>
-              <span :class="'status status-' + selectedOrder.status">
-                {{ translateStatus(selectedOrder.status) }}
-              </span>
-            </div>
-            <div class="detail-row">
               <label>Total:</label>
               <span class="total-amount">{{ formatCurrency(selectedOrder.total_amount) }}</span>
             </div>
@@ -358,7 +328,6 @@ export default {
       orders: [],
       products: [],
       searchQuery: '',
-      statusFilter: '',
       dateFrom: '',
       dateTo: '',
       currentPage: 1,
@@ -393,10 +362,6 @@ export default {
         );
       }
       
-      if (this.statusFilter) {
-        filtered = filtered.filter(order => order.status === this.statusFilter);
-      }
-      
       if (this.dateFrom) {
         filtered = filtered.filter(order => order.order_date >= this.dateFrom);
       }
@@ -416,15 +381,6 @@ export default {
     canEdit() {
       return this.user.role === 'admin';
     },
-    canConfirm() {
-      return this.user.role === 'admin';
-    },
-    canShip() {
-      return this.user.role === 'admin' || this.user.role === 'staff';
-    },
-    canDeliver() {
-      return this.user.role === 'admin' || this.user.role === 'staff';
-    },
     canDelete() {
       return this.user.role === 'admin';
     }
@@ -440,6 +396,7 @@ export default {
         this.user = JSON.parse(userData);
       }
     },
+    // translateStatus function kept for backward compatibility but hidden in UI
     translateStatus(status) {
       const statusMap = {
         'pending': 'Menunggu',
@@ -589,60 +546,7 @@ export default {
       this.selectedOrder = order;
       this.showViewModal = true;
     },
-    async confirmOrder(order) {
-      if (confirm('Konfirmasi pesanan penjualan ini?')) {
-        try {
-          const response = await axios.post(`/sales-orders/${order.id}/confirm`);
-          if (response.data && response.data.data) {
-            // Update the order in the list with the returned data
-            const index = this.orders.findIndex(o => o.id === order.id);
-            if (index > -1) {
-              this.orders[index].status = 'confirmed';
-            }
-            alert('Pesanan penjualan berhasil dikonfirmasi!');
-          }
-        } catch (error) {
-          console.error('Error confirming order:', error);
-          alert('Gagal mengonfirmasi pesanan');
-        }
-      }
-    },
-    async shipOrder(order) {
-      if (confirm('Tandai pesanan ini sebagai dikirim?')) {
-        try {
-          const response = await axios.post(`/sales-orders/${order.id}/ship`);
-          if (response.data && response.data.data) {
-            // Update the order in the list with the returned data
-            const index = this.orders.findIndex(o => o.id === order.id);
-            if (index > -1) {
-              this.orders[index].status = 'shipped';
-            }
-            alert('Pesanan berhasil ditandai sebagai dikirim!');
-          }
-        } catch (error) {
-          console.error('Error shipping order:', error);
-          alert('Gagal menandai sebagai dikirim');
-        }
-      }
-    },
-    async deliverOrder(order) {
-      if (confirm('Tandai pesanan ini sebagai diterima?')) {
-        try {
-          const response = await axios.post(`/sales-orders/${order.id}/deliver`);
-          if (response.data && response.data.data) {
-            // Update the order in the list with the returned data
-            const index = this.orders.findIndex(o => o.id === order.id);
-            if (index > -1) {
-              this.orders[index].status = 'delivered';
-            }
-            alert('Pesanan berhasil ditandai sebagai diterima!');
-          }
-        } catch (error) {
-          console.error('Error delivering order:', error);
-          alert('Gagal menandai sebagai diterima');
-        }
-      }
-    },
+    // Fungsi-fungsi confirmOrder, shipOrder, dan deliverOrder telah dihapus karena tidak diperlukan
     async deleteOrder(order) {
       if (confirm('Apakah Anda yakin ingin menghapus pesanan penjualan ini?')) {
         try {
